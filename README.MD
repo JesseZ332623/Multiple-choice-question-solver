@@ -34,7 +34,7 @@
     - http://localhost:8081/all_score_record
   - 获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容， 服务器以 JSON 格式作为响应
     - http://localhost:8081/api/question/all_questions
-  - GET 方法请求，获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。，服务器以 JSON 的格式作为响应
+  - GET 方法请求，获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。服务器以 JSON 的格式作为响应
     - http://localhost:8081/api/question/all_questions_with_correct_option
 
 #### Date：2025.4.8
