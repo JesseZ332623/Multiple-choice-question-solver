@@ -4,6 +4,22 @@
 
 ## 如何使用？
 
+### 部署
+- 修改 `/resources/application.properties` 文件下的以下两个属性：
+    - `spring.datasource.username=your_username`
+    - `spring.datasource.password=your_password`
+
+- 然后使用 Maven 进行构建：
+```bash
+    maven clean install -X
+```
+
+- 运行编译好的 .jar 包：
+```bash
+    java -jar [.jar file built by maven]
+```
+
+### 访问
 将服务器部署好后（假设部署位置是 `localhost`，端口为 `8081`），
 可以访问以下 URL（仅列出所有 GET 请求方法）：
 
