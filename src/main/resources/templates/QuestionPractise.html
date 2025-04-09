@@ -191,7 +191,7 @@
     <strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！"</strong>
 
     <div id="total">
-        <p th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
+        <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
     </div>
 
     <div th:each="question : ${QuestionPractise}" class="question-container"
@@ -201,9 +201,9 @@
             <ul>
                 <li th:each="entry : ${question.options.entrySet()}">
                     <input type="radio" th:id="'option_' + ${entry.getKey()}"
-                        th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
+                           th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
                     <label th:for="'option_' + ${entry.getKey()}"
-                        th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></label>
+                           th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></label>
                 </li>
             </ul>
         </div>
@@ -219,12 +219,11 @@
         </button>
         <div class="practise_score" id="practise_score"></div>
     </div>
-    </div>
 
 </body>
 
 <script>
-    var TOTAL_QUESTION_AMOUNT = 321;
+    var TOTAL_QUESTION_AMOUNT = Number(document.getElementById("total_questions").textContent.split('：')[1]);
     var TotalCorrect = 0;
     var TotalMistake = 0;
 
