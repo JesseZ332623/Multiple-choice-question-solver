@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩结算</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --gh-dark: #0d1117;
+            --gh-border: #30363d;
+            --gh-text: #c9d1d9;
+            --green: #2ea043;
+            --red: #f85149;
+            --gray: #8b949e;
+            --yellow: #e3b341;
+        }
+
+        body {
+            background-color: var(--gh-dark);
+            color: var(--gh-text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .result-container {
+            background-color: #161b22;
+            border: 1px solid var(--gh-border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #58a6ff;
+            text-align: center;
+            position: relative;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            padding: 1.2rem;
+            border-radius: 8px;
+            background: var(--gh-dark);
+            border: 1px solid var(--gh-border);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+        }
+
+        .correct { color: var(--green); }
+        .error { color: var(--red); }
+        .unanswered { color: var(--gray); }
+        .rate { color: var(--yellow); }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            opacity: 0;
+            animation: itemAppear 0.4s ease forwards;
+        }
+
+        @keyframes itemAppear {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .stat-item:nth-child(1) { animation-delay: 0.2s; }
+        .stat-item:nth-child(2) { animation-delay: 0.4s; }
+        .stat-item:nth-child(3) { animation-delay: 0.6s; }
+        .stat-item:nth-child(4) { animation-delay: 0.8s; }
+
+        .mistake-rate {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 1rem;
+            background: linear-gradient(45deg, #490202, #2c0101);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="title">
+            <i class="fas fa-clipboard-check"></i>
+            测验结果分析
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-item correct">
+                <i class="fas fa-check-circle stat-icon"></i>
+                <div>
+                    <div id="correct_count" class="stat-value">0 题</div>
+                    <div class="stat-label">回答正确</div>
+                </div>
+            </div>
+            
+            <div class="stat-item error">
+                <i class="fas fa-times-circle stat-icon"></i>
+                <div>
+                    <div id="error_count" class="stat-value">0 题</div>
+                    <div class="stat-label">回答错误</div>
+                </div>
+            </div>
+            
+            <div class="stat-item unanswered">
+                <i class="fas fa-ellipsis-h stat-icon"></i>
+                <div>
+                    <div id="no_answer_count" class="stat-value">0 题</div>
+                    <div class="stat-label">未作答</div>
+                </div>
+            </div>
+            
+            <div class="stat-item rate">
+                <i class="fas fa-chart-line stat-icon"></i>
+                <div>
+                    <div id="mistake_rate" class="stat-value">0%</div>
+                    <div class="stat-label">错误率</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mistake-rate">
+            <i class="fas fa-exclamation-triangle"></i>
+            综合错误率：<span id="combinded_mistake_rate">0%</span>
+        </div>
+    </div>
+</body>
+
+<script>
+    getScoreSattlement();
+
+    function getCsrfToken()
+    {
+        return document.cookie.split('; ')
+                              .find(row => row.startsWith('XSRF-TOKEN='))
+                            ?.split('=')[1];
+    }
+
+    async function getScoreSattlement()
+    {
+        try
+        {
+            const response = await fetch("/api/score_record/score_settlement");
+
+            if (!response.ok) {
+                const errorDetail = await response.text().catch(() => null);
+                throw new Error(
+                    `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
+                );
+            }
+
+            const responseJson 
+                = response.json()
+                .then((data) => {
+                    const {correctCount, errorCount, noAnswerCount, mistakeRate} = data;
+                    
+                    document.getElementById('correct_count').innerText   = `${correctCount} 题`;
+                    document.getElementById('error_count').innerText     = `${errorCount} 题`;
+                    document.getElementById('no_answer_count').innerText = `${noAnswerCount} 题`;
+                    document.getElementById('mistake_rate').innerText    = `${mistakeRate} %`;
+                    document.getElementById('combinded_mistake_rate').innerText = `${mistakeRate} %`;
+                }).catch((error) => {console.error(error)});
+        }
+        catch(error) {
+            console.error(error);
+        }
+    }
+</script>
+</html>
