@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>练习结果查询</title>
-
     <style>
-        /* GitHub 暗黑主题基础样式 */
+        /* 新增动画关键帧 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* 优化原有样式并添加动画 */
         body {
             background-color: #0d1117;
             color: #c9d1d9;
@@ -13,6 +30,7 @@
             line-height: 1.5;
             padding: 20px;
             margin: 0;
+            overflow-x: hidden;
         }
 
         p {
@@ -21,11 +39,13 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 1px solid #30363d;
+            animation: fadeInDown 0.8s ease-out both;
+            will-change: transform, opacity;
         }
 
-        /* 表格容器样式 */
         div {
             margin-bottom: 20px;
+            animation: fadeInDown 0.8s 0.2s ease-out both;
         }
 
         table {
@@ -34,7 +54,15 @@
             border-radius: 6px;
             border-collapse: collapse;
             background-color: #161b22;
-            box-shadow: 0 1px 0 rgba(21, 27, 34, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateY(0);
+            animation: float 4s ease-in-out infinite;
+            transition: all 0.6s ease;
+            will-change: transform, box-shadow;
+        }
+
+        table:hover {
+            box-shadow: 0 15px 40px rgba(88, 166, 255, 0.1);
         }
 
         caption {
@@ -45,12 +73,14 @@
             background-color: #161b22;
             border-bottom: 1px solid #30363d;
             border-radius: 6px 6px 0 0;
+            transform: perspective(100px);
         }
 
         th, td {
             padding: 12px 16px;
             text-align: left;
             border-top: 1px solid #30363d;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         th {
@@ -58,10 +88,34 @@
             font-weight: 600;
             color: #8b949e;
             border-bottom: 2px solid #21262d;
+            position: relative;
+        }
+
+        th::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #58a6ff;
+            transition: width 0.3s ease;
+        }
+
+        th:hover::after {
+            width: 100%;
+        }
+
+        tr {
+            opacity: 0;
+            animation: fadeInDown 0.6s ease-out forwards;
+            animation-delay: calc(var(--i) * 0.1s);
         }
 
         tr:hover td {
             background-color: rgba(88, 166, 255, 0.1);
+            transform: translateX(10px);
+            box-shadow: -5px 0 15px rgba(88, 166, 255, 0.1);
         }
 
         /* 响应式设计 */
@@ -69,38 +123,40 @@
             body {
                 padding: 10px;
             }
-
             th, td {
                 padding: 8px 12px;
+            }
+            tr:hover td {
+                transform: translateX(5px);
             }
         }
     </style>
 </head>
 <body>
-    <p th:text="'练习次数: ' + ${#lists.size(AllScoreRecord)}"></p>
+<p th:text="'练习次数: ' + ${#lists.size(AllScoreRecord)}"></p>
 
-    <div>
-        <table>
-            <caption>练习记录</caption>
-            <thead>
-            <tr>
-                <th scope="col">练习提交时间</th>
-                <th scope="col">错误数</th>
-                <th scope="col">正确数</th>
-                <th scope="col">未答数</th>
-                <th scope="col">错误率</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="record : ${AllScoreRecord}">
-                <td th:text="${record.submitDate.toString()}"></td>
-                <td th:text="${record.errorCount}"></td>
-                <td th:text="${record.correctCount}"></td>
-                <td th:text="${record.noAnswerCount}"></td>
-                <td th:text="${record.mistakeRate} + '%'"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+<div>
+    <table>
+        <caption>练习记录</caption>
+        <thead>
+        <tr>
+            <th scope="col">练习提交时间</th>
+            <th scope="col">错误数</th>
+            <th scope="col">正确数</th>
+            <th scope="col">未答数</th>
+            <th scope="col">错误率</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="record,iter : ${AllScoreRecord}" style="--i: ${iter.index}">
+            <td th:text="${record.submitDate.toString()}"></td>
+            <td th:text="${record.errorCount}"></td>
+            <td th:text="${record.correctCount}"></td>
+            <td th:text="${record.noAnswerCount}"></td>
+            <td th:text="${record.mistakeRate} + '%'"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
