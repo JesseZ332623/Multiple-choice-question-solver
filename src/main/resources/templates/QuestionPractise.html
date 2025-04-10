@@ -186,39 +186,39 @@
 </head>
 
 <body>
-    <h1>选择题练习</h1>
+<h1>选择题练习</h1>
 
-    <strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！"</strong>
+<strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！"</strong>
 
-    <div id="total">
-        <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
+<div id="total">
+    <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
+</div>
+
+<div th:each="question : ${QuestionPractise}" class="question-container"
+     th:data-question-id="${question.questionId}" th:data-correct-answer="${question.correctAnswer}">
+    <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
+    <div th:if="${question.options != null}">
+        <ul>
+            <li th:each="entry : ${question.options.entrySet()}">
+                <input type="radio" th:id="'option_' + ${entry.getKey()}"
+                       th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
+                <span th:for="'option_' + ${entry.getKey()}" th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span>
+                <br>
+            </li>
+        </ul>
     </div>
+    <button type="button" class="submit-btn" th:data-qid="${question.questionId}" onclick="checkAnswer(this)">
+        确认
+    </button>
+    <div class="feedback" th:id="'feedback_' + ${question.questionId}"></div>
+</div>
 
-    <div th:each="question : ${QuestionPractise}" class="question-container"
-        th:data-question-id="${question.questionId}" th:data-correct-answer="${question.correctAnswer}">
-        <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
-        <div th:if="${question.options != null}">
-            <ul>
-                <li th:each="entry : ${question.options.entrySet()}">
-                    <input type="radio" th:id="'option_' + ${entry.getKey()}"
-                           th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
-                    <label th:for="'option_' + ${entry.getKey()}"
-                           th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></label>
-                </li>
-            </ul>
-        </div>
-        <button type="button" class="submit-btn" th:data-qid="${question.questionId}" onclick="checkAnswer(this)">
-            确认
-        </button>
-        <div class="feedback" th:id="'feedback_' + ${question.questionId}"></div>
-    </div>
-
-    <div>
-        <button type="button" class="total_submit_button" onclick="totalSubmit(this)">
-            所有题目均已完成，交卷
-        </button>
-        <div class="practise_score" id="practise_score"></div>
-    </div>
+<div>
+    <button type="button" class="total_submit_button" onclick="totalSubmit(this)">
+        所有题目均已完成，交卷
+    </button>
+    <div class="practise_score" id="practise_score"></div>
+</div>
 
 </body>
 
@@ -226,6 +226,13 @@
     var TOTAL_QUESTION_AMOUNT = Number(document.getElementById("total_questions").textContent.split('：')[1]);
     var TotalCorrect = 0;
     var TotalMistake = 0;
+
+    function getCsrfToken()
+    {
+        return document.cookie.split('; ')
+                              .find(row => row.startsWith('XSRF-TOKEN='))
+                            ?.split('=')[1];
+    }
 
     function checkAnswer(button) 
     {
@@ -288,31 +295,26 @@
         const practiseScoreDOM = document.getElementById('practise_score');
 
         const recordJson = {
-            "submitDate": getCurrentISOTimeStrWithoutZone(),
-            "correctCount": TotalCorrect,
-            "errorCount": TotalMistake,
-            "noAnswerCount": noAnswer,
-            "mistakeRate": mistakeRate.toFixed(2)
+            "submitDate"    : getCurrentISOTimeStrWithoutZone(),
+            "correctCount"  : TotalCorrect,
+            "errorCount"    : TotalMistake,
+            "noAnswerCount" : noAnswer,
+            "mistakeRate"   : mistakeRate.toFixed(2)
         };
 
-        addNewScoreRecord(recordJson);
+        addNewScoreRecord(recordJson);      // 将成绩数据写入数据表
 
-        practiseScoreDOM.innerHTML
-            = `
-							<span>交卷完成 </span>
-							<span class="correct"> ✅ 回答正确：${TotalCorrect} 题。</span>
-							<span class="incorrect">❌ 回答错误：${TotalMistake} 题。</span>
-							<span class="no_answer"> [...] 未作答：${noAnswer} 题。<span>
-							<span>错误率：${mistakeRate.toFixed(2)} %</span>
-							<span>✅ ${getCurrentISOTimeStrWithoutZone()} 成绩数据已提交。<span>
-						`;
+        window.location = 'current_score_settlement'; // 跳转至结算页面
     }
 
     async function updateCorrectTimes(questionId) {
         try {
             const response = await fetch(
                 `/api/question/correct_times_plus_one/${questionId}`,
-                { method: 'PUT', headers: { 'Content-Type': 'application/json' } }
+                { 
+                    method: 'PUT', 
+                    headers: {'Content-Type' : 'application/json'} 
+                }
             );
 
             if (!response.ok) {
@@ -322,7 +324,7 @@
             const responseText = await response.text();
 
             console.log(
-                `Fetch api /correct_times_plus_one/${questionId} success, 
+                `Fetch api/correct_times_plus_one/${questionId} success, 
 				response: ${responseText}`
             );
         }
@@ -331,13 +333,15 @@
         }
     }
 
-    async function addNewScoreRecord(recordJson) {
-        try {
+    async function addNewScoreRecord(recordJson) 
+    {
+        try 
+        {
             const response = await fetch(
                 "/api/score_record/add_one_new_score_record",
                 {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {'Content-Type': 'application/json' },
                     body: JSON.stringify(recordJson)
                 },
             );
@@ -350,6 +354,11 @@
             }
 
             const responseText = await response.text();
+            
+            const practiseScoreDOM = document.getElementById('practise_score');
+
+            practiseScoreDOM.innerHTML 
+                = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交。<span>`;
 
             console.log(`${responseText}`);
         }
@@ -358,5 +367,4 @@
         }
     }
 </script>
-
 </html>
