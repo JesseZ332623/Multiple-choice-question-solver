@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/api/score_record")
@@ -43,10 +45,10 @@ public class ScoreRecordController
 
             return ResponseEntity.ok(scoreRecord);
         }
-        catch (Exception runtimeException)
+        catch (Exception exception)
         {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(runtimeException.getMessage());
+                                 .body(exception.getMessage());
         }
     }
 
@@ -59,6 +61,46 @@ public class ScoreRecordController
     @GetMapping(path = "/all_score_record")
     public ResponseEntity<?> getAllScoreRecord() {
         return ResponseEntity.ok(this.scoreRecordService.findAllScoreRecord());
+    }
+
+
+    /*
+     * Get 方法请求，获取数据库中最新的一条成绩记录（在用户完成最新一次的练习后会调用）。
+     * 服务器以 JSON 格式作为响应，如下所示：
+     *
+     * {
+     *     "submitDate": "2025-04-09T09:57:29",
+     *     "correctCount": 0,
+     *     "errorCount": 0,
+     *     "noAnswerCount": 321,
+     *     "mistakeRate": 100.0
+     * }
+     *
+     * 如果期间出现错误，会以 500 作为响应码。
+     *
+     * 可能的 URL 为：http://localhost:8081/api/score_record/score_settlement
+     * */
+    @GetMapping(path = "/score_settlement")
+    public ResponseEntity<?> scoreSettlement()
+    {
+        try
+        {
+            Optional<ScoreRecordEntity> latestScoreRecord
+                    = this.scoreRecordService.findAllScoreRecord()
+                    .stream().max(Comparator.comparing(ScoreRecordEntity::getSubmitDate));
+
+            ScoreRecordEntity scoreRecord = null;
+            if (latestScoreRecord.isPresent()) {
+                scoreRecord = latestScoreRecord.get();
+            }
+
+            return ResponseEntity.ok(scoreRecord);
+        }
+        catch (Exception exception)
+        {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(exception.getMessage());
+        }
     }
 
     /*
