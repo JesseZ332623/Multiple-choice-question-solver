@@ -30,7 +30,7 @@ public class QuestionPractiseViewController
      * 渲染在 QuestionPractise.html 页面中。
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：http://localhost:8081/practise
+     * 可能的 URL 为：https://localhost:8081/practise
      */
     @GetMapping(path = "practise")
     public String getQuestionPractise(Model model)
