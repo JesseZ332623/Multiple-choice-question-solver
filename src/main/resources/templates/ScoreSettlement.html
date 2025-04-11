@@ -165,6 +165,7 @@
 </body>
 
 <script>
+
     getScoreSattlement();
 
     function getCsrfToken()
@@ -180,8 +181,11 @@
         {
             const response = await fetch("/api/score_record/score_settlement");
 
-            if (!response.ok) {
+            if (!response.ok) 
+            {
+                // 获取响应体中携带的错误信息
                 const errorDetail = await response.text().catch(() => null);
+
                 throw new Error(
                     `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
                 );
@@ -189,7 +193,9 @@
 
             const responseJson 
                 = response.json()
-                .then((data) => {
+                .then((data) => 
+                {
+                    // 从 responseJson 中提取四个键值对存于对象中。
                     const {correctCount, errorCount, noAnswerCount, mistakeRate} = data;
                     
                     document.getElementById('correct_count').innerText   = `${correctCount} 题`;
