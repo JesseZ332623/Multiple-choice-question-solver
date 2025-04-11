@@ -229,9 +229,17 @@
 
     function getCsrfToken()
     {
+        /**
+            一个可能的 Cookie 如下所示：
+
+                "name=Oeschger; SameSite=None; Secure"
+
+            将这个 Cookie 按 ; 分割，在从分割后的字符串数组中
+            找到由 XSRF-TOKEN= 开头的行，再按 = 进行分割，取等号右边的值。
+        */
         return document.cookie.split('; ')
                               .find(row => row.startsWith('XSRF-TOKEN='))
-                            ?.split('=')[1];
+                              ?.split('=')[1];
     }
 
     function checkAnswer(button) 
@@ -289,7 +297,7 @@
 
     function totalSubmit(button) 
     {
-        var noAnswer = TOTAL_QUESTION_AMOUNT - TotalCorrect - TotalMistake;
+        var noAnswer = TOTAL_QUESTION_AMOUNT - (TotalCorrect + TotalMistake);
         var mistakeRate = (TotalMistake + noAnswer) / TOTAL_QUESTION_AMOUNT * 100;
 
         const practiseScoreDOM = document.getElementById('practise_score');
@@ -304,10 +312,15 @@
 
         addNewScoreRecord(recordJson);      // 将成绩数据写入数据表
 
-        window.location = 'current_score_settlement'; // 跳转至结算页面
+        setTimeout(
+            () => { 
+                window.location = 'current_score_settlement'; 
+            }, 2500
+        );
     }
 
-    async function updateCorrectTimes(questionId) {
+    async function updateCorrectTimes(questionId) 
+    {
         try {
             const response = await fetch(
                 `/api/question/correct_times_plus_one/${questionId}`,
@@ -333,7 +346,7 @@
         }
     }
 
-    async function addNewScoreRecord(recordJson) 
+    async function addNewScoreRecord(recordJson)
     {
         try 
         {
@@ -343,10 +356,11 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json' },
                     body: JSON.stringify(recordJson)
-                },
+                }
             );
 
-            if (!response.ok) {
+            if (!response.ok) 
+            {
                 const errorDetail = await response.text().catch(() => null);
                 throw new Error(
                     `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
@@ -358,7 +372,7 @@
             const practiseScoreDOM = document.getElementById('practise_score');
 
             practiseScoreDOM.innerHTML 
-                = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交。<span>`;
+                = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交，正在跳转至结算页面。<span>`;
 
             console.log(`${responseText}`);
         }
