@@ -26,4 +26,9 @@ public interface ScoreRecordService
      * 获取当前所有的成绩记录，以列表的形式返回。
      */
     List<ScoreRecordEntity> findAllScoreRecord();
+
+    /**
+     * 清空 score_record 表。
+     */
+    void truncateScoreRecordTable();
 }
