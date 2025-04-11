@@ -14,7 +14,7 @@ spring.datasource.password=your_password
 
 - 然后使用 Maven 进行构建：
 ```bash
-    maven clean install -X
+    mvn clean install -X
 ```
 
 - 运行编译好的 .jar 包：
