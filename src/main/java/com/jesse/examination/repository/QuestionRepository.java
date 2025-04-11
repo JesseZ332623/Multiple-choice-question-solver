@@ -2,6 +2,7 @@ package com.jesse.examination.repository;
 
 import com.jesse.examination.entity.questionentity.QuestionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -71,6 +72,18 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
             nativeQuery = true
     )
     List<QuestionProjectionWithCorrectOption> findQuestionWithCorrectOption();
+
+    /**
+     * 将 question 表中的 correct_times 数据列的值全部设为 0。
+     *
+     * @return 被更新的记录数
+     */
+    @Modifying
+    @Query(
+            value = "UPDATE questions SET correct_times = 0",
+            nativeQuery = true
+    )
+    Integer cleanCorrectTimesToZero();
 
     interface QuestionProjectionWithCorrectOption
     {
