@@ -1,4 +1,4 @@
-# 选择题刷题器
+# 水课选择题刷题器
 
 作为自己 Spring 项目的练习，目前已经掌握 Spring 中的核心部分。
 
@@ -39,5 +39,5 @@ spring.datasource.password=your_password
 - 跳转至成绩结算页面（如果是手动跳转的话就显示最新的一次成绩）
   - https://localhost:8081/current_score_settlement
 
-#### Date：2025.04.10
+#### Date：2025.04.11
 #### [Apache LICENCE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
