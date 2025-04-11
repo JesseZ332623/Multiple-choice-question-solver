@@ -85,7 +85,17 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      * 获取当前所有的成绩记录，以列表的形式返回。
      */
     @Override
+    @Transactional
     public List<ScoreRecordEntity> findAllScoreRecord() {
         return this.scoreRecordRepository.findAll();
+    }
+
+    /**
+     * 清空 score_record 表。
+     */
+    @Override
+    @Transactional
+    public void truncateScoreRecordTable() {
+        this.scoreRecordRepository.truncateScoreRecordTable();
     }
 }
