@@ -147,4 +147,10 @@ public class QuestionServiceImplement implements QuestionService
             );
         }
     }
+
+    @Override
+    @Transactional
+    public Integer clearCorrectTimesToZero() {
+        return this.questionRepository.cleanCorrectTimesToZero();
+    }
 }
