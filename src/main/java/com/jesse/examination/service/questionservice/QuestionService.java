@@ -24,4 +24,6 @@ public interface QuestionService
      * 表明用户答对了这道题一次。
      */
     Integer correctTimesPlusOneById(Integer id);
+
+    Integer clearCorrectTimesToZero();
 }
