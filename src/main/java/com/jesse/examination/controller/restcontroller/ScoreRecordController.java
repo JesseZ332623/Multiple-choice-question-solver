@@ -31,7 +31,7 @@ public class ScoreRecordController
      *
      *  服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     *  可能的 URL 为：http://localhost:8081/api/score_record/2025-04-08T09:12:04
+     *  可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04
      */
     @GetMapping(path = "/{dateTime}")
     public ResponseEntity<?> getOneScoreRecord(
@@ -56,7 +56,7 @@ public class ScoreRecordController
     * Get 方法请求，获取数据库中所有的练习成绩记录。
     * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
     *
-    * 可能的 URL 为：http://localhost:8081/api/score_record/all_score_record
+    * 可能的 URL 为：https://localhost:8081/api/score_record/all_score_record
     */
     @GetMapping(path = "/all_score_record")
     public ResponseEntity<?> getAllScoreRecord() {
@@ -78,7 +78,7 @@ public class ScoreRecordController
      *
      * 如果期间出现错误，会以 500 作为响应码。
      *
-     * 可能的 URL 为：http://localhost:8081/api/score_record/score_settlement
+     * 可能的 URL 为：https://localhost:8081/api/score_record/score_settlement
      * */
     @GetMapping(path = "/score_settlement")
     public ResponseEntity<?> scoreSettlement()
@@ -119,7 +119,7 @@ public class ScoreRecordController
      *
      * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：http://localhost:8081/api/score_record/add_one_new_score_record"
+     * 可能的 URL 为：https://localhost:8081/api/score_record/add_one_new_score_record"
      */
     @PostMapping(path = "/add_one_new_score_record")
     public ResponseEntity<?> addOneNewScoreRecord(
@@ -148,6 +148,17 @@ public class ScoreRecordController
         }
     }
 
+    /**
+     * Put 方法请求，清空所有的练习记录。
+     */
+    @PutMapping("/truncate")
+    public ResponseEntity<?> truncateScoreRecord()
+    {
+        this.scoreRecordService.truncateScoreRecordTable();
+
+        return ResponseEntity.ok("Truncate score record complete.");
+    }
+
     /*
      * Delete 方法请求，通过指定的时间信息删除对应的成绩记录行。
      * 前后端时间信息遵循 ISO 标准且精确到秒。
@@ -156,7 +167,7 @@ public class ScoreRecordController
      *
      * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：http://localhost:8081/api/score_record/2025-04-08T09:12:04"
+     * 可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04"
      */
     @DeleteMapping(path = "/{dateTime}")
     public ResponseEntity<?> deleteOneScoreRecord(
