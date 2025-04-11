@@ -40,4 +40,4 @@ spring.datasource.password=your_password
   - https://localhost:8081/current_score_settlement
 
 #### Date：2025.04.11
-#### [Apache LICENCE-2.0](https://www.apache.org/licenses/LICENSE-2.0)
+#### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
