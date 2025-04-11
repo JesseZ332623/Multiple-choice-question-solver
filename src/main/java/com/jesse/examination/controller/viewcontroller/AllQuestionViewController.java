@@ -30,7 +30,7 @@ public class AllQuestionViewController
      * 以视图的方式作为响应，渲染在 QuestionPractise.html 页面中，
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：http://localhost:8081/all_questions
+     * 可能的 URL 为：https://localhost:8081/all_questions
      */
     @GetMapping(path = "all_questions")
     public String getAllQuestionView(Model model)
@@ -67,7 +67,7 @@ public class AllQuestionViewController
      * 以视图作为响应，渲染在 AllQuestionsWithCorrectResult.html 页面中
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：http://localhost:8081/all_questions_with_correct_option
+     * 可能的 URL 为：https://localhost:8081/all_questions_with_correct_option
      */
     @GetMapping(path = "all_questions_with_correct_option")
     public String getAllQuestionWithCorrectOptionView(Model model)
