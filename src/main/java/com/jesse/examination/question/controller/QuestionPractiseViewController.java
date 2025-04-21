@@ -1,9 +1,9 @@
-package com.jesse.examination.controller.viewcontroller;
+package com.jesse.examination.question.controller;
 
-import com.jesse.examination.DTO.QuestionInfoDTO;
+import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
-import com.jesse.examination.service.questionservice.QuestionService;
+import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
