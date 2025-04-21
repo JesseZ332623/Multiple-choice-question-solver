@@ -1,4 +1,4 @@
-package com.jesse.examination.DTO;
+package com.jesse.examination.question.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
