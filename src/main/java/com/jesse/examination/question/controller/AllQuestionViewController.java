@@ -25,12 +25,17 @@ public class AllQuestionViewController
         this.questionService = questionService;
     }
 
-    /*
+    /**
      * GET 方法请求，获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容，
      * 以视图的方式作为响应，渲染在 QuestionPractise.html 页面中，
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：https://localhost:8081/all_questions
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/all_questions">
+     *          (GET Method) 获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容。
+     *      </a>
+     * </p>
      */
     @GetMapping(path = "all_questions")
     public String getAllQuestionView(Model model)
@@ -50,7 +55,8 @@ public class AllQuestionViewController
         {
             ControllerErrorMessage errorMessage
                     = ErrorMessageGenerator.getErrorMessage(
-                            this.getClass().getSimpleName(), "getAllQuestionView",
+                            this.getClass().getSimpleName(),
+                    "getAllQuestionView",
                             exception.getMessage()
                     );
 
@@ -62,12 +68,17 @@ public class AllQuestionViewController
         }
     }
 
-    /*
+    /**
      * GET 方法请求，获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。
      * 以视图作为响应，渲染在 AllQuestionsWithCorrectResult.html 页面中
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：https://localhost:8081/all_questions_with_correct_option
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/all_questions_with_correct_option">
+     *          (GET Method) 获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。
+     *      </a>
+     * </p>
      */
     @GetMapping(path = "all_questions_with_correct_option")
     public String getAllQuestionWithCorrectOptionView(Model model)
