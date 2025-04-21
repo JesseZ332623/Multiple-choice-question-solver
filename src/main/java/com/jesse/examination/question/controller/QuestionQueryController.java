@@ -1,8 +1,8 @@
-package com.jesse.examination.controller.restcontroller;
+package com.jesse.examination.question.controller;
 
-import com.jesse.examination.DTO.QuestionInfoDTO;
-import com.jesse.examination.DTO.QuestionWithCorrectOptionDTO;
-import com.jesse.examination.service.questionservice.QuestionService;
+import com.jesse.examination.question.dto.QuestionInfoDTO;
+import com.jesse.examination.question.dto.QuestionWithCorrectOptionDTO;
+import com.jesse.examination.question.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
