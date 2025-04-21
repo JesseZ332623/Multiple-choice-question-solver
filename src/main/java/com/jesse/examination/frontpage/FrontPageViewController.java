@@ -1,4 +1,4 @@
-package com.jesse.examination.controller.viewcontroller;
+package com.jesse.examination.frontpage;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
