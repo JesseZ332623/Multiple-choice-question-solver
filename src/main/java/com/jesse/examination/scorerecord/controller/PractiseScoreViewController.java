@@ -1,9 +1,9 @@
-package com.jesse.examination.controller.viewcontroller;
+package com.jesse.examination.scorerecord.controller;
 
-import com.jesse.examination.entity.scorerecord.ScoreRecordEntity;
+import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
-import com.jesse.examination.service.scorerecordservice.ScoreRecordService;
+import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
