@@ -22,11 +22,17 @@ public class QuestionQueryController
         this.questionService = questionService;
     }
 
-    /*
+    /**
      * GET 方法请求，获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容，
      * 服务器以 JSON 的格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：https://localhost:8081/api/question/all_questions
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/question/all_questions">
+     *          (GET Method) 获取所有问题的内容，正确选项，
+     *          答对次数以及它的所有选项的内容，以 JSON 的格式作为响应。
+     *      </a>
+     * </p>
      */
     @GetMapping(path = "/all_questions")
     public ResponseEntity<?> getAllQuestionInfo()
@@ -45,11 +51,17 @@ public class QuestionQueryController
         }
     }
 
-    /*
+    /**
      * GET 方法请求，获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。
      * 以 JSON 的格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：https://localhost:8081/api/question/all_questions_with_correct_option
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/question/all_questions_with_correct_option">
+     *          (GET Method) GET 方法请求，获取所有问题的内容，
+     *          正确答案，答对的次数以及对应正确选项的内容。
+     *      </a>
+     * </p>
      */
     @GetMapping(path = "/all_questions_with_correct_option")
     public ResponseEntity<?> getAllQuestionWithCorrectOption()
@@ -68,11 +80,17 @@ public class QuestionQueryController
         }
     }
 
-    /*
+    /**
      * PUT 方法请求，将 questions 表中指定 id 对应的数据行的 current_times 值加上 1，
-     * （如果期间出现错误，会以 400 作为响应码）注意这是一个敏感操作，后续会对外屏蔽。
+     * （如果期间出现错误，会以 400 作为响应码）。
+     * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
      *
-     * 可能的 URL 为：https://localhost:8081/api/question/correct_times_plus_one/114
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/question/correct_times_plus_one/1">
+     *          (PUT Method) 将 questions 表中指定 id 对应的数据行的 current_times 值加上 1。
+     *      </a>
+     * </p>
      */
     @PutMapping(path = "/correct_times_plus_one/{id}")
     public ResponseEntity<?> correctTimesPlusOneById(@PathVariable Integer id)
@@ -96,6 +114,17 @@ public class QuestionQueryController
         }
     }
 
+    /**
+     * PUT 方法请求，将所有数据行的 correct_times 列的值设为 0。
+     * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
+     *
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/clean_correct_times">
+     *          (PUT Method) 将所有数据行的 correct_times 列的值设为 0。
+     *      </a>
+     * </p>
+     */
     @Transactional
     @PutMapping(path = "/clean_correct_times")
     public ResponseEntity<?> clearCorrectTimesToZero()
