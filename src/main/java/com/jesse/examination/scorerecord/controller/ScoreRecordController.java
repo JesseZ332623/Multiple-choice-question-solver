@@ -1,14 +1,13 @@
-package com.jesse.examination.controller.restcontroller;
+package com.jesse.examination.scorerecord.controller;
 
-import com.jesse.examination.entity.scorerecord.ScoreRecordEntity;
-import com.jesse.examination.service.scorerecordservice.ScoreRecordService;
+import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
+import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -31,17 +30,17 @@ public class ScoreRecordController
      *
      *  服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     *  可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04
+     *  可能的 URL 为：https://localhost:8081/api/score_record/12
      */
-    @GetMapping(path = "/{dateTime}")
+    @GetMapping(path = "/{id}")
     public ResponseEntity<?> getOneScoreRecord(
-            @PathVariable(name = "dateTime") LocalDateTime dateTime
+            @PathVariable(name = "id") Integer id
     )
     {
         try
         {
             ScoreRecordEntity scoreRecord
-                    = this.scoreRecordService.findScoreRecordByDateTime(dateTime);
+                    = this.scoreRecordService.findScoreRecordById(id);
 
             return ResponseEntity.ok(scoreRecord);
         }
@@ -59,8 +58,11 @@ public class ScoreRecordController
     * 可能的 URL 为：https://localhost:8081/api/score_record/all_score_record
     */
     @GetMapping(path = "/all_score_record")
-    public ResponseEntity<?> getAllScoreRecord() {
-        return ResponseEntity.ok(this.scoreRecordService.findAllScoreRecord());
+    public ResponseEntity<?> getAllScoreRecord()
+    {
+        return ResponseEntity.ok(
+                this.scoreRecordService.findAllScoreRecord()
+        );
     }
 
 
@@ -130,13 +132,13 @@ public class ScoreRecordController
     {
         try
         {
-            LocalDateTime insertFeedBack
+            Integer insertFeedBack
                     = this.scoreRecordService.addNewScoreRecord(scoreRecord);
 
             return ResponseEntity.ok()
                                  .body(
                                          String.format(
-                                                 "Insert New Score Record Complete, Record Submit time: %s",
+                                                 "Insert New Score Record Complete, Record ID: {%s}.",
                                                  insertFeedBack.toString()
                                          )
                                  );
@@ -154,36 +156,36 @@ public class ScoreRecordController
     @PutMapping("/truncate")
     public ResponseEntity<?> truncateScoreRecord()
     {
-        this.scoreRecordService.truncateScoreRecordTable();
-
-        return ResponseEntity.ok("Truncate score record complete.");
+        return ResponseEntity.ok(
+                String.format(
+                        "Truncate score record complete, truncate rows: {%d}.",
+                        this.scoreRecordService.truncateScoreRecordTable()
+                )
+        );
     }
 
     /*
-     * Delete 方法请求，通过指定的时间信息删除对应的成绩记录行。
-     * 前后端时间信息遵循 ISO 标准且精确到秒。
-     *
-     * 示例：2025-04-08T09:12:04
+     * Delete 方法请求，通过指定的 ID 删除对应的成绩记录行。
      *
      * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
      * 可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04"
      */
-    @DeleteMapping(path = "/{dateTime}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> deleteOneScoreRecord(
-            @PathVariable(name = "dateTime") LocalDateTime dateTime
+            @PathVariable(name = "id") Integer id
     )
     {
         try
         {
-            LocalDateTime deleteFeedBack
-                    = this.scoreRecordService.deleteScoreRecordByDate(dateTime);
+            Integer deleteFeedBack
+                    = this.scoreRecordService.deleteScoreRecordByDate(id);
 
             return ResponseEntity.ok()
                                  .body(
                                          String.format(
-                                                 "Delete Score Record Complete, Record Submit time: %s",
-                                                 deleteFeedBack.toString()
+                                                 "Delete Score Record Complete, Record id: {%d}.",
+                                                 deleteFeedBack
                                          )
                                  );
         }
