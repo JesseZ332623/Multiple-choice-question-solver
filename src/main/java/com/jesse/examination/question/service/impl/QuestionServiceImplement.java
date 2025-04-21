@@ -1,12 +1,13 @@
-package com.jesse.examination.service.questionservice;
+package com.jesse.examination.question.service.impl;
 
-import com.jesse.examination.DTO.QuestionInfoDTO;
+import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jesse.examination.DTO.QuestionWithCorrectOptionDTO;
-import com.jesse.examination.entity.questionentity.QuestionEntity;
-import com.jesse.examination.repository.QuestionRepository;
+import com.jesse.examination.question.dto.QuestionWithCorrectOptionDTO;
+import com.jesse.examination.question.entity.questionentity.QuestionEntity;
+import com.jesse.examination.question.repository.QuestionRepository;
+import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
