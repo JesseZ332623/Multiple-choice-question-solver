@@ -39,5 +39,5 @@ spring.datasource.password=your_password
 - 跳转至成绩结算页面（如果是手动跳转的话就显示最新的一次成绩）
   - https://localhost:8081/current_score_settlement
 
-#### Date：2025.04.11
+#### Date：2025.04.21
 #### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
