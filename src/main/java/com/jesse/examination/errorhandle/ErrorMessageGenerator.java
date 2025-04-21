@@ -16,9 +16,10 @@ public class ErrorMessageGenerator
      * @param exceptionMsg   异常信息
      *
      * @return 页面上返回的错误信息可能的格式是：
-     *            Controller Name: QuestionPractiseViewController
-     *            Controller Method: getQuestionPractise()
-     *            Error: [IllegalStateException] Query Operator Failed.....
+     *
+     *     <p><strong>Controller Name: </strong>QuestionPractiseViewController</p>
+     *     <p><strong>Controller Method: </strong>getQuestionPractise()</p>
+     *     <p><strong>Error: </strong>[IllegalStateException] Query Operator Failed...</p>
      */
     @NotNull
     @Contract(pure = true)
