@@ -1,7 +1,7 @@
-package com.jesse.examination.entity.questionentity;
+package com.jesse.examination.question.entity.questionentity;
 
-import com.jesse.examination.entity.optionentity.OptionEntity;
-import com.jesse.examination.entity.optionentity.OptionKey;
+import com.jesse.examination.question.entity.optionentity.OptionEntity;
+import com.jesse.examination.question.entity.optionentity.OptionKey;
 import jakarta.persistence.*;
 import lombok.Data;
 

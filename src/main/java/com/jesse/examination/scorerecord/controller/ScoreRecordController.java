@@ -1,14 +1,13 @@
-package com.jesse.examination.controller.restcontroller;
+package com.jesse.examination.scorerecord.controller;
 
-import com.jesse.examination.entity.scorerecord.ScoreRecordEntity;
-import com.jesse.examination.service.scorerecordservice.ScoreRecordService;
+import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
+import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -23,25 +22,27 @@ public class ScoreRecordController
         this.scoreRecordService = scoreRecordService;
     }
 
-    /*
+    /**
      *  GET 方法请求，通过指定的时间信息查询对应的成绩记录行，
-     *  前后端时间信息遵循 ISO 标准且精确到秒。
-     *
-     *  示例：2025-04-08T09:12:04
-     *
+     *  前后端时间信息遵循 ISO 标准且精确到秒。</br>
      *  服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     *  可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/search/1">
+     *          (GET Method) 通过指定的时间信息查询对应的成绩记录行，以 JSON 格式作为响应。
+     *      </a>
+     *</p>
      */
-    @GetMapping(path = "/{dateTime}")
+    @GetMapping(path = "/search/{id}")
     public ResponseEntity<?> getOneScoreRecord(
-            @PathVariable(name = "dateTime") LocalDateTime dateTime
+            @PathVariable(name = "id") Integer id
     )
     {
         try
         {
             ScoreRecordEntity scoreRecord
-                    = this.scoreRecordService.findScoreRecordByDateTime(dateTime);
+                    = this.scoreRecordService.findScoreRecordById(id);
 
             return ResponseEntity.ok(scoreRecord);
         }
@@ -52,22 +53,31 @@ public class ScoreRecordController
         }
     }
 
-    /*
-    * Get 方法请求，获取数据库中所有的练习成绩记录。
-    * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
-    *
-    * 可能的 URL 为：https://localhost:8081/api/score_record/all_score_record
+    /**
+     * Get 方法请求，获取数据库中所有的练习成绩记录。
+     * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
+     *
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/all_score_record">
+     *          (GET Method) 获取数据库中所有的练习成绩记录，以 JSON 格式作为响应。
+     *      </a>
+     *</p>
     */
     @GetMapping(path = "/all_score_record")
-    public ResponseEntity<?> getAllScoreRecord() {
-        return ResponseEntity.ok(this.scoreRecordService.findAllScoreRecord());
+    public ResponseEntity<?> getAllScoreRecord()
+    {
+        return ResponseEntity.ok(
+                this.scoreRecordService.findAllScoreRecord()
+        );
     }
 
 
-    /*
+    /**
      * Get 方法请求，获取数据库中最新的一条成绩记录（在用户完成最新一次的练习后会调用）。
      * 服务器以 JSON 格式作为响应，如下所示：
      *
+     * <pre>
      * {
      *     "submitDate": "2025-04-09T09:57:29",
      *     "correctCount": 0,
@@ -75,11 +85,17 @@ public class ScoreRecordController
      *     "noAnswerCount": 321,
      *     "mistakeRate": 100.0
      * }
+     * </pre>
      *
      * 如果期间出现错误，会以 500 作为响应码。
      *
-     * 可能的 URL 为：https://localhost:8081/api/score_record/score_settlement
-     * */
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/score_settlement">
+     *          (GET Method) 往数据表中添加一条新的练习记录，以 JSON 格式作为响应。
+     *      </a>
+     *</p>
+     */
     @GetMapping(path = "/score_settlement")
     public ResponseEntity<?> scoreSettlement()
     {
@@ -103,11 +119,11 @@ public class ScoreRecordController
         }
     }
 
-    /*
+    /**
      * Post 方法请求，往数据表中添加一条新的练习记录。
      * 如果需要手动提交进行测试的话，JSON 格式示例如下：
      *
-     *
+     * <pre>
      * {
      *     "submitDate": "2015-01-12T19:12:37",
      *     "correctCount": 100,
@@ -115,11 +131,16 @@ public class ScoreRecordController
      *     "noAnswerCount": 30,
      *     "mistakeRate": 13.3333333
      * }
-     *
+     *</pre>
      *
      * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：https://localhost:8081/api/score_record/add_one_new_score_record"
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/add_one_new_score_record">
+     *          (POST Method) 往数据表中添加一条新的练习记录，以 JSON 格式作为响应。
+     *      </a>
+     *</p>
      */
     @PostMapping(path = "/add_one_new_score_record")
     public ResponseEntity<?> addOneNewScoreRecord(
@@ -130,13 +151,13 @@ public class ScoreRecordController
     {
         try
         {
-            LocalDateTime insertFeedBack
+            Integer insertFeedBack
                     = this.scoreRecordService.addNewScoreRecord(scoreRecord);
 
             return ResponseEntity.ok()
                                  .body(
                                          String.format(
-                                                 "Insert New Score Record Complete, Record Submit time: %s",
+                                                 "Insert New Score Record Complete, Record ID: {%s}.",
                                                  insertFeedBack.toString()
                                          )
                                  );
@@ -150,40 +171,54 @@ public class ScoreRecordController
 
     /**
      * Put 方法请求，清空所有的练习记录。
+     *
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/truncate">
+     *          (PUT Method) 将所有数据行的 correct_times 列的值设为 0。
+     *      </a>
+     *</p>
+     *
+     * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
      */
     @PutMapping("/truncate")
     public ResponseEntity<?> truncateScoreRecord()
     {
-        this.scoreRecordService.truncateScoreRecordTable();
-
-        return ResponseEntity.ok("Truncate score record complete.");
+        return ResponseEntity.ok(
+                String.format(
+                        "Truncate score record complete, truncate rows: {%d}.",
+                        this.scoreRecordService.truncateScoreRecordTable()
+                )
+        );
     }
 
-    /*
-     * Delete 方法请求，通过指定的时间信息删除对应的成绩记录行。
-     * 前后端时间信息遵循 ISO 标准且精确到秒。
-     *
-     * 示例：2025-04-08T09:12:04
-     *
+    /**
+     * Delete 方法请求，通过指定的 ID 删除对应的成绩记录行，
      * 服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
-     * 可能的 URL 为：https://localhost:8081/api/score_record/2025-04-08T09:12:04"
+     *<p>
+     *      链接：
+     *      <a href="https://localhost:8081/api/score_record/delete/1">
+     *          (DELETE Method) Delete 方法请求，通过指定的 ID 删除对应的成绩记录行，
+     *          以 JSON 格式作为响应。
+     *      </a>
+     *</p>
      */
-    @DeleteMapping(path = "/{dateTime}")
+    @DeleteMapping(path = "/delete/{id}")
     public ResponseEntity<?> deleteOneScoreRecord(
-            @PathVariable(name = "dateTime") LocalDateTime dateTime
+            @PathVariable(name = "id") Integer id
     )
     {
         try
         {
-            LocalDateTime deleteFeedBack
-                    = this.scoreRecordService.deleteScoreRecordByDate(dateTime);
+            Integer deleteFeedBack
+                    = this.scoreRecordService.deleteScoreRecordByDate(id);
 
             return ResponseEntity.ok()
                                  .body(
                                          String.format(
-                                                 "Delete Score Record Complete, Record Submit time: %s",
-                                                 deleteFeedBack.toString()
+                                                 "Delete Score Record Complete, Record id: {%d}.",
+                                                 deleteFeedBack
                                          )
                                  );
         }

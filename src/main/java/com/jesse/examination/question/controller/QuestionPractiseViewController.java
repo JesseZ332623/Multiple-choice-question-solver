@@ -1,9 +1,9 @@
-package com.jesse.examination.controller.viewcontroller;
+package com.jesse.examination.question.controller;
 
-import com.jesse.examination.DTO.QuestionInfoDTO;
+import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
-import com.jesse.examination.service.questionservice.QuestionService;
+import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,12 +25,17 @@ public class QuestionPractiseViewController
         this.questionService = questionService;
     }
 
-    /*
+    /**
      * GET 方法请求，进行所有选择题的练习，以视图作为响应，
      * 渲染在 QuestionPractise.html 页面中。
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：https://localhost:8081/practise
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/practise">
+     *          (GET Method) 进行所有选择题的练习，以视图作为响应。
+     *      </a>
+     * </p>
      */
     @GetMapping(path = "practise")
     public String getQuestionPractise(Model model)

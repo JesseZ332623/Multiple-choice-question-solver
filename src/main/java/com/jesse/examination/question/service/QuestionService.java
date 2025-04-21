@@ -1,7 +1,7 @@
-package com.jesse.examination.service.questionservice;
+package com.jesse.examination.question.service;
 
-import com.jesse.examination.DTO.QuestionInfoDTO;
-import com.jesse.examination.DTO.QuestionWithCorrectOptionDTO;
+import com.jesse.examination.question.dto.QuestionInfoDTO;
+import com.jesse.examination.question.dto.QuestionWithCorrectOptionDTO;
 
 import java.util.List;
 
