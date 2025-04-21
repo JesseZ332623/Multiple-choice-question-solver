@@ -25,12 +25,17 @@ public class PractiseScoreViewController
         this.scoreRecordService = scoreRecordService;
     }
 
-    /*
+    /**
      * GET 方法请求，渲染所有练习记录，以视图作为响应，
      * 渲染在 AllPractiseScore.html 页面中。
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：https://localhost:8081/all_score_record
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/all_score_record">
+     *          (GET Method) 渲染所有练习记录，以视图作为响应。
+     *     </a>
+     * </p>
      */
     @GetMapping(path = "all_score_record")
     public String getAllPractiseScoreView(Model model)
@@ -61,14 +66,21 @@ public class PractiseScoreViewController
         }
     }
 
-    /*
+    /**
      * GET 方法请求，在用户交卷后渲染它此时的成绩，以视图作为响应，
      * 渲染在 ScoreSettlement.html 页面中。
      * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
      *
-     * 可能的 URL 为：https://localhost:8081/current_score_settlement
+     * <p>
+     *      链接：
+     *      <a href="https://localhost:8081/current_score_settlement">
+     *          (GET Method) 渲染所有练习记录，以视图作为响应。
+     *     </a>
+     * </p>
      *
-     * 若用户直接访问的话，就会以最新的一次练习记录作为数据进行渲染。
+     * <strong>
+     *     若用户直接访问的话，就会以最新的一次练习记录作为数据进行渲染。
+     * </strong>
      */
     @GetMapping(path = "current_score_settlement")
     public String scoreSettlementView() { return "ScoreSettlement"; }
