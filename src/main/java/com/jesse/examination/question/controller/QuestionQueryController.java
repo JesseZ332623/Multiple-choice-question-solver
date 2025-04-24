@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/question")
+@RequestMapping(path = "/api/question", produces = "application/json")
 public class QuestionQueryController
 {
     private final QuestionService questionService;
