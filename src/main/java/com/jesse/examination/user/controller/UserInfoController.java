@@ -14,7 +14,7 @@ import static java.lang.String.format;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/api/user_info/")
+@RequestMapping(path = "/api/user_info/", produces = "application/json")
 public class UserInfoController
 {
     private final UserServiceInterface userServiceInterface;
@@ -60,7 +60,7 @@ public class UserInfoController
 
             return ResponseEntity.ok(
                     format(
-                            "Login complete. Welcome %s!",
+                            "Login complete. Welcome User: [%s]!",
                             userLoginDTO.getUserName()
                     )
             );
@@ -80,12 +80,14 @@ public class UserInfoController
     {
         try
         {
-            this.userServiceInterface.modifyUserInfo(
-                    modifyOperatorDTO.getUserLoginDTO(),
-                    modifyOperatorDTO.getUserMidifyInfoDTO()
-            );
+            this.userServiceInterface.modifyUserInfo(modifyOperatorDTO);
 
-            return ResponseEntity.ok("Modify complete!");
+            return ResponseEntity.ok(
+                    format(
+                            "Modify complete! User: [%s].",
+                            modifyOperatorDTO.getUserMidifyInfoDTO().getNewUserName()
+                    )
+            );
         }
         catch (Exception exception)
         {
