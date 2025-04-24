@@ -1,0 +1,58 @@
+package com.jesse.examination.user.service;
+
+import com.jesse.examination.user.dto.userdto.UserLoginDTO;
+import com.jesse.examination.user.dto.userdto.UserModifyDTO;
+import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
+import com.jesse.examination.user.exceptions.DuplicateUserException;
+import com.jesse.examination.user.exceptions.PasswordMismatchException;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+public interface UserServiceInterface
+{
+    /**
+     * 新用户进行注册服务。
+     *
+     * @param userRegistrationDTO 从前端注册表单上收集而来的新用户数据
+     *
+     * @throws DuplicateUserException
+     *         当用户名和用户全名冲突的时候所抛的异常
+     */
+    void userRegister(
+            @NotNull
+            UserRegistrationDTO userRegistrationDTO
+    );
+
+    /**
+     * 用户登录服务。
+     *
+     * @param userLoginDTO 从前端页面收集上来的登录表单信息。
+     *
+     * @throws UsernameNotFoundException 检查到用户不存在时抛出
+     * @throws PasswordMismatchException 密码不匹配时抛出
+     */
+    void userLogin(@NotNull UserLoginDTO userLoginDTO);
+
+    /**
+     * 用户修改账户数据服务。
+     *
+     * @param userLoginDTO          用户在修改前需要验证一次账户
+     * @param userMidifyInfoDTO     用户的新账户信息数据
+     *
+     * @throws UsernameNotFoundException 检查到用户不存在时抛出
+     * @throws DuplicateUserException    检查到用户重复时抛出
+     */
+    void modifyUserInfo(
+            @NotNull UserLoginDTO  userLoginDTO,
+            @NotNull UserModifyDTO userMidifyInfoDTO
+    );
+
+    /**
+     * 用户进行登录验证后删除自己。
+     *
+     * @param userLoginDTO 用户在删除前需要验证一次账户
+     *
+     * @throws UsernameNotFoundException 检查到用户不存在时抛出
+     */
+    void deleteUser(@NotNull UserLoginDTO userLoginDTO);
+}

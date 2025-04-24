@@ -1,0 +1,13 @@
+{
+    "userLoginDTO" : {
+        "userName" : "Jesse",
+        "password" : "114514"
+    },
+    "userMidifyInfoDTO" : {
+        "newUserName" : "Jesse",
+        "newPassword" : "1919810",
+        "newFullName" : "朱元璋",
+        "newTelephoneNumber" : "88888888888",
+        "newEmail" : "zhuyuanzhang@damin.com"
+    }
+}
