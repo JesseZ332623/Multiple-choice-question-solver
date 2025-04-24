@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -90,6 +92,7 @@ public class AdminUserService implements AdminServiceInterface
         newUser.setEmail(newUserRegisterDTO.getEmail());
         newUser.setTelephoneNumber(newUserRegisterDTO.getTelephoneNumber());
         newUser.setRoles(newUserRegisterDTO.getRoles());
+        newUser.setRegisterDateTime(LocalDateTime.now());
 
         return this.adminUserEntityRepository.save(newUser).getId();
     }
@@ -170,27 +173,17 @@ public class AdminUserService implements AdminServiceInterface
     }
 
     @Override
-    public Long deleteUsersByIdRange(Long min, Long max)
+    public Long deleteUsersByIdRange(Long begin, Long end)
     {
-        long totalCount = this.adminUserEntityRepository.count();
+        List<Long> existsIds
+                = this.adminUserEntityRepository.findIdByIdBetween(begin, end);
 
-        if (totalCount == 0) { return 0L; }
-
-        if (totalCount < max)
-        {
-            throw new IndexOutOfBoundsException(
-                    format(
-                            "Repository only has %s data, [%s, %s] is invalid range!",
-                            totalCount, min, max
-                    )
-            );
+        if (!existsIds.isEmpty()) {
+            this.adminUserEntityRepository.deleteUserRoleRelationsByIds(existsIds);
+            this.adminUserEntityRepository.deleteUserByIds(existsIds);
         }
 
-        for (long index = 0L; index < max; ++index) {
-            this.adminUserEntityRepository.deleteById(index);
-        }
-
-        return max - min;
+        return (long)existsIds.size();
     }
 
     @Override
