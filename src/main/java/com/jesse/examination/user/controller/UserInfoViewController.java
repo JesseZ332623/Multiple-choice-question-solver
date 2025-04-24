@@ -5,18 +5,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(path = "/user_info/")
+@RequestMapping(path = "/user_info")
 public class UserInfoViewController
 {
     @GetMapping(path = "/register")
-    String registerView() { return "UserRegister"; }
+    String registerView() { return "UserAccountPage/UserRegister"; }
 
     @GetMapping(path = "/login")
-    String loginView() { return "UserLogin"; }
+    String loginView() { return "UserAccountPage/UserLogin"; }
 
     @GetMapping(path = "/modify")
-    String modifyView() { return "UserModify"; }
+    String modifyView() { return "UserAccountPage/UserModify"; }
 
     @GetMapping(path = "/delete")
-    String deleteView() { return "UserDelete"; }
+    String deleteView() { return "UserAccountPage/UserDelete"; }
 }
