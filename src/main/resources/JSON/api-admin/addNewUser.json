@@ -1,0 +1,11 @@
+{
+    "userName" : "Master",
+    "password" : "1234567890",
+    "fullName" : "朱元璋",
+    "telephoneNumber" : "13888845888",
+    "email" : "zhuyuanzhang@gmail.com",
+    "roles" : [
+        {"roleId" : 2, "roleName" : "ROLE_USER"},
+        {"roleId" : 1, "roleName" : "ROLE_ADMIN"}
+    ]
+}
