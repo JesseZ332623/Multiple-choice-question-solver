@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service;
 
+import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserModifyDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -34,17 +35,16 @@ public interface UserServiceInterface
     void userLogin(@NotNull UserLoginDTO userLoginDTO);
 
     /**
-     * 用户修改账户数据服务。
+     * 用户修改账户数据服务（用户在修改前需要验证一次账户）。
      *
-     * @param userLoginDTO          用户在修改前需要验证一次账户
-     * @param userMidifyInfoDTO     用户的新账户信息数据
+     * @param modifyOperatorDTO 用户修改操作的 DTO
      *
      * @throws UsernameNotFoundException 检查到用户不存在时抛出
      * @throws DuplicateUserException    检查到用户重复时抛出
      */
     void modifyUserInfo(
-            @NotNull UserLoginDTO  userLoginDTO,
-            @NotNull UserModifyDTO userMidifyInfoDTO
+            @NotNull
+            ModifyOperatorDTO modifyOperatorDTO
     );
 
     /**
