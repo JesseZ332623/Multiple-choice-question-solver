@@ -4,7 +4,6 @@ import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
 import com.jesse.examination.user.entity.RoleEntity;
 import com.jesse.examination.user.service.AdminServiceInterface;
-import com.jesse.examination.user.service.UserServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import static java.lang.String.format;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/api/admin/")
+@RequestMapping(path = "/api/admin/", produces = "application/json")
 public class AdminController
 {
     private final AdminServiceInterface adminServiceInterface;
@@ -28,8 +27,19 @@ public class AdminController
         this.adminServiceInterface = adminServiceInterface;
     }
 
-    private @NotNull String
-    getRolesString(
+    /**
+     * 从集合中获取用户角色并合成一个字符串。
+     * 假设集合
+     *
+     * <pre>
+     *     roles = {{1, "ROLE_ADMIN"}, {2, "ROLE_USER}}
+     * </pre>
+     *
+     * 则函数处理后返回：
+     *
+     * <pre> rolesString = "[ROLE_ADMIN, ROLE_USER]" </pre>
+     */
+    private String getRolesString(
             @NotNull Set<RoleEntity> roles)
     {
         StringBuilder newUserRoles = new StringBuilder("[");
@@ -37,12 +47,22 @@ public class AdminController
         for (RoleEntity role : roles) {
             newUserRoles.append(role.getRoleName()).append(", ");
         }
-        newUserRoles.delete(newUserRoles.length() - 1, newUserRoles.length());
+        newUserRoles.delete(newUserRoles.length() - 2, newUserRoles.length());
         newUserRoles.append("]");
 
         return newUserRoles.toString();
     }
 
+    /**
+     * 管理员查询单个用户信息，服务器以 JSON 作为响应。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/search/Jesse">
+     *         (GET Method) 管理员查询用户名为 Jesse 的用户信息
+     *     </a>
+     * </p>
+     */
     @GetMapping(path = "search/{userName}")
     public ResponseEntity<?>
     searchOneUserByName(@PathVariable String userName)
@@ -61,6 +81,17 @@ public class AdminController
         }
     }
 
+    /**
+     * 管理员通过 JSON 文本添加单个用户，服务器以 JSON 作为响应，
+     * JSON 示例文本见：/resources/api-admin/addNewUser.json。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/add_new_user">
+     *         (POST Method) 管理员通过 JSON 添加新用户
+     *     </a>
+     * </p>
+     */
     @PostMapping(path = "add_new_user")
     public ResponseEntity<?>
     addNewUser(
@@ -69,7 +100,7 @@ public class AdminController
     {
         try
         {
-            Long newUserId     = this.adminServiceInterface.addNewUser(adminAddNewUserDTO);
+            Long newUserId        = this.adminServiceInterface.addNewUser(adminAddNewUserDTO);
             String newRolesString = this.getRolesString(adminAddNewUserDTO.getRoles());
 
             log.info(newRolesString);
@@ -92,6 +123,17 @@ public class AdminController
         }
     }
 
+    /**
+     * 管理员通过 JSON 文本修改单个用户，服务器以 JSON 作为响应，
+     * JSON 示例文本见：/resources/api-admin/modifyUser.json。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/modify_user">
+     *         (PUT Method) 管理员通过 JSON 修改以有的用户信息
+     *     </a>
+     * </p>
+     */
     @PutMapping(path = "modify_user")
     public ResponseEntity<?>
     modifyUserByUserName(
@@ -123,6 +165,16 @@ public class AdminController
         }
     }
 
+    /**
+     * 管理员通过用户名删除单个用户，服务器以 JSON 作为响应。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/delete/Peter">
+     *         (DELETE Method) 管理员删除用户名为 Peter 的用户信息
+     *     </a>
+     * </p>
+     */
     @DeleteMapping(path = "/delete/{userName}")
     public ResponseEntity<?> deleteUserByUserName(@PathVariable String userName)
     {
@@ -132,33 +184,10 @@ public class AdminController
                     = this.adminServiceInterface.deleteUserByUserName(userName);
 
             return ResponseEntity.ok()
-                    .body(format("Delete user ID = [%s].", modifiedUserId));
-        }
-        catch (Exception exception)
-        {
-            log.error(exception.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(exception.getMessage());
-        }
-    }
-
-    @DeleteMapping(path = "/delete/range/{min}_{max}")
-    public ResponseEntity<?>
-    deleteUsersByIdRange(
-            @PathVariable Long min,
-            @PathVariable Long max)
-    {
-        try
-        {
-            Long deletedUserIdAmount
-                    = this.adminServiceInterface.deleteUsersByIdRange(min, max);
-
-            return ResponseEntity.ok()
                     .body(
                             format(
-                                    "Delete user ID range = (%s, %s), %s rows.",
-                                    min, max, deletedUserIdAmount
+                                "Delete user ID = [%s] User Name:[%s].",
+                                modifiedUserId, userName
                             )
                     );
         }
@@ -171,6 +200,55 @@ public class AdminController
         }
     }
 
+    /**
+     * 管理员通过指定 id 范围批量删除用户，服务器以 JSON 作为响应。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/delete/range/1_10">
+     *         (DELETE Method) 管理员尝试删除 id 范围在 1 到 10 的用户信息
+     *     </a>
+     * </p>
+     */
+    @DeleteMapping(path = "/delete/range/{begin}_{end}")
+    public ResponseEntity<?>
+    deleteUsersByIdRange(
+            @PathVariable Long begin,
+            @PathVariable Long end)
+    {
+        try
+        {
+            Long deletedUserIdAmount
+                    = this.adminServiceInterface.deleteUsersByIdRange(begin, end);
+
+            return ResponseEntity.ok()
+                    .body(
+                            format(
+                                    "Delete user ID range = (%s, %s), " +
+                                    "But only [%s] data row effective.",
+                                    begin, end, deletedUserIdAmount
+                            )
+                    );
+        }
+        catch (Exception exception)
+        {
+            log.error(exception.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(exception.getMessage());
+        }
+    }
+
+    /**
+     * 管理员删除全部用户，服务器以 JSON 作为响应。
+     *
+     * <p>
+     *     链接：
+     *     <a href="https://localhost:8080/api/admin/delete/all">
+     *         (DELETE Method) 管理员删除所有的用户信息
+     *     </a>
+     * </p>
+     */
     @DeleteMapping(path = "/delete/all")
     public ResponseEntity<?> truncateAllUsers()
     {
@@ -180,7 +258,7 @@ public class AdminController
                     this.adminServiceInterface.truncateAllUsers();
 
             return ResponseEntity.ok()
-                .body(format("Delete user [%s] rows", deletedUserIdAmount));
+                .body(format("Delete user [%s] rows.", deletedUserIdAmount));
         }
         catch (Exception exception)
         {
