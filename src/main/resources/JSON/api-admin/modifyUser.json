@@ -1,0 +1,12 @@
+{
+    "oldUserName" : "Master",
+    "newUserName" : "[Grand] Master",
+    "newPassword" : "35234567890",
+    "newFullName" : "[伟大的] 洪武大帝",
+    "newTelephoneNumber" : "17788955667",
+    "newEmail" : "zhuyuanzhang@gmail.com",
+    "newRoles" : [
+        {"roleId" : 2, "roleName" : "ROLE_USER"},
+        {"roleId" : 1, "roleName" : "ROLE_ADMIN"}
+    ]
+}
