@@ -14,7 +14,7 @@ public interface AdminServiceInterface
 
     Long deleteUserByUserName(String userName);
 
-    Long deleteUsersByIdRange(Long min, Long max);
+    Long deleteUsersByIdRange(Long begin, Long end);
 
     Long truncateAllUsers();
 }
