@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = "/api/score_record")
+@RequestMapping(path = "/api/score_record", produces = "application/json")
 public class ScoreRecordController
 {
     private final ScoreRecordService scoreRecordService;
