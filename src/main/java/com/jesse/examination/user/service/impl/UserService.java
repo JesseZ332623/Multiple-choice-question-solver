@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserModifyDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import static java.lang.String.format;
 
@@ -104,6 +106,9 @@ public class UserService implements UserServiceInterface
                 Set.of(this.roleEntityRepository.findRoleByRoleName("ROLE_USER"))
         );
 
+        // 设置用户的注册时间
+        newUser.setRegisterDateTime(LocalDateTime.now());
+
         // 存入
         this.userEntityRepository.save(newUser);
     }
@@ -137,68 +142,72 @@ public class UserService implements UserServiceInterface
     }
 
     /**
-     * 用户修改账户数据服务。
+     * 用户修改账户数据服务（用户在修改前需要验证一次账户）。
      *
-     * @param userLoginDTO          用户在修改前需要验证一次账户
-     * @param userMidifyInfoDTO     用户的新账户信息数据
+     * @param modifyOperatorDTO 用户修改操作的 DTO
      *
      * @throws UsernameNotFoundException 检查到用户不存在时抛出
      * @throws DuplicateUserException    检查到用户重复时抛出
      */
     @Override
     public void modifyUserInfo(
-            @NotNull UserLoginDTO  userLoginDTO,
-            @NotNull UserModifyDTO userMidifyInfoDTO
-    )
+            @NotNull
+            ModifyOperatorDTO modifyOperatorDTO)
     {
         // 先进行一次登录验证
-        this.userLogin(userLoginDTO);
+        this.userLogin(modifyOperatorDTO.getUserLoginDTO());
 
         // 获取旧的用户信息
         UserEntity userQueryResult
                 = this.userEntityRepository
-                .findUserByUserName(userLoginDTO.getUserName())
+                .findUserByUserName(modifyOperatorDTO.getUserLoginDTO().getUserName())
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        format("User name: [%s] not found!", userLoginDTO.getUserName()))
+                        format(
+                                "User name: [%s] not found!",
+                                modifyOperatorDTO.getUserLoginDTO().getUserName()))
                 );
 
         // 检查用户名和全名是否冲突（排除自身）
-        if (!userQueryResult.getUsername().equals(userMidifyInfoDTO.getNewUserName()))
+        String newUserName
+                = modifyOperatorDTO.getUserMidifyInfoDTO().getNewUserName();
+
+        String newUserFullName
+                = modifyOperatorDTO.getUserMidifyInfoDTO().getNewFullName();
+
+        if (!userQueryResult.getUsername().equals(newUserName))
         {
-            if (this.userEntityRepository.existsByUserName(userMidifyInfoDTO.getNewUserName()))
+            if (this.userEntityRepository.existsByUserName(newUserName))
             {
                 throw new DuplicateUserException(
                         format(
-                                "New user name: [%s] already exist!",
-                                userMidifyInfoDTO.getNewUserName()
+                                "New user name: [%s] already exist!", newUserName
                         )
                 );
             }
         }
 
-        if (!userQueryResult.getFullName().equals(userMidifyInfoDTO.getNewFullName()))
+        if (!userQueryResult.getFullName().equals(newUserFullName))
         {
-            if (this.userEntityRepository.existsByFullName(userMidifyInfoDTO.getNewFullName()))
+            if (this.userEntityRepository.existsByFullName(newUserFullName))
             {
                 throw new DuplicateUserException(
                         format(
-                                "New user name: [%s] already exist!",
-                                userMidifyInfoDTO.getNewFullName()
+                                "New user name: [%s] already exist!", newUserFullName
                         )
                 );
             }
         }
 
         // 修改成新的用户信息
-        userQueryResult.setUserName(userLoginDTO.getUserName());
+        userQueryResult.setUserName(newUserName);
         userQueryResult.setPassword(
                 this.passwordEncoder.encode(
-                        userMidifyInfoDTO.getNewPassword()
+                        modifyOperatorDTO.getUserMidifyInfoDTO().getNewPassword()
                 )
         );
-        userQueryResult.setFullName(userMidifyInfoDTO.getNewFullName());
-        userQueryResult.setTelephoneNumber(userMidifyInfoDTO.getNewTelephoneNumber());
-        userQueryResult.setEmail(userMidifyInfoDTO.getNewEmail());
+        userQueryResult.setFullName(modifyOperatorDTO.getUserMidifyInfoDTO().getNewFullName());
+        userQueryResult.setTelephoneNumber(modifyOperatorDTO.getUserMidifyInfoDTO().getNewTelephoneNumber());
+        userQueryResult.setEmail(modifyOperatorDTO.getUserMidifyInfoDTO().getNewEmail());
 
         this.userEntityRepository.save(userQueryResult);
     }
