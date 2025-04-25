@@ -24,20 +24,23 @@ spring.datasource.password=your_password
 
 ### 访问
 将服务器部署好后（假设部署位置是 `localhost`，端口为 `8081`），
-可以访问以下 URL（仅列出所有以视图作为响应的 GET 请求方法）：
+可以访问以下 URL（仅列出部分主要的、以视图作为响应的 GET 请求方法）：
 
-- 首页
-  - https://localhost:8081/
-- 获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容
-  - https://localhost:8081/all_questions
-- 获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容
-  - https://localhost:8081/all_questions_with_correct_option
-- 进行所有选择题的练习
-  - https://localhost:8081/practise
-- 显示所有练习成绩记录
-  - https://localhost:8081/all_score_record
-- 跳转至成绩结算页面（如果是手动跳转的话就显示最新的一次成绩）
-  - https://localhost:8081/current_score_settlement
+- 用户注册页面
+  - https://localhost:8081/user_info/register 
+  - ![image](https://github.com/user-attachments/assets/a569dbf7-d3d0-40b4-9670-55c239f38497)
+
+- 用户登录页面
+  - https://localhost:8081/user_info/login 
+  - ![image](https://github.com/user-attachments/assets/4e3e2147-38a3-44ef-8453-ae3c6ca679ec)
+
+- 普通用户修改账号页面
+  - https://localhost:8081/user_info/modify 
+  - ![image](https://github.com/user-attachments/assets/d0c4ebaa-2827-4a75-a82f-14a6be657505)
+ 
+- 普通用户首页
+  - https://localhost:8081/user_info/user_front_page
+  - ![image](https://github.com/user-attachments/assets/3b2cde3a-17d4-470f-9bb9-5bacc391ad4a)
 
 #### Date：2025.04.21
 #### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
