@@ -23,7 +23,7 @@ spring.datasource.password=your_password
 ```
 
 ### 应用所有端点树型图
-- 应用所有端点树型图详见：
+- 详见：
   [应用所有端点树型图](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E5%BA%94%E7%94%A8%E6%89%80%E6%9C%89%E7%AB%AF%E7%82%B9%E6%A0%91%E5%9E%8B%E5%9B%BE.svg)
 
 ### 访问
