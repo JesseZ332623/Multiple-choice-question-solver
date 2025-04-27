@@ -1,4 +1,4 @@
-package com.jesse.examination.user.admin;
+package com.jesse.examination.user.controller.admin;
 
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -21,10 +22,15 @@ import static java.lang.String.format;
 public class AdminController
 {
     private final AdminServiceInterface adminServiceInterface;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminController(AdminServiceInterface adminServiceInterface) {
+    public AdminController(
+            AdminServiceInterface adminServiceInterface,
+            BCryptPasswordEncoder passwordEncoder
+    ) {
         this.adminServiceInterface = adminServiceInterface;
+        this.passwordEncoder       = passwordEncoder;
     }
 
     /**
@@ -39,7 +45,7 @@ public class AdminController
      *
      * <pre> rolesString = "[ROLE_ADMIN, ROLE_USER]" </pre>
      */
-    private String getRolesString(
+    static public String getRolesString(
             @NotNull Set<RoleEntity> roles)
     {
         StringBuilder newUserRoles = new StringBuilder("[");
@@ -101,7 +107,7 @@ public class AdminController
         try
         {
             Long newUserId        = this.adminServiceInterface.addNewUser(adminAddNewUserDTO);
-            String newRolesString = this.getRolesString(adminAddNewUserDTO.getRoles());
+            String newRolesString = AdminController.getRolesString(adminAddNewUserDTO.getRoles());
 
             log.info(newRolesString);
 
@@ -142,10 +148,17 @@ public class AdminController
     {
         try
         {
+            adminModifyUserDTO.setNewPassword(
+                    this.passwordEncoder.encode(
+                            adminModifyUserDTO.getNewPassword()
+                    )
+            );
+
             Long modifiedUserId
                     = this.adminServiceInterface.modifyUserByUserName(adminModifyUserDTO);
+
             String newRolesString
-                    = this.getRolesString(adminModifyUserDTO.getNewRoles());
+                    = AdminController.getRolesString(adminModifyUserDTO.getNewRoles());
 
             return ResponseEntity.ok()
                     .body(
