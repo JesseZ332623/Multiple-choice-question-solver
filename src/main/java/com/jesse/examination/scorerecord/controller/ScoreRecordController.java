@@ -170,18 +170,18 @@ public class ScoreRecordController
     }
 
     /**
-     * Put 方法请求，清空所有的练习记录。
+     * Delete 方法请求，清空所有的练习记录。
      *
      *<p>
      *      链接：
      *      <a href="https://localhost:8081/api/score_record/truncate">
-     *          (PUT Method) 将所有数据行的 correct_times 列的值设为 0。
+     *          (DELETE Method) 将所有数据行的 correct_times 列的值设为 0。
      *      </a>
      *</p>
      *
      * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
      */
-    @PutMapping("/truncate")
+    @DeleteMapping(path = "/truncate")
     public ResponseEntity<?> truncateScoreRecord()
     {
         return ResponseEntity.ok(
