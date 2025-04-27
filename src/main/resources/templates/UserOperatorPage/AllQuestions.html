@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>题目列表</title>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -324,18 +326,25 @@
 
     <script>
         // 优化后的处理函数
-        function handleClear() {
-            if (confirm('确定要清除所有题目的答对次数吗？此操作不可恢复！')) {
+        function handleClear()
+        {
+            if (confirm('确定要清除所有题目的答对次数吗？此操作不可恢复！')) 
+            {
                 // 添加加载状态
                 const btn = document.getElementById('clearButton');
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 处理中...';
+
+                // 从 meta 标签获取 CSRF Token
+                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
                 // 使用更现代的fetch API
                 fetch('/api/question/clean_correct_times', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
                     }
                 })
                     .then(response => {
