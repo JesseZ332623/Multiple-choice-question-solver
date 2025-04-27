@@ -76,6 +76,16 @@ public class AdminUserService implements AdminServiceInterface
     }
 
     @Override
+    public List<UserEntity> findAllUsers()
+    {
+        if (this.adminUserEntityRepository.count() == 0) {
+            return List.of();
+        }
+
+        return this.adminUserEntityRepository.findAll();
+    }
+
+    @Override
     public Long addNewUser(
             @NotNull
             AdminAddNewUserDTO newUserRegisterDTO)
@@ -150,6 +160,8 @@ public class AdminUserService implements AdminServiceInterface
         userQueryResult.setFullName(adminModifyUserDTO.getNewFullName());
         userQueryResult.setTelephoneNumber(adminModifyUserDTO.getNewTelephoneNumber());
         userQueryResult.setEmail(adminModifyUserDTO.getNewEmail());
+        userQueryResult.setRoles(adminModifyUserDTO.getNewRoles());
+
 
         return this.adminUserEntityRepository.save(userQueryResult).getId();
     }
