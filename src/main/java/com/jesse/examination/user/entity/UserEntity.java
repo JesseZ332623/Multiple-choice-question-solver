@@ -54,6 +54,17 @@ public class UserEntity implements UserDetails
     )
     private Set<RoleEntity> roles;      // 用户的角色（多对多）
 
+    @Override
+    public String toString()
+    {
+        return String.format(
+                "[ID = %s, User Name: %s, Password: %s, Full Name: %s, " +
+                "Telephone Number: %s, Email: %s, Register Time: %s, Roles: %s]",
+                id, userName, password, fullName, telephoneNumber,
+                email, registerDateTime.toString(), roles.toString()
+        );
+    }
+
     /**
      * Return the authorities granted to the user. Cannot return <code>null</code>.
      *
