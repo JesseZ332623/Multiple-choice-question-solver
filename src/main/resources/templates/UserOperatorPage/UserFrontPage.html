@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>首页</title>
     <style>
@@ -94,27 +96,27 @@
             <p>返回主页面</p>
         </a>
 
-        <a href="/all_questions" class="card">
+        <a href="/question/all_questions" class="card">
             <h3>📝 全部问题</h3>
             <p>获取所有题目及其选项的完整数据</p>
         </a>
 
-        <a href="/all_questions_with_correct_option" class="card" methods="GET">
+        <a href="/question/all_questions_with_correct_option" class="card" methods="GET">
             <h3>✅ 带正确答案的问题列表</h3>
             <p>查看包含正确答案的题目列表</p>
         </a>
 
-        <a href="/practise" class="card">
+        <a href="/question/practise" class="card">
             <h3>✍️ 开始练习</h3>
             <p>进行选择题练习</p>
         </a>
 
-        <a href="/all_score_record" class="card">
+        <a href="/score_record/all_score_record" class="card">
             <h3>📊 历史成绩</h3>
             <p>查看所有练习记录</p>
         </a>
 
-        <a href="/current_score_settlement" class="card">
+        <a href="/score_record/current_score_settlement" class="card">
             <h3>📈 最新成绩</h3>
             <p>查看最新练习结果</p>
         </a>
