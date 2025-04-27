@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>用户登录</title>
 </head>
 
@@ -119,6 +121,35 @@
         outline: 2px solid var(--gh-accent-color);
         outline-offset: 2px;
     }
+
+    /* 新增链接样式 */
+    a {
+        color: var(--gh-accent-color);
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.2s ease, text-decoration 0.2s ease;
+        display: block;
+        margin: 1rem 0;
+        position: relative;
+    }
+
+    a:hover {
+        color: #79C0FF; /* GitHub 悬停蓝 */
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
+    }
+
+    a:focus-visible {
+        outline: 2px solid var(--gh-accent-color);
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+
+    /* 微调原有表单间距 */
+    .login-form-body {
+        display: flex;
+        flex-direction: column;
+    }
 </style>
 
 <body>
@@ -128,6 +159,7 @@
         </div>
         
         <form class="login-form-body" id="loginForm">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="user_name" class="required">用户名</label>
                 <input type="text" id="user_name" class="form-control" required>
@@ -139,6 +171,8 @@
                 <input type="password" id="password" class="form-control" required>
                 <div class="error-message" id="passwordError"></div>
             </div>
+
+            <a href="/user_info/register">还没账户？先去注册一个吧！</a>
 
             <button type="button" class="btn" onclick="doLogin()">
                 用户登录
@@ -194,11 +228,17 @@
 
             try
             {
+                // 从 meta 标签获取 CSRF Token
+                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
                 const response = await fetch(
                     '/api/user_info/login',
                     {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: {
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrfToken
+                        },
                         body: loginDataJson
                     }
                 );
