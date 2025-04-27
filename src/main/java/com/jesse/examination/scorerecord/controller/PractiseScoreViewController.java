@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping(path = "/")
+@RequestMapping(path = "/score_record")
 public class PractiseScoreViewController
 {
     private final ScoreRecordService scoreRecordService;
@@ -28,11 +28,11 @@ public class PractiseScoreViewController
     /**
      * GET 方法请求，渲染所有练习记录，以视图作为响应，
      * 渲染在 AllPractiseScore.html 页面中。
-     * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
+     * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/all_score_record">
+     *      <a href="https://localhost:8081/score_record/all_score_record">
      *          (GET Method) 渲染所有练习记录，以视图作为响应。
      *     </a>
      * </p>
@@ -47,7 +47,7 @@ public class PractiseScoreViewController
 
             model.addAttribute("AllScoreRecord", allPractiseScoreQueryRes);
 
-            return "AllPractiseScore";
+            return "UserOperatorPage/AllPractiseScore";
         }
         catch (Exception exception)
         {
@@ -62,18 +62,18 @@ public class PractiseScoreViewController
 
             model.addAttribute("ErrorMessage", errorMessage);
 
-            return "Error_Page";
+            return "UserOperatorPage/Error_Page";
         }
     }
 
     /**
      * GET 方法请求，在用户交卷后渲染它此时的成绩，以视图作为响应，
      * 渲染在 ScoreSettlement.html 页面中。
-     * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
+     * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/current_score_settlement">
+     *      <a href="https://localhost:8081/score_record/current_score_settlement">
      *          (GET Method) 渲染所有练习记录，以视图作为响应。
      *     </a>
      * </p>
@@ -83,5 +83,7 @@ public class PractiseScoreViewController
      * </strong>
      */
     @GetMapping(path = "current_score_settlement")
-    public String scoreSettlementView() { return "ScoreSettlement"; }
+    public String scoreSettlementView() {
+        return "UserOperatorPage/ScoreSettlement";
+    }
 }
