@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping(path = "/")
+@RequestMapping(path = "/question")
 public class QuestionPractiseViewController
 {
     private final QuestionService questionService;
@@ -28,7 +28,7 @@ public class QuestionPractiseViewController
     /**
      * GET 方法请求，进行所有选择题的练习，以视图作为响应，
      * 渲染在 QuestionPractise.html 页面中。
-     * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
+     * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
      *      链接：
@@ -47,7 +47,7 @@ public class QuestionPractiseViewController
 
             model.addAttribute("QuestionPractise", allQuestionQueryResult);
 
-            return "QuestionPractise";
+            return "UserOperatorPage/QuestionPractise";
         }
         catch (Exception exception)
         {
@@ -61,7 +61,7 @@ public class QuestionPractiseViewController
 
             model.addAttribute("ErrorMessage", errorMessage);
 
-            return "Error_Page";
+            return "ErrorPage/Controller_ErrorPage";
         }
     }
 }
