@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @Controller
-@RequestMapping(path = "/")
+@RequestMapping(path = "/question")
 public class AllQuestionViewController
 {
     private final QuestionService questionService;
@@ -28,11 +28,11 @@ public class AllQuestionViewController
     /**
      * GET 方法请求，获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容，
      * 以视图的方式作为响应，渲染在 QuestionPractise.html 页面中，
-     * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
+     * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/all_questions">
+     *      <a href="https://localhost:8081/question/all_questions">
      *          (GET Method) 获取所有问题的内容，正确选项，答对次数以及它的所有选项的内容。
      *      </a>
      * </p>
@@ -49,7 +49,7 @@ public class AllQuestionViewController
                     "AllQuestions", allQuestionQueryResult
             );
 
-            return "AllQuestions";
+            return "UserOperatorPage/AllQuestions";
         }
         catch (Exception exception)
         {
@@ -64,18 +64,18 @@ public class AllQuestionViewController
 
             model.addAttribute("ErrorMessage", errorMessage);
 
-            return "Error_Page";
+            return "ErrorPage/Controller_ErrorPage";
         }
     }
 
     /**
      * GET 方法请求，获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。
      * 以视图作为响应，渲染在 AllQuestionsWithCorrectResult.html 页面中
-     * 如果期间出现错误，会跳转到统一的 Error_Page.html 页面并显示错误消息。
+     * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/all_questions_with_correct_option">
+     *      <a href="https://localhost:8081/question/all_questions_with_correct_option">
      *          (GET Method) 获取所有问题的内容，正确答案，答对的次数以及对应正确选项的内容。
      *      </a>
      * </p>
@@ -93,7 +93,7 @@ public class AllQuestionViewController
                     allQuestionWithCorrectOptionQueryResult
             );
 
-            return "AllQuestionsWithCorrectResult";
+            return "UserOperatorPage/AllQuestionsWithCorrectResult";
         }
         catch (Exception exception)
         {
@@ -107,7 +107,7 @@ public class AllQuestionViewController
 
             model.addAttribute("ErrorMessage", errorMessage);
 
-            return "Error_Page";
+            return "ErrorPage/Controller_ErrorPage";
         }
     }
 }
