@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>成绩结算</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -205,7 +207,8 @@
                     document.getElementById('combinded_mistake_rate').innerText = `${mistakeRate} %`;
                 }).catch((error) => {console.error(error)});
         }
-        catch(error) {
+        catch(error) 
+        {
             console.error(error);
         }
     }
