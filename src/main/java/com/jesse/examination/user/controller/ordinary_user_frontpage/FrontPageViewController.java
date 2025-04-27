@@ -1,4 +1,4 @@
-package com.jesse.examination.user.controller.frontpage;
+package com.jesse.examination.user.controller.ordinary_user_frontpage;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class FrontPageViewController
 {
     /**
-     * 跳转至首页。
+     * 跳转至普通用户操作首页。
      *
      * <p>
      *     链接：
@@ -20,6 +20,6 @@ public class FrontPageViewController
      */
     @GetMapping(path = "/user_front_page")
     public String FrontPageView() {
-        return "UserAccountPage/UserFrontPage";
+        return "UserOperatorPage/UserFrontPage";
     }
 }
