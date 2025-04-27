@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>题目练习</title>
     <style>
         body {
@@ -188,7 +190,7 @@
 <body>
 <h1>选择题练习</h1>
 
-<strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！"</strong>
+<strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！</strong>
 
 <div id="total">
     <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
@@ -264,7 +266,7 @@
         // 验证答案（不区分大小写）
         const isCorrect = selected.toUpperCase() === correctAnswer.toUpperCase();
 
-        if (isCorrect) 
+        if (isCorrect)
         {
             updateCorrectTimes(container.dataset.questionId);
 
@@ -314,19 +316,27 @@
 
         setTimeout(
             () => { 
-                window.location = 'current_score_settlement'; 
+                window.location = '../score_record/current_score_settlement'; 
             }, 2500
         );
     }
 
     async function updateCorrectTimes(questionId) 
     {
-        try {
+        try 
+        {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
             const response = await fetch(
                 `/api/question/correct_times_plus_one/${questionId}`,
                 { 
                     method: 'PUT', 
-                    headers: {'Content-Type' : 'application/json'} 
+                    headers: {
+                        'Content-Type' : 'application/json',
+                        [csrfHeader]: csrfToken
+                    } 
                 }
             );
 
@@ -350,11 +360,18 @@
     {
         try 
         {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
             const response = await fetch(
                 "/api/score_record/add_one_new_score_record",
                 {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
                     body: JSON.stringify(recordJson)
                 }
             );
