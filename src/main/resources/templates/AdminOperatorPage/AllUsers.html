@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>所有用户列表</title>
+</head>
+<style>
+    :root {
+        --gh-bg: #0D1117;
+        --gh-border: #30363D;
+        --gh-text: #C9D1D9;
+        --gh-primary: #58A6FF;
+        --gh-success: #238636;
+        --gh-danger: #DA3633;
+        --gh-btn-hover: rgba(240, 246, 252, 0.1);
+    }
+
+    body {
+        background-color: var(--gh-bg);
+        color: var(--gh-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        padding: 20px;
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--gh-border);
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    caption {
+        font-size: 16px;
+        font-weight: 600;
+        padding: 12px;
+        background-color: #161B22;
+        border-bottom: 1px solid var(--gh-border);
+    }
+
+    th, td {
+        padding: 8px 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        text-align: left;
+        border-bottom: 1px solid var(--gh-border);
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    th {
+        background-color: #161B22;
+        font-weight: 600;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    button {
+        background-color: #21262D;
+        color: var(--gh-text);
+        border: 1px solid var(--gh-border);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin: 2px;
+    }
+
+    button:hover {
+        background-color: var(--gh-btn-hover);
+        border-color: #8B949E;
+        transform: scale(1.05);
+    }
+
+    button[onclick="doModify(this)"] {
+        color: var(--gh-primary);
+        border-color: var(--gh-primary);
+    }
+
+    button[onclick="doDelete(this)"] {
+        color: var(--gh-danger);
+        border-color: var(--gh-danger);
+    }
+
+    input {
+        background-color: #0D1117;
+        border: 1px solid var(--gh-border);
+        color: var(--gh-text);
+        padding: 5px 8px;
+        border-radius: 4px;
+        width: 90%;
+        font-size: 13px;
+        transition: border-color 0.2s ease;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--gh-primary);
+        box-shadow: 0 0 0 3px rgba(17, 88, 199, 0.3);
+    }
+
+    #add_new_user_table_row td {
+        padding: 8px 12px;
+        background: #161b22;
+    }
+    
+    #add_new_user_table_row input,
+    #add_new_user_table_row select {
+        width: 100%;
+        box-sizing: border-box;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        color: #c9d1d9;
+        padding: 6px;
+    }
+    
+    #add_new_user_table_row select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238B949E'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        th, td {
+            min-width: 120px;
+        }
+        
+        button {
+            padding: 4px 8px;
+            margin: 2px 0;
+            display: block;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+        
+        table {
+            border: 0;
+        }
+        
+        thead {
+            display: none;
+        }
+        
+        tr {
+            display: block;
+            margin-bottom: 15px;
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+        }
+        
+        td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border: none;
+            max-width: none;
+            white-space: normal;
+        }
+        
+        td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            margin-right: 10px;
+            color: var(--gh-primary);
+        }
+    }
+</style>
+<body>
+    <div th:if="${#lists.size(AllUsers) != 0}">
+        <table>
+            <caption 
+            th:text="'所有用户列表（共 ' + ${#lists.size(AllUsers)} + ' 位用户)'">
+            </caption>
+     
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">用户名</th>
+                    <th scope="col">密码（密文前 16 位）</th>
+                    <th scope="col">全名</th>
+                    <th scope="col">电话号码</th>
+                    <th scope="col">邮箱</th>
+                    <th scope="col">注册日期</th>
+                    <th scope="col">角色</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${AllUsers}">
+                    <th data-label="ID" scope="row" th:text="${user.id}" th:id="'user_id_' + ${user.id}"></th>
+                    <td data-label="用户名" th:text="${user.userName}" th:id="'username_' + ${user.id}"></td>
+                    <td data-label="密码" th:text="${user.password}" th:id="'password_' + ${user.id}"></td>
+                    <td data-label="全名" th:text="${user.fullName}" th:id="'fullName_' + ${user.id}"></td>
+                    <td data-label="电话号码" th:text="${user.telephoneNumber}" th:id="'telephoneNumber_' + ${user.id}"></td>
+                    <td data-label="邮箱" th:text="${user.email}" th:id="'email_' + ${user.id}"></td>
+                    <td data-label="注册日期" th:text="${user.registerDateTime}" th:id="'registerDateTime_' + ${user.id}"></td>
+                    <td data-label="角色" th:text="${user.roles}" th:id="'roles_' + ${user.id}"></td>
+                    <td data-label="操作" th:id="'operator_' + ${user.id}">
+                        <button type="button" data-click-count="0" onclick="doModify(this)">✍️ 修改</button>
+                        <button type="button" onclick="doDelete(this)">🗑️ 删除</button>
+                    </td>
+                </tr>
+                <tr id="add_new_user_table_row"></tr>
+                <tr>
+                    <td>
+                        <button type="submit" 
+                        data-click-count="0" onclick="doAddNewOne(this)">
+                            ➕ 新增用户
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script>
+    var DONOTIFY_OLD_USERNAME;
+
+    const USER_ROLES  = {"roleId" : 2, "roleName" : "ROLE_USER"};
+    const ADMIN_ROLES = {"roleId" : 1, "roleName" : "ROLE_ADMIN"};
+
+    function createUserRolesJson(newRolesText)
+    {
+        let newRoles;
+        
+        if (newRolesText === "ROLE_USER") {
+            newRoles = [USER_ROLES];
+        }
+        else if (newRolesText === "ROLE_ADMIN") {
+            newRoles = [ADMIN_ROLES];
+        }
+        else if (
+            newRolesText === "ROLE_USER ROLE_ADMIN" ||
+            newRolesText === "ROLE_ADMIN ROLE_USER"
+        ) {
+            newRoles = [USER_ROLES, ADMIN_ROLES];
+        }
+        else {
+            newRoles = [USER_ROLES];
+        }
+
+        return newRoles;
+    }
+
+    async function doModify(button) 
+    {
+        button.addEventListener(
+            "click", 
+            async function () 
+            {
+                // 向上查找离 button 最近的父级 tr 标签
+                const tableRowElement = button.closest('tr');
+
+                // 再从该 tr 标签开始向下查找所有的子级 th 和 td 标签，返回一个 NodeList
+                const cells = tableRowElement.querySelectorAll('td');
+
+                let count = parseInt(this.dataset.clockCount) || 0;
+                ++count;
+                this.dataset.clockCount = count;
+
+                switch (count)
+                {
+                    case 1:
+                        cells.forEach((cell, index) => 
+                        {
+                            switch (index)
+                            {
+                                case 0:
+                                    DONOTIFY_OLD_USERNAME = cell.textContent;
+                                    cell.innerHTML 
+                                    = `<input type="text" id="cell_${index}" placeholder=${cell.textContent}></input>`;
+                                    break;
+                                
+                                case 5:
+                                    cell.innerHTML 
+                                        = `<input type="text" 
+                                            id="cell_${index}"
+                                            placeholder="${cell.textContent} (READ-ONLY)" readonly>
+                                          </input>`;
+                                    break;
+
+                                case 6:
+                                    cell.innerHTML
+                                          = `<select id="cell_${index}">
+                                                <option value="ROLE_USER">普通用户</option>
+                                                <option value="ROLE_ADMIN">管理员</option>
+                                                <option value="ROLE_ADMIN ROLE_USER">管理员 + 普通用户</option>
+                                            </select>`;
+                                
+                                case 7:
+                                    break;
+                                
+                                default:
+                                    cell.innerHTML 
+                                    = `<input type="text" id="cell_${index}" placeholder=${cell.textContent}></input>`;
+                                    break;
+                            }
+                        });
+
+                        button.innerText = "提交修改";
+
+                        break;
+                    
+                    case 2:
+                        let newUserName         = document.getElementById('cell_0').value;
+                        let newPassword         = document.getElementById('cell_1').value;
+                        let newFullName         = document.getElementById('cell_2').value;
+                        let newTelephoneNumber  = document.getElementById('cell_3').value;
+                        let newEmail            = document.getElementById('cell_4').value;
+                        let newRolesText        = document.getElementById('cell_6').value;
+                        let newRoles            = createUserRolesJson(newRolesText);
+                
+                        const submitData = 
+                        {
+                            "oldUserName" : DONOTIFY_OLD_USERNAME, 
+                            "newUserName" : newUserName, 
+                            "newPassword" : newPassword,
+                            "newFullName" : newFullName,
+                            "newTelephoneNumber" : newTelephoneNumber, 
+                            "newEmail" : newEmail,
+                            "newRoles" : newRoles
+                        };
+
+                        const submitDataJson = JSON.stringify(submitData);
+                
+                        console.info(submitDataJson);
+                        
+                        try 
+                        {
+                            // 从 meta 标签获取 CSRF Token
+                            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                            // fetch 操作....
+                            const response = await fetch(
+                                '/api/admin/modify_user',
+                                {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type' : 'application/json',
+                                        [csrfHeader]: csrfToken
+                                    },
+                                    body: submitDataJson
+                                }
+                            );
+
+                            if (!response.ok) 
+                            {
+                                const errorDetail = await response.text().catch(() => null);
+
+                                throw new Error(
+                                    `Http error! statues: ${response.status}. 
+                                    Detail: ${errorDetail || 'Unknown'}`
+                                );
+                            }
+                            else 
+                            {
+                                const successText = await response.text().catch(() => null);
+                                alert(successText);
+                            }
+
+                        }
+                        catch(error) 
+                        {
+                            console.error(error);
+                            alert(error);
+                        }
+
+                        location.reload();
+                        this.dataset.clockCount = 0;
+
+                        break;
+                }
+            }
+        );
+    }
+    async function doDelete(button) 
+    {
+        // 向上查找离 button 最近的父级 tr 标签
+        const tableRowElement = button.closest('tr');
+
+        const cells = tableRowElement.querySelectorAll('td');
+
+        let deleteUserName;
+
+        cells.forEach((cell, index) => 
+        {
+                switch(index) 
+                {
+                    case 0:
+                        deleteUserName = cell.textContent;
+                        break;
+
+                    default:
+                        break;
+                }
+        });
+
+        console.info(deleteUserName);
+
+        if (confirm(`确定删除用户: ${deleteUserName} 吗？`)) 
+        {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            try 
+            {
+                const response = await fetch(
+                    `/api/admin/delete/${deleteUserName}`,
+                    {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type' : 'application/json',
+                            [csrfHeader]: csrfToken
+                        },
+                        body: deleteUserName
+                    }
+                );
+
+                if (!response.ok) 
+                {
+                    const errorDetail = await response.text().catch(() => null);
+
+                    throw new Error(
+                                    `Http error! statues: ${response.status}.
+                                    Detail: ${errorDetail || 'Unknown'}`
+                    );
+                }
+                else 
+                {
+                    const successDetail = await response.text().catch(() => null);
+                    alert(successDetail);
+                    location.reload();
+                }
+
+            }   
+            catch(error) {
+                console.error(error);
+                alert(error);
+            }
+        }
+    }
+
+    async function doAddNewOne(button) 
+    {
+        button.addEventListener(
+            "click",
+            async function() 
+            {
+                const addNewUserRowElement
+                    = document.getElementById('add_new_user_table_row');
+
+                let count = parseInt(this.dataset.clockCount) || 0;
+                ++count;
+                this.dataset.clockCount = count;
+
+                switch(count) 
+                {
+                    case 1:
+                        addNewUserRowElement.innerHTML 
+                            = `
+                                <td data-label="ID"><input type="text" placeholder="用户 ID（自动生成）" readonly></input></td>
+
+                                <td data-label="用户名"><input type="text" id="new_username" placeholder="新用户名"></input></td>
+
+                                <td data-label="密码"><input type="password" id="new_password" placeholder="密码"></input></td>
+
+                                <td data-label="全名"><input type="text" id="new_fullname" placeholder="用户全名"></input></td>
+
+                                <td data-label="电话号码"><input type="tel" id="new_telephone" placeholder="电话号码（+86）"></input></td>
+
+                                <td data-label="邮箱"><input type="email" id="new_email" placeholder="邮箱"></input></td>
+                                
+                                <td data-label="注册日期"><input type="text" id="new_register_date" placeholder="注册时间（自动生成）" readonly></input></td>
+
+                                <td data-label="角色"> 
+                                    <select id="new_roles">
+                                        <option value="ROLE_USER">普通用户</option>
+                                        <option value="ROLE_ADMIN">管理员</option>
+                                        <option value="ROLE_ADMIN ROLE_USER">管理员 + 普通用户</option>
+                                    </select>
+                                </td>
+                            `;
+                        
+                        button.innerText = '➕ 创建新用户';
+
+                        break;
+                    
+                    case 2:
+                        const submitData = {
+                            userName        : document.getElementById('new_username').value,
+                            password        : document.getElementById('new_password').value,
+                            fullName        : document.getElementById('new_fullname').value,
+                            telephoneNumber : document.getElementById('new_telephone').value,
+                            email           : document.getElementById('new_email').value,
+                            roles           : createUserRolesJson(document.getElementById('new_roles').value)
+                        };
+
+                        const submitDataJson = JSON.stringify(submitData);
+
+                        console.info(submitDataJson);
+                        
+                        try 
+                        {
+                            // 从 meta 标签获取 CSRF Token
+                            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                            const response = await fetch(
+                                '/api/admin/add_new_user',
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type' : 'application/json',
+                                        [csrfHeader]   : csrfToken
+                                    },
+                                    body: submitDataJson
+                                }
+                            );
+
+                            if (!response.ok) 
+                            {
+                                const errorDetail = await response.text().catch(() => null);
+
+                                throw new Error(
+                                    `Http error! statues: ${response.status}. 
+                                    Detail: ${errorDetail || 'Unknown'}`
+                                );
+                            }
+                            else 
+                            {
+                                const successDetail = await response.text().catch(() => null);
+                                alert(successDetail);
+                                location.reload();
+                                this.dataset.clockCount = 0;
+                            }
+                        }
+                        catch(error) {
+                            console.error(error);
+                            alert(error)
+                        }
+                        break;
+                    
+                    default:
+                        break;
+                }
+            }
+        );
+    }
+</script>
+</html>
