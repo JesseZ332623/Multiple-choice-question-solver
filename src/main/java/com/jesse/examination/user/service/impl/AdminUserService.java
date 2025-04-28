@@ -19,6 +19,9 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 
+/**
+ * 管理员操作用户数据接口。
+ */
 @Service
 @Transactional
 public class AdminUserService implements AdminServiceInterface
@@ -62,6 +65,9 @@ public class AdminUserService implements AdminServiceInterface
         }
     }
 
+    /**
+     * 通过用户名查找用户实体。
+     */
     @Override
     public UserEntity findUserByUserName(String userName)
     {
@@ -75,6 +81,9 @@ public class AdminUserService implements AdminServiceInterface
                 );
     }
 
+    /**
+     * 查找表中所有的用户，存于一列表中。
+     */
     @Override
     public List<UserEntity> findAllUsers()
     {
@@ -85,28 +94,42 @@ public class AdminUserService implements AdminServiceInterface
         return this.adminUserEntityRepository.findAll();
     }
 
+    /**
+     * 创建新的用户。
+     *
+     * @param adminAddNewUserDTO
+     *        从前端提交的 JSON 中映射而来的新用户数据。
+     */
     @Override
     public Long addNewUser(
             @NotNull
-            AdminAddNewUserDTO newUserRegisterDTO)
+            AdminAddNewUserDTO adminAddNewUserDTO)
     {
         this.userNameCheckOut(
-                newUserRegisterDTO.getUserName(),
-                newUserRegisterDTO.getFullName()
+                adminAddNewUserDTO.getUserName(),
+                adminAddNewUserDTO.getFullName()
         );
 
         UserEntity newUser = new UserEntity();
-        newUser.setUserName(newUserRegisterDTO.getUserName());
-        newUser.setFullName(newUserRegisterDTO.getFullName());
-        newUser.setPassword(this.passwordEncoder.encode(newUserRegisterDTO.getPassword()));
-        newUser.setEmail(newUserRegisterDTO.getEmail());
-        newUser.setTelephoneNumber(newUserRegisterDTO.getTelephoneNumber());
-        newUser.setRoles(newUserRegisterDTO.getRoles());
+        newUser.setUserName(adminAddNewUserDTO.getUserName());
+        newUser.setFullName(adminAddNewUserDTO.getFullName());
+
+        // 密码务必要加密后再存入
+        newUser.setPassword(this.passwordEncoder.encode(adminAddNewUserDTO.getPassword()));
+        newUser.setEmail(adminAddNewUserDTO.getEmail());
+        newUser.setTelephoneNumber(adminAddNewUserDTO.getTelephoneNumber());
+        newUser.setRoles(adminAddNewUserDTO.getRoles());
         newUser.setRegisterDateTime(LocalDateTime.now());
 
         return this.adminUserEntityRepository.save(newUser).getId();
     }
 
+    /**
+     * 修改已经存在的用户。
+     *
+     * @param adminModifyUserDTO
+     *        从前端提交的 JSON 中映射而来的修改用户数据。
+     */
     @Override
     public Long modifyUserByUserName(
             @NotNull
@@ -166,6 +189,9 @@ public class AdminUserService implements AdminServiceInterface
         return this.adminUserEntityRepository.save(userQueryResult).getId();
     }
 
+    /**
+     * 通过用户名删除一条存在的用户数据。
+     */
     @Override
     public Long deleteUserByUserName(String userName)
     {
@@ -184,6 +210,10 @@ public class AdminUserService implements AdminServiceInterface
         return userQueryResult.getId();
     }
 
+    /**
+     * 通过指定 id 范围，批量的删除范围在 [begin, end] 内的用户，
+     * 如果范围内有不存在的 id 则跳过。
+     */
     @Override
     public Long deleteUsersByIdRange(Long begin, Long end)
     {
@@ -198,12 +228,16 @@ public class AdminUserService implements AdminServiceInterface
         return (long)existsIds.size();
     }
 
+    /**
+     * 删除所有用户。
+     */
     @Override
     public Long truncateAllUsers()
     {
         Long totalDataAmount = this.adminUserEntityRepository.count();
 
         this.adminUserEntityRepository.deleteAll();
+        this.adminUserEntityRepository.alterAutoIncrementToOne();
 
         return totalDataAmount;
     }
