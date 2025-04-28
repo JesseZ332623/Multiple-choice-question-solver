@@ -132,6 +132,68 @@
         background-size: 16px;
     }
 
+    .action-row td {
+        padding: 12px !important;
+        background: #161b22 !important;
+        border-top: 2px solid var(--gh-border);
+    }
+    
+    .action-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .button-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .range-delete-group {
+        display: flex;
+        gap: 8px;
+        flex-grow: 1;
+        max-width: 400px;
+    }
+    
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+    }
+    
+    .input-group input {
+        width: 120px;
+        flex-grow: 1;
+        padding: 6px 8px;
+    }
+    
+    .separator {
+        color: var(--gh-text);
+        padding: 0 4px;
+    }
+    
+    /* 按钮扩展样式 */
+    .btn-success {
+        color: var(--gh-success) !important;
+        border-color: var(--gh-success) !important;
+    }
+    
+    .btn-danger {
+        color: var(--gh-danger) !important;
+        border-color: var(--gh-danger) !important;
+    }
+    
+    .btn-warning {
+        color: #d29922 !important;
+        border-color: #d29922 !important;
+    }
+    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-5px); }
         to { opacity: 1; transform: translateY(0); }
@@ -152,6 +214,19 @@
             padding: 4px 8px;
             margin: 2px 0;
             display: block;
+            width: 100%;
+        }
+
+        .action-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .range-delete-group {
+            max-width: none;
+        }
+        
+        .input-group input {
             width: 100%;
         }
     }
@@ -192,6 +267,22 @@
             margin-right: 10px;
             color: var(--gh-primary);
         }
+
+        .button-group {
+            flex-direction: column;
+        }
+        
+        .button-group button {
+            width: 100%;
+        }
+        
+        .range-delete-group form {
+            flex-direction: column;
+        }
+        
+        .input-group {
+            width: 100%;
+        }
     }
 </style>
 <body>
@@ -200,7 +291,6 @@
             <caption 
             th:text="'所有用户列表（共 ' + ${#lists.size(AllUsers)} + ' 位用户)'">
             </caption>
-     
             <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -230,11 +320,61 @@
                     </td>
                 </tr>
                 <tr id="add_new_user_table_row"></tr>
+                <tr class="action-row">
+                    <td colspan="9">  <!-- 根据实际列数调整colspan -->
+                        <div class="action-group">
+                            <!-- 添加/删除按钮组 -->
+                            <div class="button-group">
+                                <button type="button" 
+                                    data-click-count="0" 
+                                    onclick="doAddNewOne(this)"
+                                    class="btn-success">
+                                    ➕ 新建用户
+                                </button> 
+                                <button type="button" 
+                                    onclick="doDeleteAll(this)"
+                                    class="btn-danger">
+                                    🗑️ 全部删除
+                                </button>
+                            </div>
+
+                            <!-- 批量删除表单 -->
+                            <div class="range-delete-group">
+                                <form id="delete_by_range">
+                                    <div class="input-group">
+                                        <input type="number" 
+                                            id="delete_begin_id" 
+                                            placeholder="起始ID"
+                                            min="1">
+                                        <span class="separator">-</span>
+                                        <input type="number" 
+                                            id="delete_end_id" 
+                                            placeholder="结束ID"
+                                            min="1">
+                                    </div>
+                                    <button type="button" 
+                                        onclick="doDeleteByRange(this)"
+                                        class="btn-warning">
+                                        （Range 🗑️）批量删除
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:if="${#lists.size(AllUsers) == 0}">
+        <h2>目前没有用户，以下操作进行添加：</h2>
+        <table>
+            <tbody>
+                <tr id="add_new_user_table_row"></tr>
                 <tr>
                     <td>
                         <button type="submit" 
                         data-click-count="0" onclick="doAddNewOne(this)">
-                            ➕ 新增用户
+                            ➕
                         </button>
                     </td>
                 </tr>
@@ -575,6 +715,114 @@
                 }
             }
         );
+    }
+
+    async function doDeleteAll(button) 
+    {
+        button.innerText = '处理中...';
+        button.disabled  = true;
+
+        try 
+        {
+            if (confirm('这是一个敏感操作，确定要删除所有用户吗？')) 
+            {
+                // 从 meta 标签获取 CSRF Token
+                const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                const response = await fetch(
+                    '/api/admin/delete/all',
+                    {
+                        method: 'DELETE',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            [csrfHeader]: csrfToken
+                        }
+                    }
+                );
+
+                if (!response.ok) 
+                {
+                    throw new Error(
+                        `Http error: ${response.status}, 
+                        Detail: ${await response.text().catch(() => null) || 'Unknow'}`
+                    );
+                }
+                else
+                {
+                    alert(`${await response.text().catch(() => null)}`);
+                }
+            }
+        }
+        catch(error) 
+        {
+            alert(error);
+            console.error(error);
+        }
+        finally 
+        {
+            button.innerText = 'ALL 🗑️';
+            button.disabled  = false;
+            location.reload();
+        }
+    }
+
+    async function doDeleteByRange(button)
+    {
+        const beginInput = document.getElementById('delete_begin_id');
+        const endInput   = document.getElementById('delete_end_id');
+
+        if (beginInput.value <= 0 || endInput.value <= 0) 
+        {
+            alert('id 范围不得小于 0，请重新输入。');
+            beginInput.value = '';
+            endInput.value   = '';
+
+            return;
+        }
+
+        button.innerText = '处理中...';
+        button.disabled  = true;
+
+        try 
+        {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const response = await fetch(
+                `/api/admin/delete/range/${beginInput.value}_${endInput.value}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        [csrfHeader] : csrfToken
+                    }
+                }
+            );
+
+            if (!response.ok) 
+            {
+                throw new Error(
+                    `Http error: ${response.status}, 
+                    Detail: ${await response.text().catch(() => null) || 'Unknow'}`
+                );
+            }
+            else
+            {
+                alert(`${await response.text().catch(() => null)}`);
+            }
+        }
+        catch(error) 
+        {
+            alert(error);
+            console.error(error);
+        }
+        finally 
+        {
+            button.innerText = '（Range 🗑️）批量删除';
+            button.disabled = true;
+            location.reload();
+        }
     }
 </script>
 </html>
