@@ -229,21 +229,6 @@
     var TotalCorrect = 0;
     var TotalMistake = 0;
 
-    function getCsrfToken()
-    {
-        /**
-            一个可能的 Cookie 如下所示：
-
-                "name=Oeschger; SameSite=None; Secure"
-
-            将这个 Cookie 按 ; 分割，在从分割后的字符串数组中
-            找到由 XSRF-TOKEN= 开头的行，再按 = 进行分割，取等号右边的值。
-        */
-        return document.cookie.split('; ')
-                              .find(row => row.startsWith('XSRF-TOKEN='))
-                              ?.split('=')[1];
-    }
-
     function checkAnswer(button) 
     {
         // 通过按钮元素向上查找父容器
@@ -312,10 +297,11 @@
             "mistakeRate"   : mistakeRate.toFixed(2)
         };
 
-        addNewScoreRecord(recordJson);      // 将成绩数据写入数据表
+        addNewScoreRecord(recordJson, button);      // 将成绩数据写入数据表
 
         setTimeout(
             () => { 
+                button.disabled = false;
                 window.location = '../score_record/current_score_settlement'; 
             }, 2500
         );
@@ -340,23 +326,27 @@
                 }
             );
 
-            if (!response.ok) {
-                throw new Error(`Http error! statues: ${response.status}`);
+            if (!response.ok) 
+            {
+                throw new Error(
+                    `Http error! statues: ${response.status}
+                    Error Detail: ${await response.text().catch(() => null)}`
+                );
             }
-
-            const responseText = await response.text();
 
             console.log(
                 `Fetch api/correct_times_plus_one/${questionId} success, 
-				response: ${responseText}`
+				response: ${await response.text().catch(() => null)}`
             );
         }
-        catch (error) {
+        catch (error) 
+        {
+            alert(error);
             console.error(error);
         }
     }
 
-    async function addNewScoreRecord(recordJson)
+    async function addNewScoreRecord(recordJson, button)
     {
         try 
         {
@@ -384,12 +374,14 @@
                 );
             }
 
-            const responseText = await response.text();
+            const responseText = await response.text().catch(() => null);
             
             const practiseScoreDOM = document.getElementById('practise_score');
 
             practiseScoreDOM.innerHTML 
                 = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交，正在跳转至结算页面。<span>`;
+
+            button.disabled = true;
 
             console.log(`${responseText}`);
         }
