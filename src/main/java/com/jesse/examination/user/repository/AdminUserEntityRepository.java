@@ -59,6 +59,10 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     )
     void deleteUserByIds(@Param(value = "ids") List<Long> ids);
 
+    @Modifying
+    @Query(value = "ALTER TABLE users AUTO_INCREMENT = 1", nativeQuery = true)
+    void alterAutoIncrementToOne();
+
     /**
      * 通过 full name 验证所对应的数据行是否存在（JPA 自动实现）。
      */
