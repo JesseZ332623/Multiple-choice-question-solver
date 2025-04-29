@@ -126,7 +126,7 @@
             <p>设置账号数据</p>
         </a>
 
-        <a href="/user_info/login" class="card">
+        <a href="/user_info/login" class="card" onclick="doLogout()">
             <h3>🚪 退出登录</h3>
             <p>退出账户并返回登录页面</p>
         </a>
@@ -138,4 +138,31 @@
     </div>
 </div>
 </body>
+<script>
+    async function doLogout() 
+    {
+        try
+        {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const response = await fetch(
+                '/api/user_info/logout',
+                {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                }
+            );
+
+            alert(`${await response.text().catch(() => null)}`);
+        }
+        catch(error) 
+        {
+            console.error(error);
+        }
+    }
+</script>
 </html>
