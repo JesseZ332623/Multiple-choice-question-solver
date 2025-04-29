@@ -5,11 +5,12 @@
 ## 如何使用？
 
 ### 部署
-- 修改 `/resources/application.properties` 文件下的以下两个属性：
+- 修改 `/resources/application.properties` 文件下的以下属性：
 
 ```text
-spring.datasource.username=your_username
-spring.datasource.password=your_password
+spring.datasource.primary.jdbc-url=jdbc:mysql://ipaddress:port/exam_question?...
+spring.datasource.primary.username=your_username
+spring.datasource.primary.password=your_password
 ```
 
 - 然后使用 Maven 进行构建：
