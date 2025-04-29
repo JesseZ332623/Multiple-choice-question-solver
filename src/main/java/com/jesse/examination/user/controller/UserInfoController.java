@@ -6,6 +6,7 @@ import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.service.UserServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +18,17 @@ import static java.lang.String.format;
 @RequestMapping(path = "/api/user_info/", produces = "application/json")
 public class UserInfoController
 {
-    private final UserServiceInterface userServiceInterface;
+    private final UserServiceInterface          userServiceInterface;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Autowired
-    public UserInfoController(UserServiceInterface userServiceInterface) {
+    public UserInfoController(
+            UserServiceInterface userServiceInterface,
+            RedisTemplate<String, String> redisTemplate
+    )
+    {
         this.userServiceInterface = userServiceInterface;
+        this.redisTemplate        = redisTemplate;
     }
 
     @PostMapping(path = "register")
@@ -57,6 +64,10 @@ public class UserInfoController
         try
         {
             this.userServiceInterface.userLogin(userLoginDTO);
+            this.redisTemplate.opsForValue().set(
+                    "user:UserInfoController:login_username",
+                    userLoginDTO.getUserName()
+            );
 
             return ResponseEntity.ok(
                     format(
