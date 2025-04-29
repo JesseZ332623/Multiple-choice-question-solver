@@ -85,6 +85,20 @@ public class UserInfoController
         }
     }
 
+    @PostMapping(path = "logout")
+    public ResponseEntity<String> doLogout()
+    {
+        String responseText
+                = format(
+                        "User [%s] logout, see you later~",
+                this.redisTemplate.opsForValue().get("user:UserInfoController:login_username")
+        );
+
+        this.redisTemplate.delete("user:UserInfoController:login_username");
+
+        return ResponseEntity.ok(responseText);
+    }
+
     @PutMapping(path = "modify")
     public ResponseEntity<?> doModify(
             @RequestBody ModifyOperatorDTO modifyOperatorDTO)
