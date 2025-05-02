@@ -1,5 +1,10 @@
 package com.jesse.examination.user.controller;
 
+import com.jesse.examination.file.FileTransferService;
+import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
+import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
+import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -11,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Objects;
+
 import static java.lang.String.format;
 
 @Slf4j
@@ -19,16 +27,25 @@ import static java.lang.String.format;
 public class UserInfoController
 {
     private final UserServiceInterface          userServiceInterface;
+    private final QuestionService               questionService;
+    private final ScoreRecordService            scoreRecordService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final FileTransferService           fileTransferService;
 
     @Autowired
     public UserInfoController(
-            UserServiceInterface userServiceInterface,
-            RedisTemplate<String, String> redisTemplate
+            UserServiceInterface            userServiceInterface,
+            QuestionService                 questionService,
+            ScoreRecordService              scoreRecordService,
+            RedisTemplate<String, String>   redisTemplate,
+            FileTransferService             fileTransferService
     )
     {
         this.userServiceInterface = userServiceInterface;
+        this.questionService      = questionService;
+        this.scoreRecordService   = scoreRecordService;
         this.redisTemplate        = redisTemplate;
+        this.fileTransferService  = fileTransferService;
     }
 
     @PostMapping(path = "register")
@@ -69,6 +86,19 @@ public class UserInfoController
                     userLoginDTO.getUserName()
             );
 
+            List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
+                    = this.fileTransferService.readUserCorrectTimesDataFile(
+                                this.redisTemplate.opsForValue()
+                                        .get("user:UserInfoController:login_username")
+                        );
+
+//            for (var n : questionCorrectTimesDTOS) {
+//                System.out.println(n);
+//            }
+
+            this.questionService.setAllCorrectTimesByIds(questionCorrectTimesDTOS);
+
+
             return ResponseEntity.ok(
                     format(
                             "Login complete. Welcome User: [%s]!",
@@ -88,15 +118,56 @@ public class UserInfoController
     @PostMapping(path = "logout")
     public ResponseEntity<String> doLogout()
     {
-        String responseText
-                = format(
-                        "User [%s] logout, see you later~",
-                this.redisTemplate.opsForValue().get("user:UserInfoController:login_username")
-        );
+        try
+        {
+            String logoutUserName
+                    = Objects.requireNonNull(
+                    this.redisTemplate.opsForValue()
+                            .get("user:UserInfoController:login_username")
+            );
 
-        this.redisTemplate.delete("user:UserInfoController:login_username");
+            String responseText
+                    = format("User [%s] logout, see you later~", logoutUserName);
 
-        return ResponseEntity.ok(responseText);
+            log.info(responseText);
+
+            // 存档用户数据
+            List<QuestionCorrectTimesDTO> questionCorrectTimesList
+                    = this.questionService.getAllQuestionCorrectTimes();
+
+            log.info("Call getAllQuestionCorrectTimes() complete.");
+
+            List<ScoreRecordEntity> allScoreList
+                    = this.scoreRecordService.findAllScoreRecord();
+
+            log.info("Call findAllScoreRecord complete.");
+
+            this.questionService.clearCorrectTimesToZero();
+            this.scoreRecordService.truncateScoreRecordTable();
+
+            log.info("truncate user data complete.");
+
+            this.fileTransferService.saveUserCorrectTimesDataFile(
+                    logoutUserName, questionCorrectTimesList
+            );
+
+            this.fileTransferService.saveUserScoreDataFile(
+                    logoutUserName, allScoreList
+            );
+
+            log.info("save date to file complete.");
+
+            this.redisTemplate.delete("user:UserInfoController:login_username");
+
+            log.info("delete user redis data complete.");
+
+            return ResponseEntity.ok().body(responseText);
+        }
+        catch (Exception exception)
+        {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(exception.getMessage());
+        }
     }
 
     @PutMapping(path = "modify")

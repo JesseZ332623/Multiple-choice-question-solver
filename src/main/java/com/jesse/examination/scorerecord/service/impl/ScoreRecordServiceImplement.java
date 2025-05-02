@@ -4,6 +4,7 @@ import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.repository.ScoreRecordRepository;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +91,17 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
     @Transactional
     public List<ScoreRecordEntity> findAllScoreRecord() {
         return this.scoreRecordRepository.findAll();
+    }
+
+    /**
+     * 将 scoreRecordEntities 列表中的所有数据全部存入表中。
+     */
+    @Override
+    public void saveScoreRecordFromList(@NotNull List<ScoreRecordEntity> scoreRecordEntities)
+    {
+        for (var scoreRecord : scoreRecordEntities) {
+            this.scoreRecordRepository.save(scoreRecord);
+        }
     }
 
     /**

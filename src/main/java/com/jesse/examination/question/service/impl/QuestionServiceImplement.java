@@ -1,5 +1,6 @@
 package com.jesse.examination.question.service.impl;
 
+import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -9,12 +10,16 @@ import com.jesse.examination.question.entity.questionentity.QuestionEntity;
 import com.jesse.examination.question.repository.QuestionRepository;
 import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Slf4j
@@ -107,6 +112,15 @@ public class QuestionServiceImplement implements QuestionService
                               ).toList();
     }
 
+    /**
+     * 获取所有问题的答对次数，存储在一个不可变列表中。
+     */
+    @Override
+    public List<QuestionCorrectTimesDTO> getAllQuestionCorrectTimes()
+    {
+        return this.questionRepository.findAllQuestionCorrectTimes();
+    }
+
     @Override
     public List<QuestionWithCorrectOptionDTO> getAllQuestionWithCorrectOption()
     {
@@ -145,6 +159,48 @@ public class QuestionServiceImplement implements QuestionService
                     String.format(
                             "[RuntimeException] id = {%d} not exist in questions table.", id
                     )
+            );
+        }
+    }
+
+    /**
+     * 将 questions 表中指定 id 对应的数据行的
+     * current_times 的值设为 value。
+     */
+    @Override
+    @Transactional
+    public void setOneCorrectTimesById(Integer id, Integer value)
+    {
+        QuestionEntity queryRes
+                = this.questionRepository.findById(id)
+                .orElseThrow(
+                        () -> new NoSuchElementException(format("ID = {%d} not exist!", id))
+                );
+
+        if (value < 0)
+        {
+            throw new IllegalArgumentException(
+                    format("value which = %d not less than 0", value)
+            );
+        }
+
+        queryRes.setCorrectTimes(value);
+
+        this.questionRepository.save(queryRes);
+    }
+
+
+    @Override
+    public void setAllCorrectTimesByIds(
+            @NotNull
+            List<QuestionCorrectTimesDTO> correctTimesDTOList
+    )
+    {
+        for (QuestionCorrectTimesDTO questionCorrectTimesDTO : correctTimesDTOList)
+        {
+            this.setOneCorrectTimesById(
+                    questionCorrectTimesDTO.getId(),
+                    questionCorrectTimesDTO.getCorrectTimes()
             );
         }
     }
