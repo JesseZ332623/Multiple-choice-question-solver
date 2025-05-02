@@ -1,5 +1,6 @@
 package com.jesse.examination.question.repository;
 
+import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.entity.questionentity.QuestionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -72,6 +73,18 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
             nativeQuery = true
     )
     List<QuestionProjectionWithCorrectOption> findQuestionWithCorrectOption();
+
+    /**
+     * 获取所有问题的答对次数，存储在一个不可变列表中。
+     */
+    @Query(
+            value = """
+                    SELECT questions.id, questions.correct_times
+                    FROM questions WHERE questions.correct_times IS NOT NULL
+                    """,
+            nativeQuery = true
+    )
+    List<QuestionCorrectTimesDTO> findAllQuestionCorrectTimes();
 
     /**
      * 将 question 表中的 correct_times 数据列的值全部设为 0。
