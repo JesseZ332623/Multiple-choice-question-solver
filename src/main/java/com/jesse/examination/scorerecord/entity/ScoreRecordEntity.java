@@ -32,4 +32,16 @@ public class ScoreRecordEntity
 
     @Column(name = "mistake_rate")
     private Double mistakeRate;             // 错误率（这个也要存？）
+
+    @Override
+    public String toString()
+    {
+        return String.format(
+                """
+                {"scoreId" : %d, "submitDate" : "%s", "correctCount" : %d, "errorCount" : %d, "noAnswerCount" : %d, "mistakeRate" : %f}
+                """,
+                scoreId, submitDate.toString(), correctCount,
+                errorCount, noAnswerCount, mistakeRate
+        );
+    }
 }
