@@ -1,9 +1,11 @@
 package com.jesse.examination.file;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jesse.examination.config.jacksonconfig.JacksonConfig;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -28,53 +30,28 @@ public class FileTransferService
     private @NotNull QuestionCorrectTimesDTO
     processUserCorrectJsonLine(String line)
     {
-        //System.out.println(line);
 
-        QuestionCorrectTimesDTO questionCorrectTimesDTO =
-                new QuestionCorrectTimesDTO();
+        QuestionCorrectTimesDTO questionCorrectTimesDTO = null;
 
-        /*
-         * 先按 comma 分割一行，假如一行如下：
-         *      {"id" : 1, "correctTimes" : 1},
-         * 则被分割成：
-         *      ["{"id" : 1", ""correctTimes" : 1}"]
-         */
-        String[] firstSplitRes = line.split(",");
+        ObjectMapper mapper = JacksonConfig.createObjectMapper();
 
-//        for (var str : firstSplitRes) {
-//            System.out.print(str + " ");
-//        }
-
-        for (var str : firstSplitRes) {
-            String tempStr = str;
-
-            if (str.contains("}")) {
-                tempStr = str.replace('}', ' ');
-            }
-
-            String[] secondSplitRes = tempStr.split(":");
-
-            if (secondSplitRes[0].contains("id")) {
-                questionCorrectTimesDTO.setId(
-                        Integer.parseInt(secondSplitRes[1].strip())
-                );
-            }
-
-            if (secondSplitRes[0].contains("correctTimes")) {
-                questionCorrectTimesDTO.setCorrectTimes(
-                        Integer.parseInt(secondSplitRes[1].strip())
-                );
-            }
+        try
+        {
+            questionCorrectTimesDTO
+                    = mapper.readValue(line, QuestionCorrectTimesDTO.class);
+        }
+        catch (JsonProcessingException exception) {
+            log.error(exception.getMessage());
         }
 
-        return questionCorrectTimesDTO;
+        return Objects.requireNonNull(questionCorrectTimesDTO);
     }
 
     private @NotNull ScoreRecordEntity
-    processUserScoreRecordJsonLine(
-            String line
-    )
+    processUserScoreRecordJsonLine(String line)
     {
+        ScoreRecordEntity termpScoreRecordEntity = null;
+
         /*
         * 要处理的字符串示例：
         * {
@@ -89,16 +66,19 @@ public class FileTransferService
         * 需要注意的是，在文件中它们是一整行，这里为了可读性才写成这样。
         */
 
-        String lineWithoutBraces;
+        // 错了哥，以后我不搓轮子了（哭）
+        ObjectMapper mapper = JacksonConfig.createObjectMapper();
 
-        lineWithoutBraces = line.replace('{', ' ');
-        lineWithoutBraces = line.replace('}', ' ');
+        try
+        {
+            termpScoreRecordEntity = mapper.readValue(line, ScoreRecordEntity.class);
+        }
+        catch (JsonProcessingException exception)
+        {
+            log.error(exception.getMessage());
+        }
 
-        String[] firstSplitRes = lineWithoutBraces.split(",");
-
-        /*
-         * 完成第二次分割，取出数据后构建。
-         * */
+        return Objects.requireNonNull(termpScoreRecordEntity);
     }
 
     private void saveFile(String filePath, String fileName, String fileData) throws IOException
@@ -121,7 +101,7 @@ public class FileTransferService
     {
         try
         {
-            String scoreFileName = "score_settlement.json";
+            final String scoreFileName = "score_settlement.json";
             StringBuilder scoreDataJsonBuilder = new StringBuilder();
 
             scoreDataJsonBuilder.append("[\n");
@@ -132,7 +112,7 @@ public class FileTransferService
                         .append(",\n");
             }
 
-            int lastComma = 0;
+            int lastComma;
 
             if ((lastComma = scoreDataJsonBuilder.lastIndexOf(",")) != -1) {
                 scoreDataJsonBuilder.deleteCharAt(lastComma);
@@ -160,7 +140,7 @@ public class FileTransferService
         try
         {
             // 文件名示例：correct_times.json
-            String        correctTimesFileName    = "correct_times.json";
+            final String        correctTimesFileName    = "correct_times.json";
             StringBuilder correctTimesJsonBuilder = new StringBuilder();
 
             correctTimesJsonBuilder.append("[\n");
@@ -172,7 +152,7 @@ public class FileTransferService
                        .append(",\n");
             }
 
-            int lastComma = 0;
+            int lastComma;
 
             if ((lastComma = correctTimesJsonBuilder.lastIndexOf(",")) != -1) {
                 correctTimesJsonBuilder.deleteCharAt(lastComma);
@@ -223,7 +203,7 @@ public class FileTransferService
     readUserScoreDataFile(String userName)
     {
         String filePath
-                = this.storagePath + "/" + userName + "/score_settlement";
+                = this.storagePath + "/" + userName + "/score_settlement.json";
 
         List<ScoreRecordEntity> resultList = new ArrayList<>();
 
@@ -235,11 +215,15 @@ public class FileTransferService
             {
                 if (line.contains("[") || line.contains("]")) { continue; }
 
-                resultList.add();
+                resultList.add(this.processUserScoreRecordJsonLine(line));
             }
         }
         catch (IOException exception) {
             log.error(exception.getMessage());
         }
+
+        // System.out.println("Size of resultList = " + resultList.size());
+
+        return resultList;
     }
 }
