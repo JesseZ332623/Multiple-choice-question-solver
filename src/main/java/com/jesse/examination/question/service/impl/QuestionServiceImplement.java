@@ -12,11 +12,15 @@ import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.lang.String.format;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -28,9 +32,19 @@ public class QuestionServiceImplement implements QuestionService
 {
     private final QuestionRepository questionRepository;
 
+    /**
+     * 业务场景中出现了平凡更新表数据的情况，如果使用 JPA 去一条条执行，
+     * 真的是慢到令人发指，所用需要使用 JdbcTemplate batchUpdate() 方法提提速。
+     */
+    private final JdbcTemplate jdbcTemplate;
+
     @Autowired
-    public QuestionServiceImplement(QuestionRepository questionRepository) {
+    public QuestionServiceImplement(
+            QuestionRepository questionRepository,
+            JdbcTemplate jdbcTemplate)
+    {
         this.questionRepository = questionRepository;
+        this.jdbcTemplate       = jdbcTemplate;
     }
 
     /**
@@ -191,18 +205,27 @@ public class QuestionServiceImplement implements QuestionService
 
 
     @Override
-    public void setAllCorrectTimesByIds(
+    @Transactional
+    public int[] setAllCorrectTimesByIds(
             @NotNull
             List<QuestionCorrectTimesDTO> correctTimesDTOList
     )
     {
-        for (QuestionCorrectTimesDTO questionCorrectTimesDTO : correctTimesDTOList)
+        String sql = "UPDATE questions SET correct_times = ? WHERE id = ?";
+
+        return jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter()
         {
-            this.setOneCorrectTimesById(
-                    questionCorrectTimesDTO.getId(),
-                    questionCorrectTimesDTO.getCorrectTimes()
-            );
-        }
+            @Override
+            public void setValues(@NotNull PreparedStatement ps, int i) throws SQLException
+            {
+                QuestionCorrectTimesDTO update = correctTimesDTOList.get(i);
+                ps.setInt(1, update.getCorrectTimes());
+                ps.setInt(2, update.getId());
+            }
+
+            @Override
+            public int getBatchSize() { return correctTimesDTOList.size(); }
+        });
     }
 
     @Override
