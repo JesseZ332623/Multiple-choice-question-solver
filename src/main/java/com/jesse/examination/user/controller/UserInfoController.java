@@ -81,6 +81,7 @@ public class UserInfoController
         try
         {
             this.userServiceInterface.userLogin(userLoginDTO);
+
             this.redisTemplate.opsForValue().set(
                     "user:UserInfoController:login_username",
                     userLoginDTO.getUserName()
@@ -92,12 +93,27 @@ public class UserInfoController
                                         .get("user:UserInfoController:login_username")
                         );
 
+            List<ScoreRecordEntity> scoreRecordEntityList
+                    = this.fileTransferService.readUserScoreDataFile(
+                    this.redisTemplate.opsForValue()
+                            .get("user:UserInfoController:login_username")
+            );
+
 //            for (var n : questionCorrectTimesDTOS) {
 //                System.out.println(n);
 //            }
 
-            this.questionService.setAllCorrectTimesByIds(questionCorrectTimesDTOS);
+//            for (ScoreRecordEntity scoreRecordEntity : scoreRecordEntityList) {
+//                System.out.println(scoreRecordEntity);
+//            }
 
+            if (!questionCorrectTimesDTOS.isEmpty()) {
+                this.questionService.setAllCorrectTimesByIds(questionCorrectTimesDTOS);
+            }
+
+            if (!scoreRecordEntityList.isEmpty()) {
+                this.scoreRecordService.saveScoreRecordFromList(scoreRecordEntityList);
+            }
 
             return ResponseEntity.ok(
                     format(
@@ -142,6 +158,7 @@ public class UserInfoController
 
             log.info("Call findAllScoreRecord complete.");
 
+            // 清空指定的数据
             this.questionService.clearCorrectTimesToZero();
             this.scoreRecordService.truncateScoreRecordTable();
 
