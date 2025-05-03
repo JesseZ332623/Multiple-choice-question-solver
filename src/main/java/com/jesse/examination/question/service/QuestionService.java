@@ -40,7 +40,7 @@ public interface QuestionService
      void setOneCorrectTimesById(Integer id, Integer value);
 
     /***/
-    void setAllCorrectTimesByIds(
+    int[] setAllCorrectTimesByIds(
             List<QuestionCorrectTimesDTO> correctTimesDTOList
     );
 
