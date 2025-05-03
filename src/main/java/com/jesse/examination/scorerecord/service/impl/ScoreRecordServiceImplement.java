@@ -88,7 +88,7 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      * 获取当前所有的成绩记录，以列表的形式返回。
      */
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ScoreRecordEntity> findAllScoreRecord() {
         return this.scoreRecordRepository.findAll();
     }
@@ -97,11 +97,13 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      * 将 scoreRecordEntities 列表中的所有数据全部存入表中。
      */
     @Override
-    public void saveScoreRecordFromList(@NotNull List<ScoreRecordEntity> scoreRecordEntities)
+    @Transactional
+    public void saveScoreRecordFromList(
+            @NotNull
+            List<ScoreRecordEntity> scoreRecordEntities
+    )
     {
-        for (var scoreRecord : scoreRecordEntities) {
-            this.scoreRecordRepository.save(scoreRecord);
-        }
+        this.scoreRecordRepository.saveAllAndFlush(scoreRecordEntities);
     }
 
     /**
@@ -115,7 +117,7 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
                 = this.scoreRecordRepository.count();
         this.scoreRecordRepository.truncateScoreRecordTable();
 
-        this.scoreRecordRepository.flush();
+        // this.scoreRecordRepository.flush();
 
         return currentRows;
     }
