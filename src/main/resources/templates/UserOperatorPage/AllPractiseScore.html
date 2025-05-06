@@ -129,12 +129,24 @@
             font-size: 13px;
             margin-bottom: 20px;
         }
+
+        .user-badge {
+            background-color: var(#161b22);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(#30363d);
+            font-size: 14px;
+            float: right;
+        }
     </style>
 </head>
 
 <body>
-    <p th:text="'练习次数: ' + ${#lists.size(AllScoreRecord)}"></p>
-
+    <div id="user_name" class="user-badge" th:text="${UserName}"></div>
+    <div>
+        <p th:text="'练习次数: ' + ${#lists.size(AllScoreRecord)}"></p>
+    </div>
+    
     <div>
         <button id="clean_record" type="button" onclick="truncateRecord(this)">
             清空练习记录
@@ -143,6 +155,8 @@
             <caption>练习记录</caption>
             <thead>
                 <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">用户</th>
                     <th scope="col">练习提交时间</th>
                     <th scope="col">错误数</th>
                     <th scope="col">正确数</th>
@@ -152,6 +166,8 @@
             </thead>
             <tbody>
                 <tr th:each="record,iter : ${AllScoreRecord}" style="--i: ${iter.index}">
+                    <td th:text="${record.scoreId}"></td>
+                    <td th:text="${record.userName}"></td>
                     <td th:text="${record.submitDate.toString()}"></td>
                     <td th:text="${record.errorCount}"></td>
                     <td th:text="${record.correctCount}"></td>
@@ -164,17 +180,21 @@
 </body>
 
 <script>
-    async function truncateRecord(button) {
-        try {
+    async function truncateRecord(button) 
+    {
+        try 
+        {
             // 从 meta 标签获取 CSRF Token
-            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+            var userName     = document.getElementById('user_name').textContent;
 
             button.classList.add('loading');
 
-            if (confirm('这是一个敏感操作，您确定要删除所有练习记录吗？')) {
+            if (confirm('这是一个敏感操作，您确定要删除所有练习记录吗？')) 
+            {
                 const response = await fetch(
-                    '/api/score_record/truncate',
+                    `/api/score_record/delete_by_username/${userName}`,
                     {
                         method: 'DELETE',
                         headers: {
