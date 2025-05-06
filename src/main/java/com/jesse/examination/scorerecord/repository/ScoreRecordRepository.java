@@ -4,12 +4,36 @@ import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, Integer>
 {
+
+    /**
+     * 查找指定 userName 的所有成绩记录，存于一个列表中。
+     */
+    @Query(
+            value = "SELECT * FROM score_record WHERE(user_name = :userName)",
+            nativeQuery = true
+    )
+    List<ScoreRecordEntity> findAllScoreRecordByUserName(
+            @Param(value = "userName") String userName
+    );
+
+    /**
+     * 删除指定 userName 的所有成绩记录，返回删除的行数。
+     */
+    @Modifying
+    @Query(
+            value = "DELETE FROM score_record WHERE(user_name = :userName)",
+            nativeQuery = true
+    )
+    Integer deleteAllScoreRecordByUserName(
+            @Param(value = "userName") String userName
+    );
+
     /**
      * 清空 score_record 表。
      */
