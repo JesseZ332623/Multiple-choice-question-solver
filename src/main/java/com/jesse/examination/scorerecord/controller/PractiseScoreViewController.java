@@ -4,6 +4,8 @@ import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Controller
@@ -21,12 +24,13 @@ public class PractiseScoreViewController
     private final ScoreRecordService scoreRecordService;
 
     @Autowired
-    public PractiseScoreViewController(ScoreRecordService scoreRecordService) {
-        this.scoreRecordService = scoreRecordService;
+    public PractiseScoreViewController(ScoreRecordService scoreRecordService)
+    {
+        this.scoreRecordService   = scoreRecordService;
     }
 
     /**
-     * GET 方法请求，渲染所有练习记录，以视图作为响应，
+     * GET 方法请求，渲染登录用户的所有练习记录，以视图作为响应，
      * 渲染在 AllPractiseScore.html 页面中。
      * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
@@ -38,14 +42,29 @@ public class PractiseScoreViewController
      * </p>
      */
     @GetMapping(path = "all_score_record")
-    public String getAllPractiseScoreView(Model model)
+    public String getAllPractiseScoreView(
+            Model model,
+            HttpServletRequest request
+    )
     {
         try
         {
-            List<ScoreRecordEntity> allPractiseScoreQueryRes
-                    = this.scoreRecordService.findAllScoreRecord();
+            HttpSession session = request.getSession(false);
 
-            model.addAttribute("AllScoreRecord", allPractiseScoreQueryRes);
+            if (!Objects.equals(session, null))
+            {
+                String userName = (String) session.getAttribute("user");
+
+                List<ScoreRecordEntity> allPractiseScoreQueryRes
+                        = this.scoreRecordService.findAllScoreRecordByUserName(userName);
+
+                model.addAttribute(
+                        "UserName", userName
+                );
+                model.addAttribute(
+                        "AllScoreRecord", allPractiseScoreQueryRes
+                );
+            }
 
             return "UserOperatorPage/AllPractiseScore";
         }
