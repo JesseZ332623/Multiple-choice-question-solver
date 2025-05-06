@@ -24,7 +24,6 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
         this.scoreRecordRepository = scoreRecordRepository;
     }
 
-
     /**
      * 根据指定 ID 查询成绩记录（单条查询）。
      *
@@ -94,6 +93,28 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
     }
 
     /**
+     * 查找指定 userName 的所有成绩记录，存于一个列表中。
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScoreRecordEntity>
+    findAllScoreRecordByUserName(String userName)
+    {
+        return this.scoreRecordRepository.findAllScoreRecordByUserName(userName);
+    }
+
+    /**
+     * 删除指定 userName 的所有成绩记录，返回删除的行数。
+     */
+    @Override
+    @Transactional
+    public Integer deleteAllScoreRecordByUserName(String userName)
+    {
+        return this.scoreRecordRepository
+                   .deleteAllScoreRecordByUserName(userName);
+    }
+
+    /**
      * 将 scoreRecordEntities 列表中的所有数据全部存入表中。
      */
     @Override
@@ -117,7 +138,7 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
                 = this.scoreRecordRepository.count();
         this.scoreRecordRepository.truncateScoreRecordTable();
 
-        // this.scoreRecordRepository.flush();
+        this.scoreRecordRepository.flush();
 
         return currentRows;
     }
