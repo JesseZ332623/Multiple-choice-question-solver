@@ -55,7 +55,7 @@ public class FileTransferService
         /*
         * 要处理的字符串示例：
         * {
-        *       "scoreId": 1,
+        *       "userName" : "Perter",
         *       "submitDate": "2025-04-30T09:41:01",
         *       "correctCount": 0,
         *       "errorCount": 0,
@@ -101,7 +101,7 @@ public class FileTransferService
     {
         try
         {
-            final String scoreFileName = "score_settlement.json";
+            final String  scoreFileName = "score_settlement.json";
             StringBuilder scoreDataJsonBuilder = new StringBuilder();
 
             scoreDataJsonBuilder.append("[\n");
@@ -140,7 +140,7 @@ public class FileTransferService
         try
         {
             // 文件名示例：correct_times.json
-            final String        correctTimesFileName    = "correct_times.json";
+            final String  correctTimesFileName    = "correct_times.json";
             StringBuilder correctTimesJsonBuilder = new StringBuilder();
 
             correctTimesJsonBuilder.append("[\n");
