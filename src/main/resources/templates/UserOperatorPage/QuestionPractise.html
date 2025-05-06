@@ -184,10 +184,20 @@
         .practise_score span {
             display: block;
         }
+
+        .user-badge {
+            background-color: var(#161b22);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(#30363d);
+            font-size: 14px;
+            float: right;
+        }
     </style>
 </head>
 
 <body>
+<div id="user_name" class="user-badge" th:text="${UserName}"></div>
 <h1>选择题练习</h1>
 
 <strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！</strong>
@@ -289,7 +299,9 @@
 
         const practiseScoreDOM = document.getElementById('practise_score');
 
-        const recordJson = {
+        const recordJson = 
+        {
+            "userName"      : document.getElementById('user_name').textContent,
             "submitDate"    : getCurrentISOTimeStrWithoutZone(),
             "correctCount"  : TotalCorrect,
             "errorCount"    : TotalMistake,
