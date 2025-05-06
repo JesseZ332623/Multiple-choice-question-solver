@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Comparator;
 import java.util.Optional;
 
+import static java.lang.String.format;
+
 @RestController
 @RequestMapping(path = "/api/score_record", produces = "application/json")
 public class ScoreRecordController
@@ -92,7 +94,7 @@ public class ScoreRecordController
      *<p>
      *      链接：
      *      <a href="https://localhost:8081/api/score_record/score_settlement">
-     *          (GET Method) 往数据表中添加一条新的练习记录，以 JSON 格式作为响应。
+     *          (GET Method) 往数据表中添加一条新地练习记录，以 JSON 格式作为响应。
      *      </a>
      *</p>
      */
@@ -120,7 +122,7 @@ public class ScoreRecordController
     }
 
     /**
-     * Post 方法请求，往数据表中添加一条新的练习记录。
+     * Post 方法请求，往数据表中添加一条新地练习记录。
      * 如果需要手动提交进行测试的话，JSON 格式示例如下：
      *
      * <pre>
@@ -138,7 +140,7 @@ public class ScoreRecordController
      *<p>
      *      链接：
      *      <a href="https://localhost:8081/api/score_record/add_one_new_score_record">
-     *          (POST Method) 往数据表中添加一条新的练习记录，以 JSON 格式作为响应。
+     *          (POST Method) 往数据表中添加一条新地练习记录，以 JSON 格式作为响应。
      *      </a>
      *</p>
      */
@@ -156,7 +158,7 @@ public class ScoreRecordController
 
             return ResponseEntity.ok()
                                  .body(
-                                         String.format(
+                                         format(
                                                  "Insert New Score Record Complete, Record ID: {%s}.",
                                                  insertFeedBack.toString()
                                          )
@@ -167,6 +169,21 @@ public class ScoreRecordController
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(exception.getMessage());
         }
+    }
+
+    @DeleteMapping(path = "/delete_by_username/{userName}")
+    public ResponseEntity<String>
+    deleteAllScoreRecordByUserName(@PathVariable String userName)
+    {
+        Integer affectedRows
+            = this.scoreRecordService.deleteAllScoreRecordByUserName(userName);
+
+        return ResponseEntity.ok(
+                format(
+                        "Delete %s's score record complete, truncate rows: %d.",
+                        userName, affectedRows
+                )
+        );
     }
 
     /**
@@ -185,7 +202,7 @@ public class ScoreRecordController
     public ResponseEntity<?> truncateScoreRecord()
     {
         return ResponseEntity.ok(
-                String.format(
+                format(
                         "Truncate score record complete, truncate rows: {%d}.",
                         this.scoreRecordService.truncateScoreRecordTable()
                 )
@@ -216,7 +233,7 @@ public class ScoreRecordController
 
             return ResponseEntity.ok()
                                  .body(
-                                         String.format(
+                                         format(
                                                  "Delete Score Record Complete, Record id: {%d}.",
                                                  deleteFeedBack
                                          )
