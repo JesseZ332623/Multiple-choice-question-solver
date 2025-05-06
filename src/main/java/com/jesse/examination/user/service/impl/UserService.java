@@ -2,7 +2,6 @@ package com.jesse.examination.user.service.impl;
 
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
-import com.jesse.examination.user.dto.userdto.UserModifyDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+
 import static java.lang.String.format;
 
 @Service
