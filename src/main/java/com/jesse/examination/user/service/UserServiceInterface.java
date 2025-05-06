@@ -24,6 +24,12 @@ public interface UserServiceInterface
             UserRegistrationDTO userRegistrationDTO
     );
 
+    /*
+     * 完成登录后，获取分配给该用户的 UUID。
+     * （我不知道这样做是不是良好的实践。）
+     */
+     // String getCurrentUserUUID();
+
     /**
      * 用户登录服务。
      *
