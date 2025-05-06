@@ -4,6 +4,10 @@ import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.redis.service.RedisService;
+import com.jesse.examination.user.service.UserServiceInterface;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,17 +16,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Controller
 @RequestMapping(path = "/question")
 public class QuestionPractiseViewController
 {
-    private final QuestionService questionService;
+    private final QuestionService       questionService;
+    private final UserServiceInterface  userService;
+    private final RedisService          redisService;
 
     @Autowired
-    public QuestionPractiseViewController(QuestionService questionService) {
+    public QuestionPractiseViewController(
+            QuestionService         questionService,
+            UserServiceInterface    userService,
+            RedisService            redisService
+    ) {
         this.questionService = questionService;
+        this.userService     = userService;
+        this.redisService    = redisService;
     }
 
     /**
@@ -38,12 +51,25 @@ public class QuestionPractiseViewController
      * </p>
      */
     @GetMapping(path = "practise")
-    public String getQuestionPractise(Model model)
+    public String getQuestionPractise(
+            Model model,
+            HttpServletRequest request
+    )
     {
         try
         {
             List<QuestionInfoDTO> allQuestionQueryResult
                     = this.questionService.getAllQuestionInfo();
+
+            HttpSession session = request.getSession(false);
+
+            if (!Objects.equals(session, null))
+            {
+                model.addAttribute(
+                        "UserName",
+                        session.getAttribute("user")
+                );
+            }
 
             model.addAttribute("QuestionPractise", allQuestionQueryResult);
 
