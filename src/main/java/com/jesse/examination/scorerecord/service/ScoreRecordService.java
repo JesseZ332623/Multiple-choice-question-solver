@@ -3,7 +3,6 @@ package com.jesse.examination.scorerecord.service;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ScoreRecordService
@@ -22,6 +21,17 @@ public interface ScoreRecordService
      * 根据指定 ID 删除成绩记录。
      */
     Integer deleteScoreRecordByDate(Integer id);
+
+    /**
+     * 查找指定 userName 的所有成绩记录，存于一个列表中。
+     */
+    List<ScoreRecordEntity>
+    findAllScoreRecordByUserName(String userName);
+
+    /**
+     * 删除指定 userName 的所有成绩记录，返回删除的行数。
+     */
+    Integer deleteAllScoreRecordByUserName(String userName);
 
     /**
      * 获取当前所有的成绩记录，以列表的形式返回。
