@@ -6,7 +6,6 @@ import com.jesse.examination.question.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -78,63 +77,5 @@ public class QuestionQueryController
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(exception.getMessage());
         }
-    }
-
-    /**
-     * PUT 方法请求，将 questions 表中指定 id 对应的数据行的 current_times 值加上 1，
-     * （如果期间出现错误，会以 400 作为响应码）。
-     * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
-     *
-     *<p>
-     *      链接：
-     *      <a href="https://localhost:8081/api/question/correct_times_plus_one/1">
-     *          (PUT Method) 将 questions 表中指定 id 对应的数据行的 current_times 值加上 1。
-     *      </a>
-     * </p>
-     */
-    @PutMapping(path = "/correct_times_plus_one/{id}")
-    public ResponseEntity<?> correctTimesPlusOneById(@PathVariable Integer id)
-    {
-        try
-        {
-            Integer updatedId = this.questionService.correctTimesPlusOneById(id);
-
-            return ResponseEntity.ok()
-                                 .body(
-                                         String.format(
-                                                 "Question id = {%d} correct times + 1",
-                                                 updatedId
-                                         )
-                                 );
-        }
-        catch (Exception exception)
-        {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(exception.getMessage());
-        }
-    }
-
-    /**
-     * PUT 方法请求，将所有数据行的 correct_times 列的值设为 0。
-     * <strong>注意这是一个敏感操作，后续会对外屏蔽。</strong>
-     *
-     *<p>
-     *      链接：
-     *      <a href="https://localhost:8081/api/clean_correct_times">
-     *          (PUT Method) 将所有数据行的 correct_times 列的值设为 0。
-     *      </a>
-     * </p>
-     */
-    @Transactional
-    @PutMapping(path = "/clean_correct_times")
-    public ResponseEntity<?> clearCorrectTimesToZero()
-    {
-        Integer rows = this.questionService.clearCorrectTimesToZero();
-
-        return ResponseEntity.ok(
-                String.format(
-                        "Clear correct times to zero complete. Changed {%d} rows.", rows
-                )
-        );
     }
 }
