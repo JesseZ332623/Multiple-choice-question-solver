@@ -1,30 +1,18 @@
 package com.jesse.examination.question.service.impl;
 
-import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jesse.examination.question.dto.QuestionWithCorrectOptionDTO;
-import com.jesse.examination.question.entity.questionentity.QuestionEntity;
 import com.jesse.examination.question.repository.QuestionRepository;
 import com.jesse.examination.question.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static java.lang.String.format;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,19 +20,10 @@ public class QuestionServiceImplement implements QuestionService
 {
     private final QuestionRepository questionRepository;
 
-    /**
-     * 业务场景中出现了平凡更新表数据的情况，如果使用 JPA 去一条条执行，
-     * 真的是慢到令人发指，所用需要使用 JdbcTemplate batchUpdate() 方法提提速。
-     */
-    private final JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public QuestionServiceImplement(
-            QuestionRepository questionRepository,
-            JdbcTemplate jdbcTemplate)
+    public QuestionServiceImplement(QuestionRepository questionRepository)
     {
         this.questionRepository = questionRepository;
-        this.jdbcTemplate       = jdbcTemplate;
     }
 
     /**
@@ -103,6 +82,9 @@ public class QuestionServiceImplement implements QuestionService
     }
 
     @Override
+    public Long getQuestionCount() { return this.questionRepository.count(); }
+
+    @Override
     public List<QuestionInfoDTO> getAllQuestionInfo()
     {
         List<QuestionRepository.QuestionProjection> questionInfo
@@ -120,19 +102,9 @@ public class QuestionServiceImplement implements QuestionService
                                                       projection.getQuestionID(),
                                                       projection.getQuestionContent(),
                                                       projection.getCorrectAnswer(),
-                                                      projection.getCorrectTimes(),
                                                       this.parseOptionsJson(projection.getOptionsJSON())
                                               )
                               ).toList();
-    }
-
-    /**
-     * 获取所有问题的答对次数，存储在一个不可变列表中。
-     */
-    @Override
-    public List<QuestionCorrectTimesDTO> getAllQuestionCorrectTimes()
-    {
-        return this.questionRepository.findAllQuestionCorrectTimes();
     }
 
     @Override
@@ -150,87 +122,5 @@ public class QuestionServiceImplement implements QuestionService
                                                            projection.getCorrectOptionContent()
                                                    )
                                            ).toList();
-    }
-
-    @Override
-    @Transactional
-    public Integer correctTimesPlusOneById(Integer id)
-    {
-        Optional<QuestionEntity> questionOptional = this.questionRepository.findById(id);
-
-        if (questionOptional.isPresent())
-        {
-            QuestionEntity question = questionOptional.get();
-            question.setCorrectTimes(question.getCorrectTimes() + 1);
-
-            this.questionRepository.save(question);
-
-            return question.getCorrectTimes();
-        }
-        else
-        {
-            throw new RuntimeException(
-                    String.format(
-                            "[RuntimeException] id = {%d} not exist in questions table.", id
-                    )
-            );
-        }
-    }
-
-    /**
-     * 将 questions 表中指定 id 对应的数据行的
-     * current_times 的值设为 value。
-     */
-    @Override
-    @Transactional
-    public void setOneCorrectTimesById(Integer id, Integer value)
-    {
-        QuestionEntity queryRes
-                = this.questionRepository.findById(id)
-                .orElseThrow(
-                        () -> new NoSuchElementException(format("ID = {%d} not exist!", id))
-                );
-
-        if (value < 0)
-        {
-            throw new IllegalArgumentException(
-                    format("value which = %d not less than 0", value)
-            );
-        }
-
-        queryRes.setCorrectTimes(value);
-
-        this.questionRepository.save(queryRes);
-    }
-
-
-    @Override
-    @Transactional
-    public int[] setAllCorrectTimesByIds(
-            @NotNull
-            List<QuestionCorrectTimesDTO> correctTimesDTOList
-    )
-    {
-        String sql = "UPDATE questions SET correct_times = ? WHERE id = ?";
-
-        return jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter()
-        {
-            @Override
-            public void setValues(@NotNull PreparedStatement ps, int i) throws SQLException
-            {
-                QuestionCorrectTimesDTO update = correctTimesDTOList.get(i);
-                ps.setInt(1, update.getCorrectTimes());
-                ps.setInt(2, update.getId());
-            }
-
-            @Override
-            public int getBatchSize() { return correctTimesDTOList.size(); }
-        });
-    }
-
-    @Override
-    @Transactional
-    public Integer clearCorrectTimesToZero() {
-        return this.questionRepository.cleanCorrectTimesToZero();
     }
 }
