@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -176,7 +177,7 @@ public class FileTransferService
     readUserCorrectTimesDataFile (String userName)
     {
         // 文件路径示例：D:/Spring-In-Action/Multiple-choice-question-solver/UserData/Perter/correct_times.json
-        String filePath = this.storagePath + "/" +
+        final String filePath = this.storagePath + "/" +
                           userName + "/correct_times.json";
 
         List<QuestionCorrectTimesDTO> resultList = new ArrayList<>();
@@ -202,7 +203,7 @@ public class FileTransferService
     public List<ScoreRecordEntity>
     readUserScoreDataFile(String userName)
     {
-        String filePath
+        final String filePath
                 = this.storagePath + "/" + userName + "/score_settlement.json";
 
         List<ScoreRecordEntity> resultList = new ArrayList<>();
@@ -222,8 +223,28 @@ public class FileTransferService
             log.error(exception.getMessage());
         }
 
-        // System.out.println("Size of resultList = " + resultList.size());
-
         return resultList;
+    }
+
+    public void deleteUserArchive(String userName)
+    {
+        // 指定文件路径（示例：${file.upload-dir}/Perter/）
+        final String filePath
+                = this.storagePath + "/" + userName + "/";
+
+        boolean isSuccess
+                = FileSystemUtils.deleteRecursively(
+                        Paths.get(filePath).toFile()
+                );
+
+        if (!isSuccess)
+        {
+            log.error(
+                    "Failed to delete directory: {}!",
+                    filePath
+            );
+        }
+
+        log.info("Delete directory {} complete!", filePath);
     }
 }
