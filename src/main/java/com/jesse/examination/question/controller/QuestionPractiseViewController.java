@@ -4,7 +4,7 @@ import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.question.service.QuestionService;
-import com.jesse.examination.redis.service.RedisService;
+import com.jesse.examination.redis.service.impl.RedisService;
 import com.jesse.examination.user.service.UserServiceInterface;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
