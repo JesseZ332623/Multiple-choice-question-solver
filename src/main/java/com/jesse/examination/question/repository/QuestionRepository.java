@@ -46,7 +46,6 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
                         questions.id            AS QuestionID,
                         questions.content       AS QuestionContent,
                         questions.answer        AS CorrectAnswer,
-                        questions.correct_times  AS CorrectTimes,
                         JSON_OBJECTAGG(options.option_key, options.content) AS OptionsJSON
                     FROM questions
                     INNER JOIN options ON questions.id = options.question_id
@@ -74,30 +73,6 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
     )
     List<QuestionProjectionWithCorrectOption> findQuestionWithCorrectOption();
 
-    /**
-     * 获取所有问题的答对次数，存储在一个不可变列表中。
-     */
-    @Query(
-            value = """
-                    SELECT questions.id, questions.correct_times
-                    FROM questions WHERE questions.correct_times IS NOT NULL
-                    """,
-            nativeQuery = true
-    )
-    List<QuestionCorrectTimesDTO> findAllQuestionCorrectTimes();
-
-    /**
-     * 将 question 表中的 correct_times 数据列的值全部设为 0。
-     *
-     * @return 被更新的记录数
-     */
-    @Modifying
-    @Query(
-            value = "UPDATE questions SET correct_times = 0",
-            nativeQuery = true
-    )
-    Integer cleanCorrectTimesToZero();
-
     interface QuestionProjectionWithCorrectOption
     {
         Integer     getQuestionID();
@@ -112,6 +87,5 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
         String  getQuestionContent();
         String  getCorrectAnswer();
         String  getOptionsJSON();
-        Integer getCorrectTimes();
     }
 }
