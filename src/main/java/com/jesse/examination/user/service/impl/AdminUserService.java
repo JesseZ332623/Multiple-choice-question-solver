@@ -121,7 +121,7 @@ public class AdminUserService implements AdminServiceInterface
         newUser.setRoles(adminAddNewUserDTO.getRoles());
         newUser.setRegisterDateTime(LocalDateTime.now());
 
-        return this.adminUserEntityRepository.save(newUser).getId();
+        return this.adminUserEntityRepository.saveAndFlush(newUser).getId();
     }
 
     /**
@@ -186,7 +186,7 @@ public class AdminUserService implements AdminServiceInterface
         userQueryResult.setRoles(adminModifyUserDTO.getNewRoles());
 
 
-        return this.adminUserEntityRepository.save(userQueryResult).getId();
+        return this.adminUserEntityRepository.saveAndFlush(userQueryResult).getId();
     }
 
     /**
@@ -206,12 +206,13 @@ public class AdminUserService implements AdminServiceInterface
                 );
 
         this.adminUserEntityRepository.deleteUserByUserName(userName);
+        this.adminUserEntityRepository.flush();
 
         return userQueryResult.getId();
     }
 
     /**
-     * 通过指定 id 范围，批量的删除范围在 [begin, end] 内的用户，
+     * 通过指定 id 范围，批量地删除范围在 [begin, end] 内的用户，
      * 如果范围内有不存在的 id 则跳过。
      */
     @Override
@@ -223,6 +224,7 @@ public class AdminUserService implements AdminServiceInterface
         if (!existsIds.isEmpty()) {
             this.adminUserEntityRepository.deleteUserRoleRelationsByIds(existsIds);
             this.adminUserEntityRepository.deleteUserByIds(existsIds);
+            this.adminUserEntityRepository.flush();
         }
 
         return (long)existsIds.size();
@@ -238,6 +240,7 @@ public class AdminUserService implements AdminServiceInterface
 
         this.adminUserEntityRepository.deleteAll();
         this.adminUserEntityRepository.alterAutoIncrementToOne();
+        this.adminUserEntityRepository.flush();
 
         return totalDataAmount;
     }
