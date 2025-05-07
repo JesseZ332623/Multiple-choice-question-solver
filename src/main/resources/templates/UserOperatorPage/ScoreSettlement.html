@@ -112,6 +112,78 @@
             animation: pulse 2s infinite;
         }
 
+        /* 新增样式 */
+        #user_name {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            font-size: 1.1rem;
+            color: #58a6ff;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gh-border);
+            border-radius: 5px;
+            background: rgba(88, 166, 255, 0.1);
+            animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        #error_message {
+            position: fixed;
+            top: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--red);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+            transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 1000;
+        }
+
+        #error_message.show {
+            top: 2rem;
+        }
+
+        /* 返回链接专项样式 */
+        #return_to_frontpage {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gh-text);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 0.8rem 1.8rem;
+            border: 1px solid var(--gh-border);
+            border-radius: 6px;
+            background: rgba(201, 209, 217, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        #return_to_frontpage:hover {
+            color: #58a6ff;
+            border-color: rgba(88, 166, 255, 0.4);
+            background: rgba(88, 166, 255, 0.1);
+            transform: translate(-50%, -2px);
+            box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+        }
+
+        #return_to_frontpage::before {
+            content: "←";
+            font-weight: 600;
+            color: var(--gray);
+            transition: color 0.3s ease;
+        }
+
+        #return_to_frontpage:hover::before {
+            color: #58a6ff;
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 0.9; }
             50% { opacity: 0.7; }
@@ -119,6 +191,12 @@
     </style>
 </head>
 <body>
+    <div id="user_name" th:text="${UserName}"></div>
+    <div id="error_message"></div>
+    <div>
+        <a id="return_to_frontpage" href="/user_info/user_front_page">回首页</a>
+    </div>
+
     <div class="result-container">
         <div class="title">
             <i class="fas fa-clipboard-check"></i>
@@ -129,7 +207,7 @@
             <div class="stat-item correct">
                 <i class="fas fa-check-circle stat-icon"></i>
                 <div>
-                    <div id="correct_count" class="stat-value">0 题</div>
+                    <div id="correct_count" class="stat-value">? 题</div>
                     <div class="stat-label">回答正确</div>
                 </div>
             </div>
@@ -137,7 +215,7 @@
             <div class="stat-item error">
                 <i class="fas fa-times-circle stat-icon"></i>
                 <div>
-                    <div id="error_count" class="stat-value">0 题</div>
+                    <div id="error_count" class="stat-value">? 题</div>
                     <div class="stat-label">回答错误</div>
                 </div>
             </div>
@@ -145,7 +223,7 @@
             <div class="stat-item unanswered">
                 <i class="fas fa-ellipsis-h stat-icon"></i>
                 <div>
-                    <div id="no_answer_count" class="stat-value">0 题</div>
+                    <div id="no_answer_count" class="stat-value">? 题</div>
                     <div class="stat-label">未作答</div>
                 </div>
             </div>
@@ -153,7 +231,7 @@
             <div class="stat-item rate">
                 <i class="fas fa-chart-line stat-icon"></i>
                 <div>
-                    <div id="mistake_rate" class="stat-value">0%</div>
+                    <div id="mistake_rate" class="stat-value">?%</div>
                     <div class="stat-label">错误率</div>
                 </div>
             </div>
@@ -161,7 +239,7 @@
 
         <div class="mistake-rate">
             <i class="fas fa-exclamation-triangle"></i>
-            综合错误率：<span id="combinded_mistake_rate">0%</span>
+            综合错误率：<span id="combinded_mistake_rate">?%</span>
         </div>
     </div>
 </body>
@@ -181,7 +259,9 @@
     {
         try
         {
-            const response = await fetch("/api/score_record/score_settlement");
+            const response = await fetch(
+                `/api/score_record/score_settlement/${document.getElementById('user_name').textContent}`
+            );
 
             if (!response.ok) 
             {
@@ -189,7 +269,7 @@
                 const errorDetail = await response.text().catch(() => null);
 
                 throw new Error(
-                    `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
+                    `${errorDetail || 'Unknown'}`
                 );
             }
 
@@ -209,6 +289,15 @@
         }
         catch(error) 
         {
+            const errorMessage = document.getElementById('error_message');
+
+            errorMessage.classList.add('show');
+            errorMessage.innerHTML = `<span>${error.message}</span>`;
+
+            setTimeout(() => {
+                document.getElementById('error_message').classList.remove('show');
+            }, 3500);
+
             console.error(error);
         }
     }
