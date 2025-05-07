@@ -102,7 +102,18 @@ public class PractiseScoreViewController
      * </strong>
      */
     @GetMapping(path = "current_score_settlement")
-    public String scoreSettlementView() {
+    public String scoreSettlementView(
+            Model model,
+            HttpServletRequest request
+    )
+    {
+        HttpSession session = request.getSession(false);
+
+        model.addAttribute(
+                "UserName",
+                session.getAttribute("user")
+        );
+
         return "UserOperatorPage/ScoreSettlement";
     }
 }
