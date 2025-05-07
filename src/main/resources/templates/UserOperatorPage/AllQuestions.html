@@ -18,6 +18,8 @@
             --blue: #58a6ff;
             --gray: #8b949e;
             --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            --header-pos-top: 1.1rem;
+            --header-pos-right: 1.5rem;
         }
 
         body {
@@ -255,22 +257,49 @@
                 font-size: 14px;
             }
 
-            .clear-button {
+            .user-badge {
                 top: 1rem;
                 right: 1rem;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+
+            .clear-button {
+                top: 1rem;
+                right: 6rem;
                 padding: 0.5rem 1rem;
                 font-size: 13px;
             }
         }
+
+        .user-badge {
+            background-color: var(--gh-bg);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--gh-border);
+            font-size: 14px;
+            /* 新增定位样式 */
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            top: var(--header-pos-top);
+            right: var(--header-pos-right);
+        }        
     </style>
 </head>
 
 <body>
-    <!-- 新增清除按钮 -->
+    <div id="user_name" class="user-badge" th:text="${UserName}"></div>
+    
+    <!-- 清除按钮 -->
     <button type="button" class="clear-button" id="clearButton" onclick="handleClear()">
         <i class="fas fa-eraser"></i>
         清除所有答对次数
-    </button>
+    </button>   
+        
+
 
     <h1>
         <i class="fas fa-clipboard-list"></i>
@@ -281,6 +310,7 @@
         <p class="stats-header" th:text="'总题数: ' + ${#lists.size(AllQuestions)}"></p>
 
         <div th:each="question, iter : ${AllQuestions}" class="question-card glow">
+
             <div class="question-header">
                 <i class="fas fa-question-circle fa-lg"></i>
                 <h3 th:text="${question.questionId} + '. ' + ${question.questionContent}"></h3>
@@ -303,17 +333,18 @@
                 </li>
             </ul>
 
-            <div class="stats-row">
-                <div class="status-tag" th:classappend="${question.correctTimes >= 3} ? 'mastered' : 'unmastered'">
+            <div class="stats-row" th:with="CorrectTimes=${QuestionCorrectTimes[iter.index]}">
+                <div class="status-tag" th:classappend="${CorrectTimes.correctTimes >= 3} ? 'mastered' : 'unmastered'">
                     <i class="fas"
-                        th:classappend="${question.correctTimes >= 3} ? 'fa-check-circle' : 'fa-times-circle'"></i>
-                    <span th:text="${question.correctTimes >= 3} ? '已掌握' : '未掌握'"></span>
+                        th:classappend="${CorrectTimes.correctTimes >= 3} ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                    <span th:text="${CorrectTimes.correctTimes >= 3} ? '已掌握' : '未掌握'"></span>
                 </div>
                 <div class="attempt-count">
                     <i class="fas fa-chart-line"></i>
-                    <span th:text="'答对次数: ' + ${question.correctTimes}"></span>
+                    <span th:text="'答对次数: ' + ${CorrectTimes.correctTimes}"></span>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -338,9 +369,11 @@
                 // 从 meta 标签获取 CSRF Token
                 const csrfToken = document.querySelector('meta[name="_csrf"]').content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+                
+                let userName = document.getElementById('user_name').textContent;
 
                 // 使用更现代的fetch API
-                fetch('/api/question/clean_correct_times', {
+                fetch(`/api/redis/clean_correct_times/${userName}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
