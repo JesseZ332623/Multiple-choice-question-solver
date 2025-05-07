@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static java.lang.String.format;
 
@@ -76,11 +76,12 @@ public class ScoreRecordController
 
 
     /**
-     * Get 方法请求，获取数据库中最新的一条成绩记录（在用户完成最新一次的练习后会调用）。
+     * Get 方法请求，获取指定用户最新的一条成绩记录（在用户完成最新一次的练习后会调用）。
      * 服务器以 JSON 格式作为响应，如下所示：
      *
      * <pre>
      * {
+     *     "userName"  : "Perter",
      *     "submitDate": "2025-04-09T09:57:29",
      *     "correctCount": 0,
      *     "errorCount": 0,
@@ -93,26 +94,31 @@ public class ScoreRecordController
      *
      *<p>
      *      链接：
-     *      <a href="https://localhost:8081/api/score_record/score_settlement">
-     *          (GET Method) 往数据表中添加一条新地练习记录，以 JSON 格式作为响应。
+     *      <a href="https://localhost:8081/api/score_record/score_settlement/Perter">
+     *          (GET Method) 获取用户 Perter 最新的一条成绩记录，以 JSON 格式作为响应。
      *      </a>
      *</p>
+     *
+     * @param userName 指定用户
      */
-    @GetMapping(path = "/score_settlement")
-    public ResponseEntity<?> scoreSettlement()
+    @GetMapping(path = "/score_settlement/{userName}")
+    public ResponseEntity<?> scoreSettlement(
+            @PathVariable String userName
+    )
     {
         try
         {
-            Optional<ScoreRecordEntity> latestScoreRecord
-                    = this.scoreRecordService.findAllScoreRecord()
-                    .stream().max(Comparator.comparing(ScoreRecordEntity::getSubmitDate));
+            ScoreRecordEntity latestScoreRecord
+                    = this.scoreRecordService.findAllScoreRecordByUserName(userName)
+                                             .stream()
+                                             .max(Comparator.comparing(ScoreRecordEntity::getSubmitDate))
+                                             .orElseThrow(
+                                                     () -> new NoSuchElementException(
+                                                             "暂时还没有最新成绩记录哦！"
+                                                     )
+                                             );
 
-            ScoreRecordEntity scoreRecord = null;
-            if (latestScoreRecord.isPresent()) {
-                scoreRecord = latestScoreRecord.get();
-            }
-
-            return ResponseEntity.ok(scoreRecord);
+            return ResponseEntity.ok(latestScoreRecord);
         }
         catch (Exception exception)
         {
@@ -127,6 +133,7 @@ public class ScoreRecordController
      *
      * <pre>
      * {
+     *     "userName"  : "Perter"
      *     "submitDate": "2015-01-12T19:12:37",
      *     "correctCount": 100,
      *     "errorCount": 20,
