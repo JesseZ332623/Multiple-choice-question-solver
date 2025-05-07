@@ -3,6 +3,7 @@ package com.jesse.examination.user.controller;
 import com.jesse.examination.file.FileTransferService;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.redis.service.RedisServiceInterface;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
@@ -29,23 +30,26 @@ import static java.lang.String.format;
 @RequestMapping(path = "/api/user_info/", produces = "application/json")
 public class UserInfoController
 {
-    private final UserServiceInterface          userService;
-    private final QuestionService               questionService;
-    private final ScoreRecordService            scoreRecordService;
-    private final FileTransferService           fileTransferService;
+    private final UserServiceInterface  userService;
+    private final ScoreRecordService    scoreRecordService;
+    private final QuestionService       questionService;
+    private final FileTransferService   fileTransferService;
+    private final RedisServiceInterface redisService;
 
     @Autowired
     public UserInfoController(
-            UserServiceInterface            userService,
-            QuestionService                 questionService,
-            ScoreRecordService              scoreRecordService,
-            FileTransferService             fileTransferService
+            UserServiceInterface  userService,
+            ScoreRecordService    scoreRecordService,
+            QuestionService       questionService,
+            FileTransferService   fileTransferService,
+            RedisServiceInterface redisService
     )
     {
         this.userService          = userService;
-        this.questionService      = questionService;
         this.scoreRecordService   = scoreRecordService;
+        this.questionService      = questionService;
         this.fileTransferService  = fileTransferService;
+        this.redisService         = redisService;
     }
 
     @PostMapping(path = "register")
@@ -56,6 +60,24 @@ public class UserInfoController
         try
         {
             this.userService.userRegister(userRegistrationDTO);
+
+            // 为新用户在 Redis 中写入默认的数据。
+            redisService.saveQuestionCorrectTimeList(
+                    userRegistrationDTO.getUserName(),
+                    RedisServiceInterface.createDefaultQuestionCorrectTimesList(
+                            this.questionService.getQuestionCount()
+                    )
+            );
+
+            // 建立新用户存档
+            fileTransferService.saveUserScoreDataFile(
+                    userRegistrationDTO.getUserName(),
+                    List.of()
+            );
+            fileTransferService.saveUserCorrectTimesDataFile(
+                    userRegistrationDTO.getUserName(),
+                    List.of()
+            );
 
             return ResponseEntity.ok(
                     format(
@@ -121,8 +143,22 @@ public class UserInfoController
 //                System.out.println(scoreRecordEntity);
 //            }
 
-            if (!questionCorrectTimesDTOS.isEmpty()) {
-                this.questionService.setAllCorrectTimesByIds(questionCorrectTimesDTOS);
+            if (!questionCorrectTimesDTOS.isEmpty())
+            {
+                this.redisService.saveQuestionCorrectTimeList(
+                        userLoginDTO.getUserName(),
+                        questionCorrectTimesDTOS
+                );
+            }
+            else
+            {
+                // 为新用户在 Redis 中写入默认的数据。
+                redisService.saveQuestionCorrectTimeList(
+                        userLoginDTO.getUserName(),
+                        RedisServiceInterface.createDefaultQuestionCorrectTimesList(
+                                this.questionService.getQuestionCount()
+                        )
+                );
             }
 
             if (!scoreRecordEntityList.isEmpty()) {
@@ -179,7 +215,7 @@ public class UserInfoController
 
             // 存档用户数据
             List<QuestionCorrectTimesDTO> questionCorrectTimesList
-                    = this.questionService.getAllQuestionCorrectTimes();
+                    = this.redisService.readQuestionCorrectTimeList(logoutUserName);
 
             log.info("Call getAllQuestionCorrectTimes() complete.");
 
@@ -189,8 +225,7 @@ public class UserInfoController
             log.info("Call findAllScoreRecord complete.");
 
             // 清空指定的数据
-            this.questionService.clearCorrectTimesToZero();
-            // this.scoreRecordService.truncateScoreRecordTable();
+            this.redisService.deleteAllQuestionCorrectTimesByUser(logoutUserName);
 
             log.info("truncate user data complete.");
 
@@ -249,6 +284,11 @@ public class UserInfoController
         try
         {
             this.userService.deleteUser(userLoginDTO);
+
+            // 删除用户存档
+            this.fileTransferService.deleteUserArchive(
+                    userLoginDTO.getUserName()
+            );
 
             return ResponseEntity.ok(
                     format(
