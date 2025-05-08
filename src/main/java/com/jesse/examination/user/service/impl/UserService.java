@@ -1,5 +1,8 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.file.FileTransferServiceInterface;
+import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.redis.service.RedisServiceInterface;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -9,6 +12,7 @@ import com.jesse.examination.user.exceptions.PasswordMismatchException;
 import com.jesse.examination.user.repository.RoleEntityRepository;
 import com.jesse.examination.user.repository.UserEntityRepository;
 import com.jesse.examination.user.service.UserServiceInterface;
+import com.jesse.examination.user.service.utils.UserArchiveManager;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,19 +29,23 @@ import static java.lang.String.format;
 @Transactional
 public class UserService implements UserServiceInterface
 {
-    private final UserEntityRepository  userEntityRepository;
-    private final RoleEntityRepository  roleEntityRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserEntityRepository   userEntityRepository;
+    private final RoleEntityRepository   roleEntityRepository;
+    private final BCryptPasswordEncoder  passwordEncoder;
+    private final UserArchiveManager     userArchiveManager;
 
     @Autowired
     public UserService(
-            UserEntityRepository userEntityRepository,
-            RoleEntityRepository roleEntityRepository,
-            BCryptPasswordEncoder passwordEncoder
-    ) {
+            UserEntityRepository  userEntityRepository,
+            RoleEntityRepository  roleEntityRepository,
+            BCryptPasswordEncoder passwordEncoder,
+            UserArchiveManager userArchiveManager
+    )
+    {
         this.userEntityRepository  = userEntityRepository;
         this.roleEntityRepository  = roleEntityRepository;
         this.passwordEncoder       = passwordEncoder;
+        this.userArchiveManager    = userArchiveManager;
     }
 
     /**
@@ -111,6 +119,7 @@ public class UserService implements UserServiceInterface
 
         // 存入
         this.userEntityRepository.save(newUser);
+        this.userArchiveManager.createNewArchiveForUser(userRegistrationDTO.getUserName());
     }
 
     /**
@@ -139,6 +148,17 @@ public class UserService implements UserServiceInterface
         {
             throw new PasswordMismatchException("Incorrect password!");
         }
+
+        userArchiveManager.readUserArchive(userLoginDTO.getUserName());
+    }
+
+    /**
+     * 用户登出服务。
+     */
+    @Override
+    public void userLogout(String userName)
+    {
+        this.userArchiveManager.saveUserArchive(userName);
     }
 
     /**
@@ -226,5 +246,6 @@ public class UserService implements UserServiceInterface
 
         this.userEntityRepository
                 .deleteUserByUserName(userLoginDTO.getUserName());
+        this.userArchiveManager.deleteUserArchive(userLoginDTO.getUserName());
     }
 }
