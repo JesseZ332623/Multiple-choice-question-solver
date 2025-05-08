@@ -12,11 +12,18 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * RedisTemplate 配置，使用 Jackson 库而非 JDK 默认的序列化。
+ * RedisTemplate 配置。
  */
 @Configuration
 public class RedisConfig
 {
+    /**
+     * Redis 连接工厂配置。
+     *
+     * @param host      主机 IP
+     * @param port      端口号
+     * @param password  密码
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory(
             @Value("${spring.redis.host}")      String host,
@@ -31,6 +38,9 @@ public class RedisConfig
         return new LettuceConnectionFactory(conf);
     }
 
+    /**
+     * 使用 Jackson 库而非 JDK 默认的序列化。
+     */
     @Bean
     public RedisTemplate<String, Object>
     configRedisTemplate(
@@ -41,8 +51,10 @@ public class RedisConfig
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // 使用 Jackson2JsonRedisSerializer 序列化值
+        // 键采用字符串序列化
         template.setKeySerializer(new StringRedisSerializer());
+
+        // 值采用泛型序列化
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
         return template;
