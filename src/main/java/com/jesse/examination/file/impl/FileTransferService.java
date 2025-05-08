@@ -1,8 +1,9 @@
-package com.jesse.examination.file;
+package com.jesse.examination.file.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jesse.examination.config.jacksonconfig.JacksonConfig;
+import com.jesse.examination.file.FileTransferServiceInterface;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -21,20 +22,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 @Slf4j
 @Service
-public class FileTransferService
+public class FileTransferService implements FileTransferServiceInterface
 {
     @Value(value = "${file.upload-dir}")
     private String storagePath;     // 文件存储目录（从配置文件中读取）
 
+    // 创建带有时间字符串解析的 ObjectMapper 实例。
+    private final ObjectMapper mapper = JacksonConfig.createObjectMapper();
+
+    /**
+     * 使用 Jackson 库，将 correct_times.json 文件中的一行 JSON 文本映射成一个
+     * QuestionCorrectTimesDTO 实例，JSON 文本示例如下：
+     *
+     * <pre>
+     *     {"id" : 21, "correctTimes" : 0},
+     * </pre>
+     */
     private @NotNull QuestionCorrectTimesDTO
     processUserCorrectJsonLine(String line)
     {
 
         QuestionCorrectTimesDTO questionCorrectTimesDTO = null;
-
-        ObjectMapper mapper = JacksonConfig.createObjectMapper();
 
         try
         {
@@ -48,27 +60,25 @@ public class FileTransferService
         return Objects.requireNonNull(questionCorrectTimesDTO);
     }
 
+    /**
+     * 使用 Jackson 库，将 score_settlement.json 文件中的一行 JSON 文本映射成一个 ScoreRecordEntity。
+     * JSON 文本示例如下（文件中直接是一整行显示，这里为了可读性做了格式化）：
+     *
+     * <pre>
+     *     {
+     *          "userName"      : "Jesse",
+     *          "submitDate"    : "2025-05-06T03:50:40",
+     *          "correctCount"  : 1,
+     *          "errorCount"    : 0,
+     *          "noAnswerCount" : 320,
+     *          "mistakeRate"   : 99.690000
+     *     },
+     * </pre>
+     */
     private @NotNull ScoreRecordEntity
     processUserScoreRecordJsonLine(String line)
     {
         ScoreRecordEntity termpScoreRecordEntity = null;
-
-        /*
-        * 要处理的字符串示例：
-        * {
-        *       "userName" : "Perter",
-        *       "submitDate": "2025-04-30T09:41:01",
-        *       "correctCount": 0,
-        *       "errorCount": 0,
-        *       "noAnswerCount": 321,
-        *       "mistakeRate": 100.000000
-        * },
-        *
-        * 需要注意的是，在文件中它们是一整行，这里为了可读性才写成这样。
-        */
-
-        // 错了哥，以后我不搓轮子了（哭）
-        ObjectMapper mapper = JacksonConfig.createObjectMapper();
 
         try
         {
@@ -82,19 +92,36 @@ public class FileTransferService
         return Objects.requireNonNull(termpScoreRecordEntity);
     }
 
+    /**
+     * 文件存储通用方法。
+     *
+     * @param filePath 文件路径
+     * @param fileName 文件名
+     * @param fileData 文件数据（通常是 JSON 字符串）
+     */
     private void saveFile(String filePath, String fileName, String fileData) throws IOException
     {
         Path dir = Paths.get(filePath);
 
+        // 检查路径是否存在，没有则创建。
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
         }
 
+        // 创建文件
         Path completeFilePath = dir.resolve(fileName);
 
+        // 写入数据
         Files.writeString(completeFilePath, fileData);
     }
 
+    /**
+     * 存储用户成绩记录文件。
+     *
+     * @param userName          用户名（作为文件路径的根据）
+     * @param allScoreList      成绩数据列表
+     */
+    @Override
     public void saveUserScoreDataFile(
             String userName,
             @NotNull List<ScoreRecordEntity> allScoreList
@@ -105,6 +132,7 @@ public class FileTransferService
             final String  scoreFileName = "score_settlement.json";
             StringBuilder scoreDataJsonBuilder = new StringBuilder();
 
+            // 手动将数据拼合成 JSON 文件（笑）
             scoreDataJsonBuilder.append("[\n");
 
             for (var n : allScoreList) {
@@ -130,12 +158,22 @@ public class FileTransferService
         catch (IOException exception)
         {
             log.error(exception.getMessage());
+
+            throw new RuntimeException(exception.getMessage());
         }
     }
 
+    /**
+     * 存储用户问题答对次数文件。
+     *
+     * @param userName                  用户名（作为文件路径的根据）
+     * @param questionCorrectTimesList  成绩数据列表
+     */
+    @Override
     public void saveUserCorrectTimesDataFile(
             String userName,
-            @NotNull List<QuestionCorrectTimesDTO> userData
+            @NotNull List<QuestionCorrectTimesDTO>
+            questionCorrectTimesList
     )
     {
         try
@@ -146,7 +184,7 @@ public class FileTransferService
 
             correctTimesJsonBuilder.append("[\n");
 
-            for (var n : userData)
+            for (var n : questionCorrectTimesList)
             {
                 correctTimesJsonBuilder.append("\t")
                        .append(n.toString(), 0, n.toString().length() - 1)
@@ -170,18 +208,32 @@ public class FileTransferService
         catch (IOException exception)
         {
             log.error(exception.getMessage());
+
+            throw new RuntimeException(exception.getMessage());
         }
     }
 
+    /**
+     * 通过指定用户名读取该用户的所有问题答对次数。
+     *
+     * @param userName 用户名（作为文件路径的根据）
+     */
+    @Override
     public List<QuestionCorrectTimesDTO>
     readUserCorrectTimesDataFile (String userName)
     {
-        // 文件路径示例：D:/Spring-In-Action/Multiple-choice-question-solver/UserData/Perter/correct_times.json
-        final String filePath = this.storagePath + "/" +
-                          userName + "/correct_times.json";
+        /*
+        * 文件路径示例：
+        * D:/Spring-In-Action/Multiple-choice-question-solver/UserData/Perter/correct_times.json
+        */
+        final String filePath = this.storagePath +
+                                "/"              +
+                                userName         +
+                                "/correct_times.json";
 
         List<QuestionCorrectTimesDTO> resultList = new ArrayList<>();
 
+        // 使用 try-with-resource 如果存在用户不存在的情况也能处理
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath)))
         {
             String line;
@@ -193,13 +245,23 @@ public class FileTransferService
                 resultList.add(this.processUserCorrectJsonLine(line));
             }
         }
-        catch (IOException exception) {
+        catch (IOException exception)
+        {
             log.error(exception.getMessage());
+
+            // 需要重新抛出异常（向上传递给控制器）
+            throw new RuntimeException(exception.getMessage());
         }
 
         return resultList;
     }
 
+    /**
+     * 通过指定用户名读取该用户的所有答题成绩。
+     *
+     * @param userName 用户名（作为文件路径的根据）
+     */
+    @Override
     public List<ScoreRecordEntity>
     readUserScoreDataFile(String userName)
     {
@@ -219,13 +281,22 @@ public class FileTransferService
                 resultList.add(this.processUserScoreRecordJsonLine(line));
             }
         }
-        catch (IOException exception) {
+        catch (IOException exception)
+        {
             log.error(exception.getMessage());
+
+            throw new RuntimeException(exception.getMessage());
         }
 
         return resultList;
     }
 
+    /**
+     * 在用户删除账户的同时删除存档数据。
+     *
+     * @param userName 用户名（作为文件路径的根据）
+     */
+    @Override
     public void deleteUserArchive(String userName)
     {
         // 指定文件路径（示例：${file.upload-dir}/Perter/）
@@ -239,10 +310,12 @@ public class FileTransferService
 
         if (!isSuccess)
         {
-            log.error(
-                    "Failed to delete directory: {}!",
-                    filePath
-            );
+            String errorMessage
+                    = format("Failed to delete directory: [%s]!", filePath);
+
+            log.error(errorMessage);
+
+            throw new RuntimeException(errorMessage);
         }
 
         log.info("Delete directory {} complete!", filePath);
