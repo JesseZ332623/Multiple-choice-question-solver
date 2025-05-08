@@ -37,7 +37,17 @@
 - 普通用户首页
   - https://localhost:8081/user_info/user_front_page
   
-  ![image](https://github.com/user-attachments/assets/3b2cde3a-17d4-470f-9bb9-5bacc391ad4a)
+  ![image](https://github.com/user-attachments/assets/9fd8e17a-a748-4056-9f23-654e962747e0)
+
+- 用户练习成绩展示页面
+  - https://localhost:8081/score_record/all_score_record
+
+  ![image](https://github.com/user-attachments/assets/d5c7622f-6560-46e4-90f7-8f82a33a6e5f)
+
+- 管理员界面（当前只写了用户数据管理页面）
+  - https://localhost:8081/admin/all_users
+
+  ![image](https://github.com/user-attachments/assets/ddd62054-2722-478a-9702-2d8eea628f38)
 
 #### Date：2025.04.21
 #### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
