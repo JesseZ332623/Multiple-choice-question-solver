@@ -6,6 +6,7 @@ import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.repository.AdminUserEntityRepository;
 import com.jesse.examination.user.service.AdminServiceInterface;
+import com.jesse.examination.user.service.utils.UserArchiveManager;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +27,20 @@ import static java.lang.String.format;
 @Transactional
 public class AdminUserService implements AdminServiceInterface
 {
-    AdminUserEntityRepository adminUserEntityRepository;
-    BCryptPasswordEncoder     passwordEncoder;
+    private final AdminUserEntityRepository       adminUserEntityRepository;
+    private final BCryptPasswordEncoder           passwordEncoder;
+    private final UserArchiveManager              userArchiveManager ;
 
     @Autowired
     public AdminUserService(
-            AdminUserEntityRepository adminUserEntityRepository,
-            BCryptPasswordEncoder bCryptPasswordEncoder)
+            AdminUserEntityRepository       adminUserEntityRepository,
+            BCryptPasswordEncoder           bCryptPasswordEncoder,
+            UserArchiveManager              userArchiveManager
+    )
     {
         this.adminUserEntityRepository = adminUserEntityRepository;
         this.passwordEncoder           = bCryptPasswordEncoder;
+        this.userArchiveManager        = userArchiveManager;
     }
 
     /**
@@ -99,6 +104,8 @@ public class AdminUserService implements AdminServiceInterface
      *
      * @param adminAddNewUserDTO
      *        从前端提交的 JSON 中映射而来的新用户数据。
+     *
+     * @return 返回新用户的 ID
      */
     @Override
     public Long addNewUser(
@@ -121,6 +128,10 @@ public class AdminUserService implements AdminServiceInterface
         newUser.setRoles(adminAddNewUserDTO.getRoles());
         newUser.setRegisterDateTime(LocalDateTime.now());
 
+        this.userArchiveManager
+            .createNewArchiveForUser(adminAddNewUserDTO.getUserName());
+
+        // 管理员的修改需要立即生效，所以应该 flush。
         return this.adminUserEntityRepository.saveAndFlush(newUser).getId();
     }
 
@@ -160,10 +171,8 @@ public class AdminUserService implements AdminServiceInterface
             }
         }
 
-        if (!Objects.equals(userQueryResult.getFullName(), adminModifyUserDTO.getNewFullName()))
-        {
-            if (this.adminUserEntityRepository.existsByFullName(adminModifyUserDTO.getNewFullName()))
-            {
+        if (!Objects.equals(userQueryResult.getFullName(), adminModifyUserDTO.getNewFullName())) {
+            if (this.adminUserEntityRepository.existsByFullName(adminModifyUserDTO.getNewFullName())) {
                 throw new DuplicateUserException(
                         format(
                                 "New user name: [%s] already exist!",
@@ -191,6 +200,8 @@ public class AdminUserService implements AdminServiceInterface
 
     /**
      * 通过用户名删除一条存在的用户数据。
+     *
+     * @return 删除的用户 ID。
      */
     @Override
     public Long deleteUserByUserName(String userName)
@@ -205,6 +216,7 @@ public class AdminUserService implements AdminServiceInterface
                         )
                 );
 
+        this.userArchiveManager.deleteUserArchive(userName);
         this.adminUserEntityRepository.deleteUserByUserName(userName);
         this.adminUserEntityRepository.flush();
 
@@ -214,6 +226,8 @@ public class AdminUserService implements AdminServiceInterface
     /**
      * 通过指定 id 范围，批量地删除范围在 [begin, end] 内的用户，
      * 如果范围内有不存在的 id 则跳过。
+     *
+     * @return 返回实际删除的数据条数
      */
     @Override
     public Long deleteUsersByIdRange(Long begin, Long end)
@@ -221,13 +235,27 @@ public class AdminUserService implements AdminServiceInterface
         List<Long> existsIds
                 = this.adminUserEntityRepository.findIdByIdBetween(begin, end);
 
-        if (!existsIds.isEmpty()) {
+        if (!existsIds.isEmpty())
+        {
+            // 逐个删除（由于经过了 findIdByIdBetween() 的查询，id 基本上不会落空）
+            for (Long id : existsIds)
+            {
+                this.userArchiveManager
+                        .deleteUserArchive(
+                                this.adminUserEntityRepository
+                                        .findById(id)
+                                        .orElseThrow()
+                                        .getUsername()
+                        );
+            }
+
             this.adminUserEntityRepository.deleteUserRoleRelationsByIds(existsIds);
             this.adminUserEntityRepository.deleteUserByIds(existsIds);
+
             this.adminUserEntityRepository.flush();
         }
 
-        return (long)existsIds.size();
+        return (long) existsIds.size();
     }
 
     /**
@@ -236,12 +264,29 @@ public class AdminUserService implements AdminServiceInterface
     @Override
     public Long truncateAllUsers()
     {
-        Long totalDataAmount = this.adminUserEntityRepository.count();
+        List<Long> existsIds
+            = this.adminUserEntityRepository.findAllUserId();
 
-        this.adminUserEntityRepository.deleteAll();
+        // 逐个删除用户存档
+        for (Long id : existsIds)
+        {
+            this.userArchiveManager
+                    .deleteUserArchive(
+                            this.adminUserEntityRepository
+                                .findById(id)
+                                .orElseThrow()
+                                .getUsername()
+                    );
+        }
+
+        this.adminUserEntityRepository.deleteAll(); // 删除所有用户
+
+        // ID 计数重置为 1
         this.adminUserEntityRepository.alterAutoIncrementToOne();
+
+        // 刷新（管理员的操作要立即生效）
         this.adminUserEntityRepository.flush();
 
-        return totalDataAmount;
+        return (long) existsIds.size();
     }
 }
