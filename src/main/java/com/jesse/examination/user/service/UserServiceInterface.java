@@ -2,7 +2,6 @@ package com.jesse.examination.user.service;
 
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
-import com.jesse.examination.user.dto.userdto.UserModifyDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.exceptions.PasswordMismatchException;
@@ -24,12 +23,6 @@ public interface UserServiceInterface
             UserRegistrationDTO userRegistrationDTO
     );
 
-    /*
-     * 完成登录后，获取分配给该用户的 UUID。
-     * （我不知道这样做是不是良好的实践。）
-     */
-     // String getCurrentUserUUID();
-
     /**
      * 用户登录服务。
      *
@@ -39,6 +32,11 @@ public interface UserServiceInterface
      * @throws PasswordMismatchException 密码不匹配时抛出
      */
     void userLogin(@NotNull UserLoginDTO userLoginDTO);
+
+    /**
+     * 用户登出服务。
+     */
+    void userLogout(String userName);
 
     /**
      * 用户修改账户数据服务（用户在修改前需要验证一次账户）。
