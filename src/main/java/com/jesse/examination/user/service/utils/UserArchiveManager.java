@@ -4,7 +4,6 @@ import com.jesse.examination.file.FileTransferServiceInterface;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.service.QuestionService;
 import com.jesse.examination.redis.service.RedisServiceInterface;
-import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,16 +38,22 @@ public class UserArchiveManager
     }
 
     /**
-     * 为新用户创建存档数据，redis 数据库中也应该创建对应的数据。
+     * 为新用户创建存档数据，数据描述如下所示：
+     *
+     * <ol>
+     *      <li>创建用户所有问题答对次数记录文件</li>
+     *      <li>将默认的用户所有问题答对次数列表写入 Redis 数据库</li>
+     * </ol>
+     *
+     * @param userName 指定用户名
      */
     public void createNewArchiveForUser(String userName)
     {
-        this.fileTransferService.saveUserScoreDataFile(
-                userName, List.of()
-        );
-
         this.fileTransferService.saveUserCorrectTimesDataFile(
-                userName, List.of()
+                userName,
+                RedisServiceInterface.createDefaultQuestionCorrectTimesList(
+                        this.questionService.getQuestionCount()
+                )
         );
 
         this.redisService.saveQuestionCorrectTimeList(
@@ -60,15 +65,28 @@ public class UserArchiveManager
     }
 
     /**
-     * 用户登录时，读取用户的存档信息。
+     * 用户登录时，读取用户的存档信息，具体操作如下所示。
+     *
+     * <ol>
+     *     <li>读取用户所有问题答对次数记录文件</li>
+     *     <li>
+     *         将该列表整体存入 Redis 数据库中，</br>
+     *         键值对是这样的：
+     *         <pre>
+     *         [key = userName, value = questionCorrectTimesDTOS]
+     *         </pre>
+     *          在 Redis 服务器中使用 LRANGE userName 0 -1 命令可以查看这个列表。</br>
+     *         （这大概不是最好的写法，但是目前能用就先予以保留吧。）
+     *     </li>
+     * </ol>
+     *
+     * @param userName 指定用户名
      */
     public void readUserArchive(String userName)
     {
+
         List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
                 = this.fileTransferService.readUserCorrectTimesDataFile(userName);
-
-        List<ScoreRecordEntity> scoreRecordEntityList
-                = this.fileTransferService.readUserScoreDataFile(userName);
 
         if (!questionCorrectTimesDTOS.isEmpty())
         {
@@ -76,56 +94,46 @@ public class UserArchiveManager
                     userName, questionCorrectTimesDTOS
             );
         }
-        else
-        {
-            // 为新用户在 Redis 中写入默认的数据。
-            redisService.saveQuestionCorrectTimeList(
-                    userName,
-                    RedisServiceInterface.createDefaultQuestionCorrectTimesList(
-                            this.questionService.getQuestionCount()
-                    )
-            );
-        }
-
-        if (!scoreRecordEntityList.isEmpty()) {
-            this.scoreRecordService.saveScoreRecordFromList(scoreRecordEntityList);
-        }
 
         log.info("Read user: {} archive complete.", userName);
     }
 
     /**
-     * 用户登出时，保存用户的存档信息。
+     * 用户登出时，保存用户的存档信息，具体操作如下所示：
+     *
+     * <ol>
+     *     <li>将用户所有问题答对次数列表从 Redis 中读出，写入指定文件中</li>
+     *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
+     * </ol>
      */
     public void saveUserArchive(String userName)
     {
         // 存档用户数据
-        List<QuestionCorrectTimesDTO> questionCorrectTimesList
-                = this.redisService.readQuestionCorrectTimeList(userName);
-
-        List<ScoreRecordEntity> allScoreList
-                = this.scoreRecordService.findAllScoreRecordByUserName(userName);
+        this.fileTransferService.saveUserCorrectTimesDataFile(
+                userName,
+                this.redisService.readQuestionCorrectTimeList(userName)
+        );
 
         // 清空 Redis 中指定的数据
         this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
-
-        this.fileTransferService.saveUserCorrectTimesDataFile(
-                userName, questionCorrectTimesList
-        );
-
-        this.fileTransferService.saveUserScoreDataFile(
-                userName, allScoreList
-        );
 
         log.info("Save user: {} data to file complete.", userName);
     }
 
     /**
-     * 删除用户时，对应的存档也应该一并删除。
+     * 删除用户时，对应的存档、数据库记录也应该一并删除，
+     * 具体要删除这几类数据：
+     *
+     * <ol>
+     *     <li>删除用户存档数据</li>
+     *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
+     *     <li>删除 score_record 表中所有用户名为 userName 的数据行</li>
+     * </ol>
      */
     public void deleteUserArchive(String userName)
     {
         this.fileTransferService.deleteUserArchive(userName);
         this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
+        this.scoreRecordService.deleteAllScoreRecordByUserName(userName);
     }
 }
