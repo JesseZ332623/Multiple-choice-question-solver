@@ -1,11 +1,5 @@
 package com.jesse.examination.user.controller;
 
-import com.jesse.examination.file.FileTransferService;
-import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
-import com.jesse.examination.question.service.QuestionService;
-import com.jesse.examination.redis.service.RedisServiceInterface;
-import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
-import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -20,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -30,26 +23,12 @@ import static java.lang.String.format;
 @RequestMapping(path = "/api/user_info/", produces = "application/json")
 public class UserInfoController
 {
-    private final UserServiceInterface  userService;
-    private final ScoreRecordService    scoreRecordService;
-    private final QuestionService       questionService;
-    private final FileTransferService   fileTransferService;
-    private final RedisServiceInterface redisService;
+    private final UserServiceInterface userService;
 
     @Autowired
-    public UserInfoController(
-            UserServiceInterface  userService,
-            ScoreRecordService    scoreRecordService,
-            QuestionService       questionService,
-            FileTransferService   fileTransferService,
-            RedisServiceInterface redisService
-    )
+    public UserInfoController(UserServiceInterface  userService)
     {
-        this.userService          = userService;
-        this.scoreRecordService   = scoreRecordService;
-        this.questionService      = questionService;
-        this.fileTransferService  = fileTransferService;
-        this.redisService         = redisService;
+        this.userService = userService;
     }
 
     @PostMapping(path = "register")
@@ -60,24 +39,6 @@ public class UserInfoController
         try
         {
             this.userService.userRegister(userRegistrationDTO);
-
-            // 为新用户在 Redis 中写入默认的数据。
-            redisService.saveQuestionCorrectTimeList(
-                    userRegistrationDTO.getUserName(),
-                    RedisServiceInterface.createDefaultQuestionCorrectTimesList(
-                            this.questionService.getQuestionCount()
-                    )
-            );
-
-            // 建立新用户存档
-            fileTransferService.saveUserScoreDataFile(
-                    userRegistrationDTO.getUserName(),
-                    List.of()
-            );
-            fileTransferService.saveUserCorrectTimesDataFile(
-                    userRegistrationDTO.getUserName(),
-                    List.of()
-            );
 
             return ResponseEntity.ok(
                     format(
@@ -125,46 +86,6 @@ public class UserInfoController
             cookie.setSecure(true);         // 如果使用 HTTPS
             response.addCookie(cookie);
 
-            List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
-                    = this.fileTransferService.readUserCorrectTimesDataFile(
-                        userLoginDTO.getUserName()
-                    );
-
-            List<ScoreRecordEntity> scoreRecordEntityList
-                    = this.fileTransferService.readUserScoreDataFile(
-                            userLoginDTO.getUserName()
-                    );
-
-//            for (var n : questionCorrectTimesDTOS) {
-//                System.out.println(n);
-//            }
-
-//            for (ScoreRecordEntity scoreRecordEntity : scoreRecordEntityList) {
-//                System.out.println(scoreRecordEntity);
-//            }
-
-            if (!questionCorrectTimesDTOS.isEmpty())
-            {
-                this.redisService.saveQuestionCorrectTimeList(
-                        userLoginDTO.getUserName(),
-                        questionCorrectTimesDTOS
-                );
-            }
-            else
-            {
-                // 为新用户在 Redis 中写入默认的数据。
-                redisService.saveQuestionCorrectTimeList(
-                        userLoginDTO.getUserName(),
-                        RedisServiceInterface.createDefaultQuestionCorrectTimesList(
-                                this.questionService.getQuestionCount()
-                        )
-                );
-            }
-
-            if (!scoreRecordEntityList.isEmpty()) {
-                this.scoreRecordService.saveScoreRecordFromList(scoreRecordEntityList);
-            }
-
             log.info(
                     "User [{}] logged in with session ID: {}",
                     userLoginDTO.getUserName(), session.getId()
@@ -200,6 +121,9 @@ public class UserInfoController
             if (!Objects.equals(session, null))
             {
                 logoutUserName = (String) session.getAttribute("user");
+
+                // 得查得到用户名才能执行登出操作不是吗。
+                this.userService.userLogout(logoutUserName);
                 session.invalidate();
             }
 
@@ -213,31 +137,6 @@ public class UserInfoController
 
             log.info("User [{}] logout, see you later~", logoutUserName);
 
-            // 存档用户数据
-            List<QuestionCorrectTimesDTO> questionCorrectTimesList
-                    = this.redisService.readQuestionCorrectTimeList(logoutUserName);
-
-            log.info("Call getAllQuestionCorrectTimes() complete.");
-
-            List<ScoreRecordEntity> allScoreList
-                    = this.scoreRecordService.findAllScoreRecordByUserName(logoutUserName);
-
-            log.info("Call findAllScoreRecord complete.");
-
-            // 清空指定的数据
-            this.redisService.deleteAllQuestionCorrectTimesByUser(logoutUserName);
-
-            log.info("truncate user data complete.");
-
-            this.fileTransferService.saveUserCorrectTimesDataFile(
-                    logoutUserName, questionCorrectTimesList
-            );
-
-            this.fileTransferService.saveUserScoreDataFile(
-                    logoutUserName, allScoreList
-            );
-
-            log.info("save date to file complete.");
 
             return ResponseEntity.ok()
                     .body(
@@ -284,11 +183,6 @@ public class UserInfoController
         try
         {
             this.userService.deleteUser(userLoginDTO);
-
-            // 删除用户存档
-            this.fileTransferService.deleteUserArchive(
-                    userLoginDTO.getUserName()
-            );
 
             return ResponseEntity.ok(
                     format(
