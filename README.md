@@ -21,32 +21,26 @@
 
 - 用户注册页面
   - https://localhost:8081/user_info/register 
-  
   ![image](https://github.com/user-attachments/assets/a569dbf7-d3d0-40b4-9670-55c239f38497)
 
 - 用户登录页面
   - https://localhost:8081/user_info/login 
-  
   ![image](https://github.com/user-attachments/assets/4e3e2147-38a3-44ef-8453-ae3c6ca679ec)
 
 - 普通用户修改账号页面
   - https://localhost:8081/user_info/modify 
-  
   ![image](https://github.com/user-attachments/assets/d0c4ebaa-2827-4a75-a82f-14a6be657505)
  
 - 普通用户首页
   - https://localhost:8081/user_info/user_front_page
-  
   ![image](https://github.com/user-attachments/assets/9fd8e17a-a748-4056-9f23-654e962747e0)
 
 - 用户练习成绩展示页面
   - https://localhost:8081/score_record/all_score_record
-
   ![image](https://github.com/user-attachments/assets/d5c7622f-6560-46e4-90f7-8f82a33a6e5f)
 
 - 管理员界面（当前只写了用户数据管理页面）
   - https://localhost:8081/admin/all_users
-
   ![image](https://github.com/user-attachments/assets/ddd62054-2722-478a-9702-2d8eea628f38)
 
 #### Date：2025.04.21
