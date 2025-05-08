@@ -32,6 +32,15 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     );
 
     /**
+     * 查询当前表中的所有用户 id。
+     */
+    @Query(
+            value = "SELECT users.user_id FROM users",
+            nativeQuery = true
+    )
+    List<Long> findAllUserId();
+
+    /**
      * 删除通过用户名删除用户实体。（JPA 自动实现）
      */
     void deleteUserByUserName(String userName);
