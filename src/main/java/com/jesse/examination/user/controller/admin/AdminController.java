@@ -148,24 +148,15 @@ public class AdminController
     {
         try
         {
-            adminModifyUserDTO.setNewPassword(
-                    this.passwordEncoder.encode(
-                            adminModifyUserDTO.getNewPassword()
-                    )
-            );
-
             Long modifiedUserId
                     = this.adminServiceInterface.modifyUserByUserName(adminModifyUserDTO);
-
-            String newRolesString
-                    = AdminController.getRolesString(adminModifyUserDTO.getNewRoles());
 
             return ResponseEntity.ok()
                     .body(
                             format(
                                     "Modify  new user ID = [%s], Name = [%s], Roles = %s.",
                                     modifiedUserId, adminModifyUserDTO.getNewUserName(),
-                                    newRolesString
+                                    AdminController.getRolesString(adminModifyUserDTO.getNewRoles())
                             )
                     );
         }
