@@ -5,22 +5,10 @@
 ## 如何使用？
 
 ### 部署
-- 修改 `/resources/application.properties` 文件下的以下属性：
 
-```text
-spring.datasource.primary.jdbc-url=jdbc:mysql://ipaddress:port/exam_question?...
-spring.datasource.primary.username=your_username
-spring.datasource.primary.password=your_password
-```
-
-- 然后使用 Maven 进行构建：
+- 从 release 处下载编译好的 .jar 包并运行：
 ```bash
-    mvn clean install -X
-```
-
-- 运行编译好的 .jar 包：
-```bash
-    java -jar [.jar file built by maven]
+    java -jar [your-jar-path/examination-1.3.0-SNAPSHOT.jar]
 ```
 
 ### 应用所有端点树型图
@@ -33,19 +21,23 @@ spring.datasource.primary.password=your_password
 
 - 用户注册页面
   - https://localhost:8081/user_info/register 
-  - ![image](https://github.com/user-attachments/assets/a569dbf7-d3d0-40b4-9670-55c239f38497)
+  
+  ![image](https://github.com/user-attachments/assets/a569dbf7-d3d0-40b4-9670-55c239f38497)
 
 - 用户登录页面
   - https://localhost:8081/user_info/login 
-  - ![image](https://github.com/user-attachments/assets/4e3e2147-38a3-44ef-8453-ae3c6ca679ec)
+  
+  ![image](https://github.com/user-attachments/assets/4e3e2147-38a3-44ef-8453-ae3c6ca679ec)
 
 - 普通用户修改账号页面
   - https://localhost:8081/user_info/modify 
-  - ![image](https://github.com/user-attachments/assets/d0c4ebaa-2827-4a75-a82f-14a6be657505)
+  
+  ![image](https://github.com/user-attachments/assets/d0c4ebaa-2827-4a75-a82f-14a6be657505)
  
 - 普通用户首页
   - https://localhost:8081/user_info/user_front_page
-  - ![image](https://github.com/user-attachments/assets/3b2cde3a-17d4-470f-9bb9-5bacc391ad4a)
+  
+  ![image](https://github.com/user-attachments/assets/3b2cde3a-17d4-470f-9bb9-5bacc391ad4a)
 
 #### Date：2025.04.21
 #### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
