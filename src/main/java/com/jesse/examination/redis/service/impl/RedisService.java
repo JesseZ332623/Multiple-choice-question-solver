@@ -234,4 +234,12 @@ public class RedisService implements RedisServiceInterface
             );
         }
     }
+
+    /**
+     *
+     */
+    @Override
+    public RedisTemplate<String, Object> getRedisTemplate() {
+        return this.redisTemplate;
+    }
 }
