@@ -1,45 +1,47 @@
 package com.jesse.examination.user.service.impl;
 
-import com.jesse.examination.file.FileTransferServiceInterface;
-import com.jesse.examination.question.service.QuestionService;
-import com.jesse.examination.redis.service.RedisServiceInterface;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.exceptions.PasswordMismatchException;
+import com.jesse.examination.user.exceptions.VarifyCodeMismatchException;
 import com.jesse.examination.user.repository.RoleEntityRepository;
 import com.jesse.examination.user.repository.UserEntityRepository;
 import com.jesse.examination.user.service.UserServiceInterface;
-import com.jesse.examination.user.service.utils.UserArchiveManager;
+import com.jesse.examination.user.service.utils.UserArchiveManagerInterface;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.lang.String.format;
 
 @Service
 @Transactional
-public class UserService implements UserServiceInterface
+public class UserService implements UserServiceInterface, UserDetailsService
 {
-    private final UserEntityRepository   userEntityRepository;
-    private final RoleEntityRepository   roleEntityRepository;
-    private final BCryptPasswordEncoder  passwordEncoder;
-    private final UserArchiveManager     userArchiveManager;
+    private final UserEntityRepository        userEntityRepository;
+    private final RoleEntityRepository        roleEntityRepository;
+    private final BCryptPasswordEncoder       passwordEncoder;
+    private final UserArchiveManagerInterface userArchiveManager;
 
     @Autowired
     public UserService(
-            UserEntityRepository  userEntityRepository,
-            RoleEntityRepository  roleEntityRepository,
-            BCryptPasswordEncoder passwordEncoder,
-            UserArchiveManager userArchiveManager
+            UserEntityRepository        userEntityRepository,
+            RoleEntityRepository        roleEntityRepository,
+            BCryptPasswordEncoder       passwordEncoder,
+            UserArchiveManagerInterface userArchiveManager
     )
     {
         this.userEntityRepository  = userEntityRepository;
@@ -60,7 +62,7 @@ public class UserService implements UserServiceInterface
      */
     private void userNameCheckOut(String userName, String fullName)
     {
-        if (this.userEntityRepository.existsByUserName(userName))
+        if (this.userEntityRepository.existsByUsername(userName))
         {
             throw new DuplicateUserException(
                     format("User name: [%s] already exists!", userName)
@@ -97,7 +99,7 @@ public class UserService implements UserServiceInterface
 
         // 构建新用户实体
         UserEntity newUser = new UserEntity();
-        newUser.setUserName(userRegistrationDTO.getUserName());
+        newUser.setUsername(userRegistrationDTO.getUserName());
         newUser.setFullName(userRegistrationDTO.getFullName());
         newUser.setTelephoneNumber(userRegistrationDTO.getTelephoneNumber());
         newUser.setEmail(userRegistrationDTO.getEmail());
@@ -127,14 +129,15 @@ public class UserService implements UserServiceInterface
      *
      * @param userLoginDTO 从前端页面收集上来的登录表单信息。
      *
-     * @throws UsernameNotFoundException 检查到用户不存在时抛出
-     * @throws PasswordMismatchException 密码不匹配时抛出
+     * @throws UsernameNotFoundException   检查到用户不存在时抛出
+     * @throws PasswordMismatchException   密码不匹配时抛出
+     * @throws VarifyCodeMismatchException 验证码不匹配时抛出
      */
     @Override
     public void userLogin(@NotNull UserLoginDTO userLoginDTO)
     {
         UserEntity userQueryRes = this.userEntityRepository
-                .findUserByUserName(userLoginDTO.getUserName())
+                .findUserByUsername(userLoginDTO.getUserName())
                 .orElseThrow(() -> new UsernameNotFoundException(
                         format("User name: [%s] not found!", userLoginDTO.getUserName()))
                 );
@@ -149,7 +152,28 @@ public class UserService implements UserServiceInterface
             throw new PasswordMismatchException("Incorrect password!");
         }
 
-        userArchiveManager.readUserArchive(userLoginDTO.getUserName());
+        // 从 Redis 数据库中查询该用户的验证码
+        String userVerifyCode
+                = (String) this.userArchiveManager
+                               .getRedisTemplate()
+                               .opsForValue()
+                               .get("VerifyCodeFor" + userLoginDTO.getUserName());
+
+        // 与从页面表单上收集的验证码做比较
+        if (!Objects.equals(userLoginDTO.getVerifyCode(), userVerifyCode))
+        {
+            throw new VarifyCodeMismatchException(
+                    "Code value incorrect or has been invalid."
+            );
+        }
+        else
+        {
+            // 需要注意的是，如果用户登录成功了，对应的验证码也应该删掉。
+            this.userArchiveManager
+                    .getRedisTemplate()
+                    .delete("VerifyCodeFor" + userLoginDTO.getUserName());
+            userArchiveManager.readUserArchive(userLoginDTO.getUserName());
+        }
     }
 
     /**
@@ -180,7 +204,7 @@ public class UserService implements UserServiceInterface
         // 获取旧的用户信息
         UserEntity userQueryResult
                 = this.userEntityRepository
-                .findUserByUserName(modifyOperatorDTO.getUserLoginDTO().getUserName())
+                .findUserByUsername(modifyOperatorDTO.getUserLoginDTO().getUserName())
                 .orElseThrow(() -> new UsernameNotFoundException(
                         format(
                                 "User name: [%s] not found!",
@@ -196,7 +220,7 @@ public class UserService implements UserServiceInterface
 
         if (!userQueryResult.getUsername().equals(newUserName))
         {
-            if (this.userEntityRepository.existsByUserName(newUserName))
+            if (this.userEntityRepository.existsByUsername(newUserName))
             {
                 throw new DuplicateUserException(
                         format(
@@ -219,7 +243,7 @@ public class UserService implements UserServiceInterface
         }
 
         // 修改成新的用户信息
-        userQueryResult.setUserName(newUserName);
+        userQueryResult.setUsername(newUserName);
         userQueryResult.setPassword(
                 this.passwordEncoder.encode(
                         modifyOperatorDTO.getUserMidifyInfoDTO().getNewPassword()
@@ -245,7 +269,41 @@ public class UserService implements UserServiceInterface
         this.userLogin(userLoginDTO);       // 登录验证，不能想删谁就删谁
 
         this.userEntityRepository
-                .deleteUserByUserName(userLoginDTO.getUserName());
+                .deleteUserByUsername(userLoginDTO.getUserName());
         this.userArchiveManager.deleteUserArchive(userLoginDTO.getUserName());
+    }
+
+    /**
+     * Locates the user based on the username.
+     * In the actual implementation, the search
+     * may possibly be case-sensitive, or case-insensitive depending on how the
+     * implementation instance is configured.
+     * In this case, the <code>UserDetails</code>
+     * object that comes back may have a username of a different case than what
+     * was actually requested.
+     *
+     * @param username the username identifying the user whose data is required.
+     * @return a fully populated user record (never <code>null</code>)
+     * @throws UsernameNotFoundException if the user could not be found or the user has no
+     *                                   GrantedAuthority
+     */
+    @Override
+    public UserDetails
+    loadUserByUsername(String username) throws UsernameNotFoundException
+    {
+        UserEntity queryResult
+                = this.userEntityRepository
+                      .findUserByUsername(username)
+                      .orElseThrow(
+                             () -> new UsernameNotFoundException(
+                                     "User: " + username + " Not Found."
+                             )
+                      );
+
+        return new User(
+                queryResult.getUsername(),
+                queryResult.getPassword(),
+                queryResult.getAuthorities()
+        );
     }
 }
