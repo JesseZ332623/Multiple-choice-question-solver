@@ -90,6 +90,7 @@
         color: var(--gh-error-color);
         font-size: 12px;
         margin-top: 4px;
+        min-height: 18px;
         display: none;
     }
 
@@ -150,6 +151,42 @@
         display: flex;
         flex-direction: column;
     }
+
+    /* 新增发送验证码按钮样式 */
+    #send_verify_code {
+        background-color: var(--gh-btn-bg);
+        color: white;
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        border-radius: 5px;
+        padding: 6px 12px;
+        font-size: 14px;
+        margin-top: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    #send_verify_code:hover {
+        background-color: var(--gh-btn-hover);
+        border-color: rgba(240, 246, 252, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(1, 4, 9, 0.5);
+        transition: 
+          background-color 0.2s ease,
+          border-color 0.2s ease,
+          transform 0.2s cubic-bezier(0.3, 0.9, 0.5, 1.5),
+          box-shadow 0.2s ease;
+      }
+      
+      #send_verify_code:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(1, 4, 9, 0.3);
+        transition: none;
+      }
+
+    #send_verify_code:disabled {
+        background-color: #555;
+        cursor: not-all-allowed;
+    }
 </style>
 
 <body>
@@ -162,21 +199,30 @@
             <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="user_name" class="required">用户名</label>
-                <input type="text" id="user_name" class="form-control" required>
-                <div class="error-message" id="usernameError"></div>
+                <input type="text" id="user_name" name="username" class="form-control" required>
+                <div class="error-message" id="user_nameError"></div>
             </div>
 
             <div class="form-group">
                 <label for="password" class="required">密码</label>
-                <input type="password" id="password" class="form-control" required>
+                <input type="password" id="password" name="username" class="form-control" required>
                 <div class="error-message" id="passwordError"></div>
+            </div>
+            
+            <!-- 验证码发送与校验区域，用户无需显式的填写邮箱，后端会查询出来的 -->
+            <div class="form-group">
+                <label for="verify_code">验证码</label>
+                <input type="text" id="verify_code" class="form-control" pattern="\d*" required>
+                <button id="send_verify_code" onclick="doObtainVarifyCode()">
+                    获取验证码
+                </button>
+                <div class="notify-message" id="notifyMessage"></div>
+                <div class="error-message" id="verify_codeError"></div>
             </div>
 
             <a href="/user_info/register">还没账户？先去注册一个吧！</a>
 
-            <button type="button" class="btn" onclick="doLogin()">
-                用户登录
-            </button>
+            <button type="button" class="btn" onclick="doLogin()">用户登录</button>
         </form>
     </div>
 
@@ -184,8 +230,71 @@
         // 增强版验证逻辑
         const validators = {
             user_name: value => value.length >= 3 || '用户名至少需要3个字符',
-            password:  value => value.length >= 8 || '密码至少需要8个字符'
+            password:  value => value.length >= 8 || '密码至少需要8个字符',
+            verify_code : value => value.length >= 0 || '验证码不得为空'
         };
+        
+        function showError(elementId, message)
+        {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.style.display = 'block';
+        }
+          
+        function showNotify(message) 
+        {
+            const el = document.getElementById('notifyMessage');
+            el.textContent = message;
+            el.style.color = `#58A6FF`;
+        }
+
+        async function doObtainVarifyCode()
+        {
+            // 每次调用前，先清空错误和通知的内容。
+            document.getElementById('verify_codeError').textContent = '';
+            document.getElementById('notifyMessage').textContent    = '';
+
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+            
+            // 从表单中拿到用户名
+            let userName  = document.getElementById('user_name').value.trim();
+            const sendBtn = document.getElementById('send_verify_code');
+
+            if (!userName) {
+                showError('user_nameError', "请先输入用户名!");
+                return;
+            }
+
+            sendBtn.disabled = true;
+
+            try 
+            {
+                const response = await fetch(
+                    `/api/email/send_verify_code_email/${userName}`,
+                    {
+                        method: 'POST',
+                        headers: { [csrfHeader]: csrfToken }
+                    }
+                );
+
+                if (!response.ok) 
+                {
+                    sendBtn.disabled = false;
+                    throw new Error(
+                        `验证码发送失败，状态码：${response.status}\n原因：${await response.text()}。`
+                    );
+                }
+
+                showNotify('验证码已经发送至您的邮箱。');
+                setTimeout(() => sendBtn.disabled = false, 60000);
+            }
+            catch (error)
+            {
+                showError('verify_codeError', error.message);
+            }
+        }
 
         async function doLogin() 
         {
@@ -200,7 +309,16 @@
             {
                 const input     = document.getElementById(id);
                 const errorEl   = document.getElementById(`${id}Error`);
-                const result    = validator(input.value.trim(), form);
+                
+                if (!input.value)
+                {
+                    input.classList.add('invalid');
+                    errorEl.textContent = result;
+                    errorEl.style.display = 'block';
+                    isValid = false;
+                }
+
+                const result = validator(input.value.trim(), form);
                 
                 if (result !== true) 
                 {
@@ -215,11 +333,13 @@
                 }
             }
 
-            if (!isValid) return;
+            if (!isValid) { return; }
 
-            const loginData = {
-                userName : document.getElementById('user_name').value,
-                password : document.getElementById('password').value
+            const loginData = 
+            {
+                userName   : document.getElementById('user_name').value,
+                password   : document.getElementById('password').value,
+                verifyCode : document.getElementById('verify_code').value
             };
 
             const loginDataJson = JSON.stringify(loginData);
@@ -229,8 +349,9 @@
             try
             {
                 // 从 meta 标签获取 CSRF Token
-                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
                 const response = await fetch(
                     '/api/user_info/login',
                     {
@@ -240,6 +361,7 @@
                             [csrfHeader]: csrfToken
                         },
                         body: loginDataJson
+                        //credentials: 'include'
                     }
                 );
 
@@ -254,8 +376,9 @@
                 document.querySelectorAll('input')
                         .forEach(input => input.value = '');
 
-                window.location = '/user_info/user_front_page';
+                window.location.href = '/user_info/user_front_page';
 
+                
             }
             catch (error) 
             {
