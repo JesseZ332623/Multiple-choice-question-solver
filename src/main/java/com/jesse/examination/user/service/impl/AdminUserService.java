@@ -6,7 +6,7 @@ import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.repository.AdminUserEntityRepository;
 import com.jesse.examination.user.service.AdminServiceInterface;
-import com.jesse.examination.user.service.utils.UserArchiveManager;
+import com.jesse.examination.user.service.utils.impl.UserArchiveManager;
 import jakarta.transaction.Transactional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class AdminUserService implements AdminServiceInterface
      */
     private void userNameCheckOut(String userName, String fullName)
     {
-        if (this.adminUserEntityRepository.existsByUserName(userName))
+        if (this.adminUserEntityRepository.existsByUsername(userName))
         {
             throw new DuplicateUserException(
                     format("User name: [%s] already exists!", userName)
@@ -76,7 +76,7 @@ public class AdminUserService implements AdminServiceInterface
     @Override
     public UserEntity findUserByUserName(String userName)
     {
-        return this.adminUserEntityRepository.findUserByUserName(userName)
+        return this.adminUserEntityRepository.findUserByUsername(userName)
                 .orElseThrow(
                         () -> new UsernameNotFoundException(
                                 String.format(
@@ -118,7 +118,7 @@ public class AdminUserService implements AdminServiceInterface
         );
 
         UserEntity newUser = new UserEntity();
-        newUser.setUserName(adminAddNewUserDTO.getUserName());
+        newUser.setUsername(adminAddNewUserDTO.getUserName());
         newUser.setFullName(adminAddNewUserDTO.getFullName());
 
         // 密码务必要加密后再存入
@@ -148,7 +148,7 @@ public class AdminUserService implements AdminServiceInterface
     {
         UserEntity userQueryResult
                 = this.adminUserEntityRepository
-                .findUserByUserName(adminModifyUserDTO.getOldUserName())
+                .findUserByUsername(adminModifyUserDTO.getOldUserName())
                 .orElseThrow(
                         () -> new UsernameNotFoundException(
                                 String.format(
@@ -160,7 +160,7 @@ public class AdminUserService implements AdminServiceInterface
 
         if (!Objects.equals(userQueryResult.getUsername(), adminModifyUserDTO.getNewUserName()))
         {
-            if (this.adminUserEntityRepository.existsByUserName(adminModifyUserDTO.getNewUserName()))
+            if (this.adminUserEntityRepository.existsByUsername(adminModifyUserDTO.getNewUserName()))
             {
                 throw new DuplicateUserException(
                         format(
@@ -183,7 +183,7 @@ public class AdminUserService implements AdminServiceInterface
         }
 
         // 修改成新的用户信息
-        userQueryResult.setUserName(adminModifyUserDTO.getNewUserName());
+        userQueryResult.setUsername(adminModifyUserDTO.getNewUserName());
         userQueryResult.setPassword(
                 this.passwordEncoder.encode(
                         adminModifyUserDTO.getNewPassword()
@@ -207,7 +207,7 @@ public class AdminUserService implements AdminServiceInterface
     public Long deleteUserByUserName(String userName)
     {
         UserEntity userQueryResult
-                = this.adminUserEntityRepository.findUserByUserName(userName)
+                = this.adminUserEntityRepository.findUserByUsername(userName)
                 .orElseThrow(
                         () -> new UsernameNotFoundException(
                                 String.format(
@@ -217,7 +217,7 @@ public class AdminUserService implements AdminServiceInterface
                 );
 
         this.userArchiveManager.deleteUserArchive(userName);
-        this.adminUserEntityRepository.deleteUserByUserName(userName);
+        this.adminUserEntityRepository.deleteUserByUsername(userName);
         this.adminUserEntityRepository.flush();
 
         return userQueryResult.getId();
