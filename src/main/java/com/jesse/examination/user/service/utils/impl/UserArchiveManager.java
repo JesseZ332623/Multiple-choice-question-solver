@@ -1,12 +1,14 @@
-package com.jesse.examination.user.service.utils;
+package com.jesse.examination.user.service.utils.impl;
 
 import com.jesse.examination.file.FileTransferServiceInterface;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.service.QuestionService;
 import com.jesse.examination.redis.service.RedisServiceInterface;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
+import com.jesse.examination.user.service.utils.UserArchiveManagerInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class UserArchiveManager
+public class UserArchiveManager implements UserArchiveManagerInterface
 {
     private final FileTransferServiceInterface fileTransferService;
     private final RedisServiceInterface        redisService;
@@ -47,6 +49,7 @@ public class UserArchiveManager
      *
      * @param userName 指定用户名
      */
+    @Override
     public void createNewArchiveForUser(String userName)
     {
         this.fileTransferService.saveUserCorrectTimesDataFile(
@@ -82,6 +85,7 @@ public class UserArchiveManager
      *
      * @param userName 指定用户名
      */
+    @Override
     public void readUserArchive(String userName)
     {
 
@@ -106,6 +110,7 @@ public class UserArchiveManager
      *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
      * </ol>
      */
+    @Override
     public void saveUserArchive(String userName)
     {
         // 存档用户数据
@@ -130,10 +135,20 @@ public class UserArchiveManager
      *     <li>删除 score_record 表中所有用户名为 userName 的数据行</li>
      * </ol>
      */
+    @Override
     public void deleteUserArchive(String userName)
     {
         this.fileTransferService.deleteUserArchive(userName);
         this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
         this.scoreRecordService.deleteAllScoreRecordByUserName(userName);
+    }
+
+    /**
+     * 获取内部的 RedisTemplate 进行一些独立的操作，
+     * 有点破坏封装性但是可控且值得。
+     */
+    @Override
+    public RedisTemplate<String, Object> getRedisTemplate() {
+        return this.redisService.getRedisTemplate();
     }
 }
