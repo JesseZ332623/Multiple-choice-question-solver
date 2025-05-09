@@ -15,7 +15,7 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
      * 通过用户名查找用户实体。（JPA 自动实现）
      */
     Optional<UserEntity>
-    findUserByUserName(String userName);
+    findUserByUsername(String userName);
 
     /**
      * 查询在 [startId, endId] 范围内，
@@ -43,7 +43,7 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     /**
      * 删除通过用户名删除用户实体。（JPA 自动实现）
      */
-    void deleteUserByUserName(String userName);
+    void deleteUserByUsername(String userName);
 
     /**
      * 按 ids 列表的指示删除 user_role_relation 从表对应的数据行。
@@ -80,5 +80,5 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     /**
      * 通过 user name 验证所对应的数据行是否存在（JPA 自动实现）。
      */
-    boolean existsByUserName(String userName);
+    boolean existsByUsername(String userName);
 }
