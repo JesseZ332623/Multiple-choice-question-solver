@@ -5,6 +5,7 @@ import com.jesse.examination.redis.dto.QuestionPosDTO;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,4 +75,8 @@ public interface RedisServiceInterface
      * 将用户 userName 的问题答对次数列表从 Redis 中删除。
      */
     void deleteAllQuestionCorrectTimesByUser(String userName);
+
+    /**
+     * */
+    RedisTemplate<String, Object> getRedisTemplate();
 }
