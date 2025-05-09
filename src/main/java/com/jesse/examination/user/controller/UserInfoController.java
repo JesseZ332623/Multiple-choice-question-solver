@@ -26,7 +26,7 @@ public class UserInfoController
     private final UserServiceInterface userService;
 
     @Autowired
-    public UserInfoController(UserServiceInterface  userService)
+    public UserInfoController(UserServiceInterface userService)
     {
         this.userService = userService;
     }
