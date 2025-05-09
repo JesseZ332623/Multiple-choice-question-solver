@@ -28,7 +28,7 @@ public class UserEntity implements UserDetails
     private Long id;                    // 用户 ID（自动生成）
 
     @Column(name = "user_name", unique = true, nullable = false)
-    private String userName;            // 用户名
+    private String username;            // 用户名
 
     @Column(name = "password", nullable = false)
     private String password;            // 用户密码
@@ -60,7 +60,7 @@ public class UserEntity implements UserDetails
         return String.format(
                 "[ID = %s, User Name: %s, Password: %s, Full Name: %s, " +
                 "Telephone Number: %s, Email: %s, Register Time: %s, Roles: %s]",
-                id, userName, password, fullName, telephoneNumber,
+                id, username, password, fullName, telephoneNumber,
                 email, registerDateTime.toString(), roles.toString()
         );
     }
@@ -85,7 +85,7 @@ public class UserEntity implements UserDetails
      * @return the username (never <code>null</code>)
      */
     @Override
-    public String getUsername() { return this.userName; }
+    public String getUsername() { return this.username; }
 
     /**
      * Returns the password used to authenticate the user.
