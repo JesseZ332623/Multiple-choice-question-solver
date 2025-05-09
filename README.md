@@ -1,5 +1,8 @@
 # 水课选择题刷题器
 
+### 2025-05-09 小记：
+- 一个由使用 userName 还是 username 引发的小灾难
+
 ## 如何使用？
 
 ### 部署
@@ -41,5 +44,5 @@
   - https://localhost:8081/admin/all_users
   ![image](https://github.com/user-attachments/assets/ddd62054-2722-478a-9702-2d8eea628f38)
 
-#### Date：2025.04.21
+#### Date：2025.05.09
 #### [Apache LICENCE-2.0](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/LICENSE)
