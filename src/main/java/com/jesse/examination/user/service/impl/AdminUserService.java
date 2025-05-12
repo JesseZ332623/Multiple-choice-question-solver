@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -108,9 +109,8 @@ public class AdminUserService implements AdminServiceInterface
      * @return 返回新用户的 ID
      */
     @Override
-    public Long addNewUser(
-            @NotNull
-            AdminAddNewUserDTO adminAddNewUserDTO)
+    public
+    Long addNewUser(@NotNull AdminAddNewUserDTO adminAddNewUserDTO) throws IOException
     {
         this.userNameCheckOut(
                 adminAddNewUserDTO.getUserName(),
