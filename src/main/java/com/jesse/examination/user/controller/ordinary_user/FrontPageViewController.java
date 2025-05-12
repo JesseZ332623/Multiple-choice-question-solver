@@ -1,4 +1,4 @@
-package com.jesse.examination.user.controller.ordinary_user_frontpage;
+package com.jesse.examination.user.controller.ordinary_user;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
