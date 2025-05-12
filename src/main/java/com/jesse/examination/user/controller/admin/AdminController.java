@@ -1,18 +1,14 @@
 package com.jesse.examination.user.controller.admin;
 
+import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
-import com.jesse.examination.user.entity.RoleEntity;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 
 import static java.lang.String.format;
 
@@ -22,41 +18,10 @@ import static java.lang.String.format;
 public class AdminController
 {
     private final AdminServiceInterface adminServiceInterface;
-    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminController(
-            AdminServiceInterface adminServiceInterface,
-            BCryptPasswordEncoder passwordEncoder
-    ) {
+    public AdminController(AdminServiceInterface adminServiceInterface) {
         this.adminServiceInterface = adminServiceInterface;
-        this.passwordEncoder       = passwordEncoder;
-    }
-
-    /**
-     * 从集合中获取用户角色并合成一个字符串。
-     * 假设集合
-     *
-     * <pre>
-     *     roles = {{1, "ROLE_ADMIN"}, {2, "ROLE_USER}}
-     * </pre>
-     *
-     * 则函数处理后返回：
-     *
-     * <pre> rolesString = "[ROLE_ADMIN, ROLE_USER]" </pre>
-     */
-    static public String getRolesString(
-            @NotNull Set<RoleEntity> roles)
-    {
-        StringBuilder newUserRoles = new StringBuilder("[");
-
-        for (RoleEntity role : roles) {
-            newUserRoles.append(role.getRoleName()).append(", ");
-        }
-        newUserRoles.delete(newUserRoles.length() - 2, newUserRoles.length());
-        newUserRoles.append("]");
-
-        return newUserRoles.toString();
     }
 
     /**
@@ -107,7 +72,7 @@ public class AdminController
         try
         {
             Long newUserId        = this.adminServiceInterface.addNewUser(adminAddNewUserDTO);
-            String newRolesString = AdminController.getRolesString(adminAddNewUserDTO.getRoles());
+            String newRolesString = UserInfoProcessUtils.getRolesString(adminAddNewUserDTO.getRoles());
 
             log.info(newRolesString);
 
@@ -156,7 +121,7 @@ public class AdminController
                             format(
                                     "Modify  new user ID = [%s], Name = [%s], Roles = %s.",
                                     modifiedUserId, adminModifyUserDTO.getNewUserName(),
-                                    AdminController.getRolesString(adminModifyUserDTO.getNewRoles())
+                                    UserInfoProcessUtils.getRolesString(adminModifyUserDTO.getNewRoles())
                             )
                     );
         }
