@@ -1,5 +1,6 @@
 package com.jesse.examination.user.controller.admin;
 
+import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.admindto.AdminDisplayUsersDTO;
 import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.service.AdminServiceInterface;
@@ -52,7 +53,7 @@ public class AdminViewController
                             .toString().replace('T', ' ')
             );
             tempDisplayUser.setRoles(
-                    AdminController.getRolesString(
+                    UserInfoProcessUtils.getRolesString(
                             tempUser.getRoles()
                     )
             );
