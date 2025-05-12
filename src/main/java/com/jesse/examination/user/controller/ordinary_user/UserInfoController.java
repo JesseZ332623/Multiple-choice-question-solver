@@ -1,4 +1,4 @@
-package com.jesse.examination.user.controller;
+package com.jesse.examination.user.controller.ordinary_user;
 
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
@@ -10,7 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +28,81 @@ public class UserInfoController
     private final UserServiceInterface userService;
 
     @Autowired
-    public UserInfoController(UserServiceInterface userService)
-    {
+    public UserInfoController(UserServiceInterface userService) {
         this.userService = userService;
+    }
+
+    /**
+     * 获取指定用户的头像数据。
+     */
+    @GetMapping(path = "user_overview_avatar/{userName}")
+    public ResponseEntity<?>
+    getUserAvatar(@PathVariable String userName)
+    {
+        try
+        {
+            byte[] imageData = this.userService.getUserAvatarImage(userName);
+
+            HttpHeaders headers = new HttpHeaders();
+
+            headers.setContentType(MediaType.IMAGE_PNG);
+
+            return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+        }
+        catch (RuntimeException exception)
+        {
+            log.error(exception.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(exception.getMessage());
+        }
+    }
+
+    /**
+     * 设置用户的头像数据，这个操作需要更安全的处理，
+     * 因此要从 Session 中拿到用户名，而不是在前端通过 URL 参数指定。
+     *
+     * @param imageByteData 从前端页面传来的图片字节数组。
+     */
+    @PostMapping(path = "set_user_overview_avatar")
+    public ResponseEntity<?>
+    setUserOverviewAvatar(
+            @RequestBody byte[] imageByteData,
+            HttpServletRequest  request,
+            HttpServletResponse response
+    )
+    {
+        try
+        {
+            HttpSession session = request.getSession(false);
+            String operatorUserName;
+
+            if (!Objects.equals(session, null))
+            {
+                operatorUserName
+                        = (String) session.getAttribute("user");
+
+                this.userService.setUserAvatarImage(operatorUserName, imageByteData);
+
+                return ResponseEntity.ok(
+                        format(
+                                "Set overview avatar with user: %s complete!",
+                                operatorUserName
+                        )
+                );
+            }
+            else
+            {
+                throw new RuntimeException("Session not found!");
+            }
+        }
+        catch (RuntimeException exception)
+        {
+            log.error(exception.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(exception.getMessage());
+        }
     }
 
     @PostMapping(path = "register")
