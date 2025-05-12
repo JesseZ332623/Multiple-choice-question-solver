@@ -1,4 +1,4 @@
-package com.jesse.examination.user.controller;
+package com.jesse.examination.user.controller.ordinary_user;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
