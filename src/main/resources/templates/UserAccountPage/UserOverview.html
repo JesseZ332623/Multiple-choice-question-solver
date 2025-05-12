@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title th:text="${UserOverview.getUserName()} + ' 的主页'"></title>
+</head>
+<style>
+    :root {
+        --gh-bg: #1f2428;
+        --gh-border: #444c56;
+        --gh-text: #adbac7;
+        --gh-text-secondary: #768390;
+        --gh-avatar-border: rgba(99, 110, 123, 0.4);
+    }
+
+    body {
+        background-color: var(--gh-bg);
+        color: var(--gh-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.5;
+        margin: 2rem;
+        max-width: 768px;
+        margin: 2rem auto;
+    }
+
+    h1 {
+        color: #ffffff;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--gh-border);
+    }
+
+    #user_overview {
+        background-color: #2d333b;
+        border: 1px solid var(--gh-border);
+        border-radius: 6px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    #user_overview img {
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        border: 3px solid var(--gh-avatar-border);
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+
+    #user_overview p {
+        margin: 0.8rem 0;
+        font-size: 14px;
+        display: flex;
+        align-items: baseline;
+    }
+
+    #user_overview p::before {
+        content: attr(data-label);
+        color: var(--gh-text-secondary);
+        min-width: 100px;
+        margin-right: 1rem;
+        font-size: 0.9em;
+    }
+
+    #user_overview a {
+        width: 110px;
+        margin: 0.8rem 0;
+        font-size: 14px;
+        display: flex;
+        text-decoration: none;
+        background-color: #373e47;
+        color: #adbac7;
+        border: 1px solid #444c56;
+        border-radius: 6px;
+        padding: 5px 8px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+        margin-top: 1rem;
+        
+    }
+
+    #user_overview a:hover {
+        background-color: #1f6feb;
+    }
+
+    #user_overview a:active {
+        transform: scale(0.95);  /* 缩小到 95% */
+        background-color: #1f6feb; /* GitHub 蓝色 */
+        border-color: #1f6feb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 为每个信息项添加数据标签 */
+    p:nth-child(2)::before { content: "用户 ID："; }
+    p:nth-child(3)::before { content: "用户名："; }
+    p:nth-child(4)::before { content: "全名："; }
+    p:nth-child(5)::before { content: "电话："; }
+    p:nth-child(6)::before { content: "邮箱："; }
+    p:nth-child(7)::before { content: "注册时间："; }
+    p:nth-child(8)::before { content: "角色："; }
+
+    /* 特殊样式调整 */
+    #user_overview p:nth-child(8) {
+        color: #57ab5a; /* GitHub 权限颜色 */
+        font-weight: 500;
+    }
+
+    /* GitHub 风格按钮 */
+    .gh-button{
+        background-color: #373e47;
+        color: #adbac7;
+        border: 1px solid #444c56;
+        border-radius: 6px;
+        padding: 5px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 80ms ease-out;
+        margin-top: 1rem;
+    }
+
+    .gh-button:hover {
+        background-color: #444c56;
+        border-color: #768390;
+    }
+
+    .gh-button:active {
+        transform: scale(0.95);  /* 缩小到95% */
+    }
+
+    .avatar-upload {
+        position: relative;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    #avatar-preview {
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        border: 3px solid var(--gh-avatar-border);
+        display: block;
+        margin: 0 auto 1rem;
+        object-fit: cover;
+    }
+
+    #upload-status {
+        color: var(--gh-text-secondary);
+        font-size: 0.9em;
+        margin-top: 0.5rem;
+        min-height: 1.5em;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            margin: 1rem;
+        }
+        
+        #user_overview {
+            padding: 1.5rem;
+        }
+        
+        #user_overview img {
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 1.5rem;
+        }
+    }
+</style>
+<body>
+    <h1 th:text="${UserOverview.getUserName()} + ' 的主页'"></h1>
+
+    <div id="user_overview">
+        <img id="avatar-image" th:src="@{'/api/user_info/user_overview_avatar/' + ${UserOverview.getUserName}}" alt="头像">
+
+        <input type="file" id="avatar-input" 
+               accept="image/png, image/jpeg, image/webp" 
+               onclick="doAvatarModify()" hidden>
+        <button class="gh-button" type="button" 
+                onclick="document.getElementById('avatar-input').click()">
+            <span class="button-text">📌 更换头像</span>
+        </button>
+        <div id="upload-status"></div>
+        
+        <p data-label="用户 ID" th:text="${UserOverview.getId()}"></p>
+        <p data-label="用户名" th:text="${UserOverview.getUserName()}"></p>
+        <p data-label="全名" th:text="${UserOverview.getFullName()}"></p>
+        <p data-label="电话" th:text="'+86 ' + ${UserOverview.getTelephoneNumber()}"></p>
+        <p data-label="邮箱" th:text="${UserOverview.getEmail()}"></p>
+        <p data-label="注册时间" th:text="${UserOverview.getRegisterDateTime()}"></p>
+        <p data-label="角色" th:text="${UserOverview.getRoles()}"></p>
+
+        <a href="/user_info/modify" id="modify-account">
+            <span>✏️ 修改账户信息</span>
+        </a>
+    </div>
+</body>
+
+<script>
+    async function doAvatarModify() 
+    {
+        // 文件大小不得超过 8 MB
+        const MAX_FILE_SIZE = 8 * 1024 * 1024;
+        
+        // 支持的文件类型
+        const ALLOWED_FILE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+        const avatarModifyButton = document.getElementById('avatar-input');
+
+        avatarModifyButton.addEventListener('change', 
+            async (event) => 
+            {
+                const file          = event.target.files[0];  // 获取上传的第一个文件？
+                const statusElement = document.getElementById('upload-status');
+
+                if (!file) { return; }
+                
+                // 检查文件格式
+                if (!ALLOWED_FILE_TYPES.includes(file.type)) 
+                {
+                    statusElement.textContent = '仅支持 PNG/JPED/WEBP 格式的图片。';
+                    statusElement.style.color = '#F47067';
+
+                    return;
+                }
+                
+                // 检查文件大小
+                if (file.size >= MAX_FILE_SIZE)
+                {
+                    statusElement.textContent = `文件大小应小于 ${MAX_FILE_SIZE / 1024/ 1024} MB!`;
+                    statusElement.style.color = '#F47067';
+
+                    return;
+                }
+
+                try 
+                {
+                    statusElement.textContent = '头像上传中';
+                    statusElement.style.color = 'inherit';
+
+                    const fileByteArray = new Uint8Array(await file.arrayBuffer());
+
+                    const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                    // 发送请求
+                    const response 
+                        = await fetch('/api/user_info/set_user_overview_avatar',
+                        {
+                            method: 'POST',
+                            headers: 
+                            {
+                                'Content-Type': 'application/octet-stream',
+                                [csrfHeader]: csrfToken
+                            },
+                            body: fileByteArray
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(await response.text());
+                    }
+
+                    statusElement.textContent = '头像更新成功！';
+                    statusElement.style.color = '#57ab5a';
+
+                    // 3 秒后清除状态
+                    setTimeout(
+                        () => { statusElement.textContent = ''; location.reload(); }, 
+                        2500
+                    );
+                }
+                catch (error) 
+                {
+                    console.error('Upload failed:', error);
+                    statusElement.textContent = `上传失败: ${error.message}`;
+                    statusElement.style.color = '#f47067';
+                }
+            }
+        );
+    }
+</script>
+
+</html>
