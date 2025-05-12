@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.String.format;
 
 /**
- * 邮件发送 Restful 控制器。
+ * 邮件发送服务 Restful 控制器。
  */
 @Slf4j
 @RestController
@@ -24,7 +24,14 @@ import static java.lang.String.format;
 public class EmailSenderController
 {
     // 默认的验证码长度是 8 位
-    private final static int DEFAULT_CODE_LENGTH = 8;
+    private final static int    DEFAULT_CODE_LENGTH      = 8;
+
+    private final static String SMTP_HOST                = "smtp.qq.com";
+    private final static int    SMTP_PORT                = 465;
+
+    // 未来验证码自然是由企业邮箱发出的，这里先用我的替代。
+    private final static String ENTERPRISE_EMAIL_ADDRESS = "3191955858@qq.com";
+    private final static String SERVICE_AUTH_CODE        = "ttlzjkjjbldzdffj";
 
     private final EmailSenderInterface  emailSender;
     private final AdminServiceInterface emailQueryService;
@@ -40,10 +47,10 @@ public class EmailSenderController
         // 邮箱模块采用生成器模式，所以它的参数需要我自己决定。
         this.emailSender
                 = new EmailSender.EmailSenderBuilder()
-                .smtpHost("smtp.qq.com")
-                .smtpPort(465)
-                .userName("3191955858@qq.com")
-                .appPassword("ttlzjkjjbldzdffj")
+                .smtpHost(SMTP_HOST)
+                .smtpPort(SMTP_PORT)
+                .userName(ENTERPRISE_EMAIL_ADDRESS)
+                .appPassword(SERVICE_AUTH_CODE)
                 .defaultSetProperties()
                 .defaultSetSession()
                 .build();
