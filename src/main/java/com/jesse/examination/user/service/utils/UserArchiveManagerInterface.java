@@ -2,11 +2,25 @@ package com.jesse.examination.user.service.utils;
 
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.io.IOException;
+
 /**
  * 用户存档管理工具类接口（用户和管理员都会用到）。
 */
 public interface UserArchiveManagerInterface
 {
+    /**
+     * 获取指定用户头像数据。
+     */
+    byte[] getUserAvatarImage(String userName) throws IOException;
+
+    /**
+     * 设置指定用户头像数据。
+     */
+    void setUserAvatarImage(String userName, byte[] imageDataBytes) throws IOException;
+
+    void renameUserArchiveDir(String oldUserName, String newUserName) throws Exception;
+
     /**
      * 为新用户创建存档数据，数据描述如下所示：
      *
@@ -17,7 +31,7 @@ public interface UserArchiveManagerInterface
      *
      * @param userName 指定用户名
      */
-    void createNewArchiveForUser(String userName);
+    void createNewArchiveForUser(String userName) throws IOException;
 
     /**
      * 用户登录时，读取用户的存档信息，具体操作如下所示。
