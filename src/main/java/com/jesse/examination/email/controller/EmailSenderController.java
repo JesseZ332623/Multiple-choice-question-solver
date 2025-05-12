@@ -5,6 +5,7 @@ import com.jesse.examination.email.service.EmailSenderInterface;
 import com.jesse.examination.email.service.impl.EmailSender;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -23,20 +24,56 @@ import static java.lang.String.format;
 @RequestMapping(path = "/api/email")
 public class EmailSenderController
 {
-    // 默认的验证码长度是 8 位
+    /** 默认的验证码长度是 8 位 */
     private final static int    DEFAULT_CODE_LENGTH      = 8;
 
     private final static String SMTP_HOST                = "smtp.qq.com";
     private final static int    SMTP_PORT                = 465;
 
-    // 未来验证码自然是由企业邮箱发出的，这里先用我的替代。
+    /**
+     * 未来验证码自然是由企业邮箱发出的，这里先用我的替代。
+     */
     private final static String ENTERPRISE_EMAIL_ADDRESS = "3191955858@qq.com";
-    private final static String SERVICE_AUTH_CODE        = "SERVICE_AUTH_CODE";
+
+    /**
+     * 来自邮箱服务提供的授权码
+     */
+    private final static String SERVICE_AUTH_CODE = "ttlzjkjjbldzdffj";
+
+    /**
+     * 规定用户验证码在 Redis 中对应的键的格式是：VerifyCodeFor[user-name]
+    */
+    private final static String VERIFYCODE_KEY = "VerifyCodeFor";
+
+    /** 验证码的有效期为 90 秒。 */
+    private final static int CODE_VALID_TIME = 90;
 
     private final EmailSenderInterface  emailSender;
     private final AdminServiceInterface emailQueryService;
 
     private final RedisTemplate<String, Object> redisTemplate;
+
+    /**
+     * 根据传入的参数，组合成一封验证码邮件的全部内容。
+     */
+    private static @NotNull EmailContentDTO
+    getEmailContentDTO(String userName, String userEmail, String varifyCode)
+    {
+        EmailContentDTO emailContent = new EmailContentDTO();
+
+        emailContent.setTo(userEmail);
+        emailContent.setSubject("用户：" + userName + " 请查收您的验证码。");
+        emailContent.setTextBody(
+                format(
+                        "用户：%s 您的验证码是：[%s]，" +
+                                "请在 %d 秒内完成验证，超过 %d 秒后验证码自动失效！",
+                        userName, varifyCode, CODE_VALID_TIME, CODE_VALID_TIME
+                )
+        );
+        emailContent.setAttachmentPath(null);
+
+        return emailContent;
+    }
 
     @Autowired
     public EmailSenderController(
@@ -45,15 +82,14 @@ public class EmailSenderController
     )
     {
         // 邮箱模块采用生成器模式，所以它的参数需要我自己决定。
-        this.emailSender
-                = new EmailSender.EmailSenderBuilder()
-                .smtpHost(SMTP_HOST)
-                .smtpPort(SMTP_PORT)
-                .userName(ENTERPRISE_EMAIL_ADDRESS)
-                .appPassword(SERVICE_AUTH_CODE)
-                .defaultSetProperties()
-                .defaultSetSession()
-                .build();
+        this.emailSender = new EmailSender.EmailSenderBuilder()
+                                          .smtpHost(SMTP_HOST)
+                                          .smtpPort(SMTP_PORT)
+                                          .userName(ENTERPRISE_EMAIL_ADDRESS)
+                                          .appPassword(SERVICE_AUTH_CODE)
+                                          .defaultSetProperties()
+                                          .defaultSetSession()
+                                          .build();
 
         this.emailQueryService = emailQueryService;
         this.redisTemplate     = redisTemplate;
@@ -73,30 +109,18 @@ public class EmailSenderController
                                    .findUserByUserName(userName)
                                    .getEmail();
 
-            String varifyCode
-                    = EmailSender.generateVarifyCode(DEFAULT_CODE_LENGTH);
+            String varifyCode = EmailSender.generateVarifyCode(DEFAULT_CODE_LENGTH);
 
             /*
              * 将验证码存入 Redis 数据库，
-             * 并设置有效期为 60 秒，超过该时间 Redis 会自动删除。
+             * 并设置有效期为 90 秒，超过该时间 Redis 会自动删除。
              */
             this.redisTemplate.opsForValue().set(
-                    "VerifyCodeFor" + userName, varifyCode,
-                    60, TimeUnit.SECONDS
+                    VERIFYCODE_KEY + userName, varifyCode,
+                    CODE_VALID_TIME, TimeUnit.SECONDS
             );
 
-            EmailContentDTO emailContent = new EmailContentDTO();
-
-            emailContent.setTo(userEmail);
-            emailContent.setSubject("用户：" + userName + " 请查收您的验证码。");
-            emailContent.setTextBody(
-                    format(
-                            "用户：%s 您的验证码是：[%s]，" +
-                            "请在 60 秒内完成验证，超过 60 秒后验证码失效。",
-                            userName, varifyCode
-                    )
-            );
-            emailContent.setAttachmentPath(null);
+            EmailContentDTO emailContent = getEmailContentDTO(userName, userEmail, varifyCode);
 
             this.emailSender.sendEmail(emailContent);
 
