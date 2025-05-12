@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
@@ -11,6 +12,7 @@ import com.jesse.examination.user.repository.RoleEntityRepository;
 import com.jesse.examination.user.repository.UserEntityRepository;
 import com.jesse.examination.user.service.UserServiceInterface;
 import com.jesse.examination.user.service.utils.UserArchiveManagerInterface;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -21,12 +23,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.font.TextHitInfo;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
 import static java.lang.String.format;
 
+@Slf4j
 @Service
 @Transactional
 public class UserService implements UserServiceInterface, UserDetailsService
@@ -77,6 +82,40 @@ public class UserService implements UserServiceInterface, UserDetailsService
         }
     }
 
+    @Override
+    public byte[] getUserAvatarImage(String userName)
+    {
+        try
+        {
+            return this.userArchiveManager.getUserAvatarImage(userName);
+        }
+        catch (IOException | FileNotExistException exception)
+        {
+            log.error(exception.getMessage());
+
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    /**
+     * 设置指定用户头像数据。
+     */
+    @Override
+    public void
+    setUserAvatarImage(String userName, byte[] imageDataBytes)
+    {
+        try
+        {
+            this.userArchiveManager.setUserAvatarImage(userName, imageDataBytes);
+        }
+        catch (IOException exception)
+        {
+            log.error(exception.getMessage());
+
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
     /**
      * 新用户进行注册服务。
      *
@@ -86,10 +125,8 @@ public class UserService implements UserServiceInterface, UserDetailsService
      *         当用户名和用户全名冲突的时候所抛的异常
      */
     @Override
-    public void userRegister(
-            @NotNull
-            UserRegistrationDTO userRegistrationDTO
-    )
+    public void
+    userRegister(@NotNull UserRegistrationDTO userRegistrationDTO) throws IOException
     {
         // 验证用户名和全名
         this.userNameCheckOut(
@@ -196,7 +233,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
     @Override
     public void modifyUserInfo(
             @NotNull
-            ModifyOperatorDTO modifyOperatorDTO)
+            ModifyOperatorDTO modifyOperatorDTO) throws Exception
     {
         // 先进行一次登录验证
         this.userLogin(modifyOperatorDTO.getUserLoginDTO());
@@ -254,6 +291,10 @@ public class UserService implements UserServiceInterface, UserDetailsService
         userQueryResult.setEmail(modifyOperatorDTO.getUserMidifyInfoDTO().getNewEmail());
 
         this.userEntityRepository.save(userQueryResult);
+        this.userArchiveManager.renameUserArchiveDir(
+                modifyOperatorDTO.getUserLoginDTO().getUserName(),
+                newUserName
+        );
     }
 
     /**
