@@ -4,6 +4,7 @@ import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
 import com.jesse.examination.user.entity.UserEntity;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface AdminServiceInterface
@@ -12,7 +13,7 @@ public interface AdminServiceInterface
 
     List<UserEntity> findAllUsers();
 
-    Long addNewUser(AdminAddNewUserDTO newUser);
+    Long addNewUser(AdminAddNewUserDTO newUser) throws IOException;
 
     Long modifyUserByUserName(AdminModifyUserDTO adminModifyUserDTO);
 
