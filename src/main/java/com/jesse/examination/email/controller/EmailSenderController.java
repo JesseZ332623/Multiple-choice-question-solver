@@ -31,7 +31,7 @@ public class EmailSenderController
 
     // 未来验证码自然是由企业邮箱发出的，这里先用我的替代。
     private final static String ENTERPRISE_EMAIL_ADDRESS = "3191955858@qq.com";
-    private final static String SERVICE_AUTH_CODE        = "ttlzjkjjbldzdffj";
+    private final static String SERVICE_AUTH_CODE        = "SERVICE_AUTH_CODE";
 
     private final EmailSenderInterface  emailSender;
     private final AdminServiceInterface emailQueryService;
