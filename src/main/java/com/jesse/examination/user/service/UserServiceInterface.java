@@ -8,8 +8,21 @@ import com.jesse.examination.user.exceptions.PasswordMismatchException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.io.IOException;
+
 public interface UserServiceInterface
 {
+
+    /**
+     * 获取指定用户头像数据。
+     */
+    byte[] getUserAvatarImage(String userName);
+
+    /**
+     * 设置指定用户头像数据。
+     */
+    void setUserAvatarImage(String userName, byte[] imageDataBytes);
+
     /**
      * 新用户进行注册服务。
      *
@@ -17,11 +30,13 @@ public interface UserServiceInterface
      *
      * @throws DuplicateUserException
      *         当用户名和用户全名冲突的时候所抛的异常
+     *
+     * @throws IOException 写入用户存档时可能抛出的异常
      */
     void userRegister(
             @NotNull
             UserRegistrationDTO userRegistrationDTO
-    );
+    ) throws IOException;
 
     /**
      * 用户登录服务。
@@ -49,7 +64,7 @@ public interface UserServiceInterface
     void modifyUserInfo(
             @NotNull
             ModifyOperatorDTO modifyOperatorDTO
-    );
+    ) throws Exception;
 
     /**
      * 用户进行登录验证后删除自己。
