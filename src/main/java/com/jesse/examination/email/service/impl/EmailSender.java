@@ -5,7 +5,6 @@ import com.jesse.examination.email.service.EmailSenderInterface;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -15,7 +14,6 @@ import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.String.format;
@@ -45,7 +43,7 @@ public class EmailSender implements EmailSenderInterface
     // 发送人邮箱地址
     private final String userName;
 
-    // 发送人邮箱密码（以 Google 为例，可以申请应用专用密码使用）。
+    // 发送人邮箱密码（可以申请应用专用密码使用）。
     private final String applicationPassword;
 
     // 邮件配置属性
@@ -90,6 +88,10 @@ public class EmailSender implements EmailSenderInterface
         int min = (int) Math.pow(10, digits - 1);
         int max = (int) Math.pow(10, digits);
 
+        /*
+         * 在多线程环境下应该使用 ThreadLocalRandom，
+         * 这样每一个线程都会维护一个随机数生成实例，相比起 Random 的原子操作节省了很多性能开销。
+         */
         return String.valueOf(ThreadLocalRandom.current().nextInt(min, max));
     }
 
@@ -134,6 +136,9 @@ public class EmailSender implements EmailSenderInterface
             this.applicationPassword = password; return this;
         }
 
+        /**
+         * 添加邮件服务配置属性。
+         */
         public EmailSenderBuilder addProperty(String key, String value)
         {
             if (this.mailProperties == null) {
@@ -172,7 +177,7 @@ public class EmailSender implements EmailSenderInterface
             {
                 throw new IllegalStateException(
                         "[IllegalStateException] Couldn't set Properties, " +
-                                "Cause: Not setting SMTP Port or SMTP Host."
+                        "Cause: Not setting SMTP Port or SMTP Host."
                 );
             }
 
@@ -186,8 +191,8 @@ public class EmailSender implements EmailSenderInterface
         {
             if (
                     this.userName != null            &&
-                            this.applicationPassword != null &&
-                            this.mailProperties != null
+                    this.applicationPassword != null &&
+                    this.mailProperties != null
             ) {
                 this.session = Session.getInstance(this.mailProperties, new Authenticator() {
                     @Override
@@ -221,7 +226,7 @@ public class EmailSender implements EmailSenderInterface
      * @param emailContent 向指定用户发送邮件的数据传输类
      */
     @Override
-    public void sendEmail(EmailContentDTO emailContent)
+    public void sendEmail(@NotNull EmailContentDTO emailContent)
     {
         try
         {
@@ -261,7 +266,7 @@ public class EmailSender implements EmailSenderInterface
             log.error(exception.getMessage());
 
             throw new RuntimeException(
-                    "[RuntimeException] Failed to send com.jesse.examination.email: " + exception.getMessage()
+                    "[RuntimeException] Failed to send email: " + exception.getMessage()
             );
         }
     }
