@@ -1,6 +1,8 @@
 package com.jesse.examination.user.service.utils.impl;
 
 import com.jesse.examination.file.FileTransferServiceInterface;
+import com.jesse.examination.file.exceptions.FileNotExistException;
+import com.jesse.examination.file.impl.FileTransferService;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.service.QuestionService;
 import com.jesse.examination.redis.service.RedisServiceInterface;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -40,9 +43,36 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     }
 
     /**
+     * 获取指定用户头像数据。
+     */
+    @Override
+    public byte[]
+    getUserAvatarImage(String userName) throws IOException
+    {
+        return this.fileTransferService.getUserAvatarImage(userName);
+    }
+
+    /**
+     * 设置指定用户头像数据。
+     */
+    @Override
+    public void
+    setUserAvatarImage(String userName, byte[] imageDataBytes) throws IOException
+    {
+        this.fileTransferService.writeUserAvatarImage(userName, imageDataBytes);
+    }
+
+    @Override
+    public void renameUserArchiveDir(String oldUserName, String newUserName) throws Exception
+    {
+        this.fileTransferService.renameUserArchiveDir(oldUserName, newUserName);
+    }
+
+    /**
      * 为新用户创建存档数据，数据描述如下所示：
      *
      * <ol>
+     *      <li>为该用户创建默认的头像</li>
      *      <li>创建用户所有问题答对次数记录文件</li>
      *      <li>将默认的用户所有问题答对次数列表写入 Redis 数据库</li>
      * </ol>
@@ -50,8 +80,13 @@ public class UserArchiveManager implements UserArchiveManagerInterface
      * @param userName 指定用户名
      */
     @Override
-    public void createNewArchiveForUser(String userName)
+    public void createNewArchiveForUser(String userName) throws IOException
     {
+        this.fileTransferService.writeUserAvatarImage(
+                userName,
+                FileTransferService.getDefaultAvatarImageData()
+        );
+
         this.fileTransferService.saveUserCorrectTimesDataFile(
                 userName,
                 RedisServiceInterface.createDefaultQuestionCorrectTimesList(
@@ -65,6 +100,8 @@ public class UserArchiveManager implements UserArchiveManagerInterface
                         this.questionService.getQuestionCount()
                 )
         );
+
+
     }
 
     /**
