@@ -7,6 +7,13 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>题目练习</title>
     <style>
+        :root {
+            --gh-border: #30363D;
+            --header-pos-top: 1.1rem;
+            --header-pos-right: 30px;
+            --header-spacing: 0px;      /* 新增间距变量 */
+        }
+
         body {
             background-color: #0D1117;
             /* GitHub 暗黑模式背景 */
@@ -185,13 +192,31 @@
             display: block;
         }
 
-        .user-badge {
-            background-color: var(#161b22);
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid var(#30363d);
+        .user-badge 
+        {
+            position: fixed;
+            background-color: var(--gh-bg);
+            padding: 0.4rem 1.0rem;
+            border-radius: 8px;
+            border: 1px solid var(--gh-border);
             font-size: 14px;
-            float: right;
+            top: var(--header-pos-top);
+            right: calc(var(--header-pos-right) + var(--header-spacing));
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        .user-badge img 
+        {
+            height: 25px;
+            width:  25px;
+            border-radius: 50%;
+            border: 1px solid rgba(99, 110, 123, 0.4);
+            object-fit: cover;
+            position: relative;
         }
 
          /* 返回链接专项样式 */
@@ -237,46 +262,48 @@
 </head>
 
 <body>
-<div id="user_name" class="user-badge" th:text="${UserName}"></div>
-
-<div>
-    <a id="return_to_frontpage" href="/user_info/user_front_page">回首页</a>
-</div>
-
-<h1>选择题练习</h1>
-
-<strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！</strong>
-
-<div id="total">
-    <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
-</div>
-
-<div th:each="question : ${QuestionPractise}" class="question-container"
-     th:data-question-id="${question.questionId}" th:data-correct-answer="${question.correctAnswer}">
-    <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
-    <div th:if="${question.options != null}">
-        <ul>
-            <li th:each="entry : ${question.options.entrySet()}">
-                <input type="radio" th:id="'option_' + ${entry.getKey()}"
-                       th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
-                <span th:for="'option_' + ${entry.getKey()}" th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span>
-                <br>
-            </li>
-        </ul>
+    <div id="user_name" class="user-badge">
+        <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
+        <span th:text="${UserName}" id="user_name_text"></span>
     </div>
-    <button type="button" class="submit-btn" th:data-qid="${question.questionId}" onclick="checkAnswer(this)">
-        确认
-    </button>
-    <div class="feedback" th:id="'feedback_' + ${question.questionId}"></div>
-</div>
 
-<div>
-    <button type="button" class="total_submit_button" onclick="totalSubmit(this)">
-        所有题目均已完成，交卷
-    </button>
-    <div class="practise_score" id="practise_score"></div>
-</div>
+    <div>
+        <a id="return_to_frontpage" href="/user_info/user_front_page">回首页</a>
+    </div>
 
+    <h1>选择题练习</h1>
+
+    <strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！</strong>
+
+    <div id="total">
+        <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
+    </div>
+
+    <div th:each="question : ${QuestionPractise}" class="question-container"
+        th:data-question-id="${question.questionId}" th:data-correct-answer="${question.correctAnswer}">
+        <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
+        <div th:if="${question.options != null}">
+            <ul>
+                <li th:each="entry : ${question.options.entrySet()}">
+                    <input type="radio" th:id="'option_' + ${entry.getKey()}"
+                        th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
+                    <span th:for="'option_' + ${entry.getKey()}" th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span>
+                    <br>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="submit-btn" th:data-qid="${question.questionId}" onclick="checkAnswer(this)">
+            确认
+        </button>
+        <div class="feedback" th:id="'feedback_' + ${question.questionId}"></div>
+    </div>
+
+    <div>
+        <button type="button" class="total_submit_button" onclick="totalSubmit(this)">
+            所有题目均已完成，交卷
+        </button>
+        <div class="practise_score" id="practise_score"></div>
+    </div>
 </body>
 
 <script>
@@ -346,7 +373,7 @@
 
         const recordJson = 
         {
-            "userName"      : document.getElementById('user_name').textContent,
+            "userName"      : document.getElementById('user_name_text').textContent,
             "submitDate"    : getCurrentISOTimeStrWithoutZone(),
             "correctCount"  : TotalCorrect,
             "errorCount"    : TotalMistake,
