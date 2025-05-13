@@ -87,30 +87,27 @@
         background-color: #1f6feb;
     }
 
+    /* 当 ✏️ 修改账户信息 链接被按下时所发生的变化。*/
     #user_overview a:active {
-        transform: scale(0.95);  /* 缩小到 95% */
+        transform: scale(0.95);      /* 缩小到 95% */
         background-color: #1f6feb; /* GitHub 蓝色 */
         border-color: #1f6feb;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     }
 
-    /* 为每个信息项添加数据标签 */
-    p:nth-child(2)::before { content: "用户 ID："; }
-    p:nth-child(3)::before { content: "用户名："; }
-    p:nth-child(4)::before { content: "全名："; }
-    p:nth-child(5)::before { content: "电话："; }
-    p:nth-child(6)::before { content: "邮箱："; }
-    p:nth-child(7)::before { content: "注册时间："; }
-    p:nth-child(8)::before { content: "角色："; }
-
-    /* 特殊样式调整 */
-    #user_overview p:nth-child(8) {
+    /* 
+        特殊样式调整，
+        选择器：#user_overview p:nth-of-type(7) 表示：
+        选择 id 为 user_overview 标签下的第 7 个 p 标签。
+    */
+    #user_overview p:nth-of-type(7) 
+    {
         color: #57ab5a; /* GitHub 权限颜色 */
         font-weight: 500;
     }
 
     /* GitHub 风格按钮 */
-    .gh-button{
+    .gh-button {
         background-color: #373e47;
         color: #adbac7;
         border: 1px solid #444c56;
@@ -154,6 +151,15 @@
         min-height: 1.5em;
     }
 
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #user_overview * {
+        animation: fadeIn 0.3s ease-in;
+    }
+
     @media (max-width: 768px) {
         body {
             margin: 1rem;
@@ -185,13 +191,13 @@
         </button>
         <div id="upload-status"></div>
         
-        <p data-label="用户 ID" th:text="${UserOverview.getId()}"></p>
-        <p data-label="用户名" th:text="${UserOverview.getUserName()}"></p>
-        <p data-label="全名" th:text="${UserOverview.getFullName()}"></p>
-        <p data-label="电话" th:text="'+86 ' + ${UserOverview.getTelephoneNumber()}"></p>
-        <p data-label="邮箱" th:text="${UserOverview.getEmail()}"></p>
-        <p data-label="注册时间" th:text="${UserOverview.getRegisterDateTime()}"></p>
-        <p data-label="角色" th:text="${UserOverview.getRoles()}"></p>
+        <p data-label="用户 ID：" th:text="${UserOverview.getId()}">???</p>
+        <p data-label="用户名：" th:text="${UserOverview.getUserName()}">???</p>
+        <p data-label="全名：" th:text="${UserOverview.getFullName()}">???</p>
+        <p data-label="电话：" th:text="'+86 ' + ${UserOverview.getTelephoneNumber()}">???</p>
+        <p data-label="邮箱：" th:text="${UserOverview.getEmail()}">???</p>
+        <p data-label="注册时间：" th:text="${UserOverview.getRegisterDateTime()}">???</p>
+        <p data-label="角色：" th:text="${UserOverview.getRoles()}">???</p>
 
         <a href="/user_info/modify" id="modify-account">
             <span>✏️ 修改账户信息</span>
@@ -267,10 +273,10 @@
                     statusElement.textContent = '头像更新成功！';
                     statusElement.style.color = '#57ab5a';
 
-                    // 3 秒后清除状态
+                    // 1.5 秒后清除状态
                     setTimeout(
                         () => { statusElement.textContent = ''; location.reload(); }, 
-                        2500
+                        1500
                     );
                 }
                 catch (error) 
