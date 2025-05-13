@@ -1,5 +1,6 @@
 package com.jesse.examination.file;
 
+import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public interface FileTransferServiceInterface
     /**
      * 重命名用户存档路径（修改用户账户信息时用）。
      */
-    void renameUserArchiveDir(String oldUserName, String newUserName) throws Exception;
+    void renameUserArchiveDir(String oldUserName, String newUserName) throws DirectoryRenameException;
 
     /**
      * 存储用户成绩记录文件。
