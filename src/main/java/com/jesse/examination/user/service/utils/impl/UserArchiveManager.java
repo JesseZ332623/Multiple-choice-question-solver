@@ -1,6 +1,7 @@
 package com.jesse.examination.user.service.utils.impl;
 
 import com.jesse.examination.file.FileTransferServiceInterface;
+import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.file.impl.FileTransferService;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
@@ -63,7 +64,10 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     }
 
     @Override
-    public void renameUserArchiveDir(String oldUserName, String newUserName) throws Exception
+    public void
+    renameUserArchiveDir(
+            String oldUserName, String newUserName
+    ) throws DirectoryRenameException
     {
         this.fileTransferService.renameUserArchiveDir(oldUserName, newUserName);
     }
