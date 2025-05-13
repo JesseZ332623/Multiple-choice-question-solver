@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.utils;
 
+import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.IOException;
@@ -19,7 +20,12 @@ public interface UserArchiveManagerInterface
      */
     void setUserAvatarImage(String userName, byte[] imageDataBytes) throws IOException;
 
-    void renameUserArchiveDir(String oldUserName, String newUserName) throws Exception;
+    /**
+     * 将已经存在的旧路径名 oldUserName 修改成新路径名 newUserName。
+     */
+    void renameUserArchiveDir(
+            String oldUserName, String newUserName
+    ) throws DirectoryRenameException;
 
     /**
      * 为新用户创建存档数据，数据描述如下所示：
