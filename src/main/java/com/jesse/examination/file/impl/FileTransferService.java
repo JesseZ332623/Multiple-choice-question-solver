@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jesse.examination.config.jacksonconfig.JacksonConfig;
 import com.jesse.examination.file.FileTransferServiceInterface;
+import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
@@ -33,23 +34,32 @@ public class FileTransferService implements FileTransferServiceInterface
     // 创建带有时间字符串解析的 ObjectMapper 实例。
     private final ObjectMapper mapper = JacksonConfig.createObjectMapper();
 
+    // 获取默认头像图片的字节数组。
     private static final byte[] DEFAULT_AVATAR_IMAGE_DATA;
 
-    // 静态块还可以这么用？
+    /*
+     * 终于把静态块用出来了，一些被 static 修饰的实例在初始化时也可能抛出异常，
+     * 此时就需要 静态块 去捕获。
+     * 这样在 Spring 应用启动的时候，如果资源加载失败，应用在输出异常信息后也会停止。
+     */
     static
     {
         try
         {
             DEFAULT_AVATAR_IMAGE_DATA = Files.readAllBytes(
                     Paths.get(
-                            "D:\\Spring-In-Action\\Multiple-choice-question-solver\\src\\main\\resources\\image\\avatar.png"
+                            "D:/Spring-In-Action/Multiple-choice-question-solver" +
+                                 "/src/main/resources/image/avatar.png"
                     )
             );
         }
         catch (IOException exception)
         {
             log.error(exception.getMessage());
-            throw new RuntimeException(exception);
+
+            throw new RuntimeException(
+                    "[RuntimeException] " + exception.getMessage()
+            );
         }
     }
 
@@ -58,7 +68,7 @@ public class FileTransferService implements FileTransferServiceInterface
      */
     public static byte[] getDefaultAvatarImageData()
     {
-        return DEFAULT_AVATAR_IMAGE_DATA;
+        return Objects.requireNonNull(DEFAULT_AVATAR_IMAGE_DATA);
     }
 
     /**
@@ -119,8 +129,18 @@ public class FileTransferService implements FileTransferServiceInterface
         return Objects.requireNonNull(termpScoreRecordEntity);
     }
 
+    /**
+     * 重命名用户存档路径（修改用户账户信息时用）
+     *
+     * @param oldPathName 旧路径名，需要确保其存在
+     * @param newPathName 新路径名，需要确保其不存在（√）
+     *
+     * @throws DirectoryRenameException 处理掉内部的异常后，
+     *                                  会 re-throw 一个 DirectoryRenameException 向上传递，
+     *                                  告知操作失败。
+     */
     private void
-    renameDirectory(String oldPathName, String newPathName) throws Exception
+    renameDirectory(String oldPathName, String newPathName) throws DirectoryRenameException
     {
         Path oldPath = Paths.get(oldPathName);
         Path newPath = Paths.get(newPathName);
@@ -134,11 +154,31 @@ public class FileTransferService implements FileTransferServiceInterface
 
         try
         {
+            /*
+             * 检查新路径的父级路径是否存在，
+             * 否则就递归的创建所有缺失的父目录。
+             */
             Files.createDirectories(newPath.getParent());
 
+            /*
+             * 新旧路径校验完后，进行文件的移动操作，Files.move() 方法在不同情况下的行为也不同：
+             *
+             *  case 1：若同盘移动则仅修改文件的元数据，速度极快。
+             *  case 2: 若跨盘移动则触发文件的复制，在目录层级很深的时候有性能问题。
+             *
+             * 这里还需要解释下面两个参数：
+             *
+             * 1. StandardCopyOption.REPLACE_EXISTING
+             *      在操作路径时，若目标路径已经存在，则直接抛出 FileAlreadyExistsException
+             *
+             * 2. StandardCopyOption.ATOMIC_MOVE
+             *      将该移动操作视为一个整体（原子化），如果期间出现任何失败，则都会回滚操作。
+             *
+             * 但当前项目的对该方法的使用不涉及跨盘的操作，所以不需要 REPLACE_EXISTING 参数。
+             */
             Files.move(
                     oldPath, newPath,
-                    StandardCopyOption.REPLACE_EXISTING,
+                    // StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE
             );
 
@@ -147,25 +187,25 @@ public class FileTransferService implements FileTransferServiceInterface
         catch (FileAlreadyExistsException exception)
         {
             String errorMessage = format(
-                    "New directory already exist, cause: %s",
+                    "New directory already exist, cause: %s.",
                     exception.getMessage()
             );
 
             log.error(errorMessage);
 
-            throw new Exception(errorMessage);
+            throw new DirectoryRenameException(errorMessage);
         }
         catch (IOException exception)
         {
             String errorMessage = format(
-                    "[%s] Failed operator cause: %s",
+                    "[%s] Failed operator cause: %s.",
                     exception.getClass().getSimpleName(),
                     exception.getMessage()
             );
 
             log.error(errorMessage);
 
-            throw new Exception(errorMessage);
+            throw new DirectoryRenameException(errorMessage);
         }
     }
 
@@ -258,7 +298,9 @@ public class FileTransferService implements FileTransferServiceInterface
 
     @Override
     public void
-    renameUserArchiveDir(String oldUserName, String newUserName) throws Exception
+    renameUserArchiveDir(
+            String oldUserName, String newUserName
+    ) throws DirectoryRenameException
     {
         this.renameDirectory(
                 this.storagePath  + "/" + oldUserName,
