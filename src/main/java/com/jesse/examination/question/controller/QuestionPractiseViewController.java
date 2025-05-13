@@ -23,19 +23,11 @@ import java.util.Objects;
 @RequestMapping(path = "/question")
 public class QuestionPractiseViewController
 {
-    private final QuestionService       questionService;
-    private final UserServiceInterface  userService;
-    private final RedisService          redisService;
+    private final QuestionService questionService;;
 
     @Autowired
-    public QuestionPractiseViewController(
-            QuestionService         questionService,
-            UserServiceInterface    userService,
-            RedisService            redisService
-    ) {
+    public QuestionPractiseViewController(QuestionService questionService) {
         this.questionService = questionService;
-        this.userService     = userService;
-        this.redisService    = redisService;
     }
 
     /**
