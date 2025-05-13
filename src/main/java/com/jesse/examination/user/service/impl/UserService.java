@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.email.controller.EmailSenderController;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
@@ -194,7 +195,10 @@ public class UserService implements UserServiceInterface, UserDetailsService
                 = (String) this.userArchiveManager
                                .getRedisTemplate()
                                .opsForValue()
-                               .get("VerifyCodeFor" + userLoginDTO.getUserName());
+                               .get(
+                                       EmailSenderController.VERIFYCODE_KEY +
+                                       userLoginDTO.getUserName()
+                               );
 
         // 与从页面表单上收集的验证码做比较
         if (!Objects.equals(userLoginDTO.getVerifyCode(), userVerifyCode))
@@ -208,7 +212,11 @@ public class UserService implements UserServiceInterface, UserDetailsService
             // 需要注意的是，如果用户登录成功了，对应的验证码也应该删掉。
             this.userArchiveManager
                     .getRedisTemplate()
-                    .delete("VerifyCodeFor" + userLoginDTO.getUserName());
+                    .delete(
+                            EmailSenderController.VERIFYCODE_KEY +
+                                 userLoginDTO.getUserName()
+                    );
+
             userArchiveManager.readUserArchive(userLoginDTO.getUserName());
         }
     }
@@ -219,6 +227,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
     @Override
     public void userLogout(String userName)
     {
+        // 暂时没什么别的操作，就是存储用户的存档。
         this.userArchiveManager.saveUserArchive(userName);
     }
 
@@ -291,6 +300,8 @@ public class UserService implements UserServiceInterface, UserDetailsService
         userQueryResult.setEmail(modifyOperatorDTO.getUserMidifyInfoDTO().getNewEmail());
 
         this.userEntityRepository.save(userQueryResult);
+
+        // 用户名改了，与之对应的存档路径也应该修改。
         this.userArchiveManager.renameUserArchiveDir(
                 modifyOperatorDTO.getUserLoginDTO().getUserName(),
                 newUserName
