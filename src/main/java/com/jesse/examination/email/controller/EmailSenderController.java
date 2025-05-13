@@ -43,7 +43,7 @@ public class EmailSenderController
     /**
      * 规定用户验证码在 Redis 中对应的键的格式是：VerifyCodeFor[user-name]
     */
-    private final static String VERIFYCODE_KEY = "VerifyCodeFor";
+    public final static String VERIFYCODE_KEY = "VerifyCodeFor";
 
     /** 验证码的有效期为 90 秒。 */
     private final static int CODE_VALID_TIME = 90;
