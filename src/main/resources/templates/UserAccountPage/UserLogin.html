@@ -288,7 +288,7 @@
                 }
 
                 showNotify('验证码已经发送至您的邮箱。');
-                setTimeout(() => sendBtn.disabled = false, 60000);
+                setTimeout(() => sendBtn.disabled = false, 90000);
             }
             catch (error)
             {
@@ -376,9 +376,7 @@
                 document.querySelectorAll('input')
                         .forEach(input => input.value = '');
 
-                window.location.href = '/user_info/user_front_page';
-
-                
+                window.location.href = '/user_info/user_front_page';                
             }
             catch (error) 
             {
