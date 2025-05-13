@@ -16,6 +16,9 @@
 - 详见：
   [应用所有端点树型图](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E5%BA%94%E7%94%A8%E6%89%80%E6%9C%89%E7%AB%AF%E7%82%B9%E6%A0%91%E5%9E%8B%E5%9B%BE.svg)
 
+### 应用模块描述
+- 详见：[应用模块描述](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E5%BA%94%E7%94%A8%E6%A8%A1%E5%9D%97%E6%8F%8F%E8%BF%B0.md)
+
 ### 访问
 将服务器部署好后（假设部署位置是 `localhost`，端口为 `8081`），
 可以访问以下 URL（仅列出部分主要的、以视图作为响应的 GET 请求方法）：
