@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.jesse</groupId>
 	<artifactId>examination</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<name>examination</name>
 	<description>选择题练习 Web 应用</description>
 	<url/>
@@ -147,5 +147,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
