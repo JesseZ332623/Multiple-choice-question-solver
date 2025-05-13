@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
 import com.jesse.examination.user.entity.UserEntity;
@@ -142,7 +143,8 @@ public class AdminUserService implements AdminServiceInterface
      *        从前端提交的 JSON 中映射而来的修改用户数据。
      */
     @Override
-    public Long modifyUserByUserName(
+    public Long
+    modifyUserByUserName(
             @NotNull
             AdminModifyUserDTO adminModifyUserDTO)
     {
@@ -194,6 +196,17 @@ public class AdminUserService implements AdminServiceInterface
         userQueryResult.setEmail(adminModifyUserDTO.getNewEmail());
         userQueryResult.setRoles(adminModifyUserDTO.getNewRoles());
 
+        // 修改用户存档路径
+        try
+        {
+            userArchiveManager.renameUserArchiveDir(
+                    adminModifyUserDTO.getOldUserName(),
+                    adminModifyUserDTO.getNewUserName()
+            );
+        }
+        catch (DirectoryRenameException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
 
         return this.adminUserEntityRepository.saveAndFlush(userQueryResult).getId();
     }
