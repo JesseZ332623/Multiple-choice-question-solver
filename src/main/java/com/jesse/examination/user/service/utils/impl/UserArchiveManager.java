@@ -43,6 +43,12 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         this.scoreRecordService  = scoreRecordService;
     }
 
+    @Override
+    public byte[] getDefaultAvatarImage()
+    {
+        return FileTransferService.getDefaultAvatarImageData();
+    }
+
     /**
      * 获取指定用户头像数据。
      */
