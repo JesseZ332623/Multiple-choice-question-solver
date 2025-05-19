@@ -7,283 +7,182 @@
     <title>所有用户列表</title>
 </head>
 <style>
-    :root {
-        --gh-bg: #0D1117;
-        --gh-border: #30363D;
-        --gh-text: #C9D1D9;
-        --gh-primary: #58A6FF;
-        --gh-success: #238636;
-        --gh-danger: #DA3633;
-        --gh-btn-hover: rgba(240, 246, 252, 0.1);
-    }
+:root {
+  --gh-bg-color: #0d1117;
+  --gh-border-color: #30363d;
+  --gh-text-color: #c9d1d9;
+  --gh-header-bg: #161b22;
+  --gh-button-bg: #21262d;
+  --gh-button-hover: #30363d;
+  --gh-accent-blue: #1f6feb;
+  --gh-accent-red: #d41310;
+  --gh-accent-green: #01911e;
+}
 
-    body {
-        background-color: var(--gh-bg);
-        color: var(--gh-text);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-        padding: 20px;
-        margin: 0;
-    }
+body {
+  background-color: var(--gh-bg-color);
+  color: var(--gh-text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  padding: 20px;
+  max-width: 1780px;
+  margin: 0 auto;
+}
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--gh-border-color);
+  border-radius: 8px;
+  overflow: scroll;
+  margin: auto;
+  background-color: var(--gh-header-bg);
+}
+
+caption {
+  text-align: center;
+  padding: 12px;
+  font-weight: 600;
+  background-color: var(--gh-header-bg);
+  border-bottom: 1.5px solid var(--gh-border-color);
+}
+
+th, td {
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid var(--gh-border-color);
+  position: relative;
+}
+
+/* 为每个单元格添加微妙的投影 */
+th:not(:first-child),
+td:not(:first-child) {
+  box-shadow: inset 1px 0 0 var(--gh-border-color);
+}
+
+th {
+  background-color: var(--gh-header-bg);
+  font-weight: 480;
+  font-size: 14px;
+}
+
+tr:hover {
+  background-color: rgba(110, 118, 129, 0.1);
+}
+
+button {
+  background-color: var(--gh-button-bg);
+  color: var(--gh-text-color);
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 2px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  font-family: inherit;
+}
+
+button:hover {
+  background-color: var(--gh-button-hover);
+  border-color: #8b949e;
+  transition-duration: 0.1s;
+}
+
+.btn-success {
+  background-color: var(--gh-accent-green);
+  border-color: #2ea043;
+}
+
+.btn-danger {
+  background-color: var(--gh-accent-red);
+  border-color: #f85149;
+}
+
+.btn-warning {
+  background-color: #b88010;
+  border-color: #c08714;
+}
+
+input, select {
+  background-color: var(--gh-header-bg);
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  color: var(--gh-text-color);
+  padding: 6px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gh-accent-blue);
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 1;
+  max-width: 120px;
+}
+
+.action-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.gh-button {
+  background-color: rgba(31, 111, 235, 0.1);
+  border: 1px solid rgba(31, 111, 235, 0.4);
+}
+
+.gh-button:hover {
+  background-color: rgba(31, 111, 235, 0.2);
+}
+
+#upload-status {
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+img {
+  vertical-align: middle;
+  background-color: var(--gh-header-bg);
+  border: 1px solid var(--gh-border-color);
+}
+
+@media (max-width: 768px) 
+{
     table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 1px solid var(--gh-border);
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        animation: fadeIn 0.3s ease-in;
+        border-spacing: 0 6px; /* 移动端减少垂直间距 */
     }
 
-    caption {
-        font-size: 16px;
-        font-weight: 600;
-        padding: 12px;
-        background-color: #161B22;
-        border-bottom: 1px solid var(--gh-border);
+    td, th {
+        padding: 12px 10px;
+        font-size: 0.9em;
     }
-
-    th, td {
-        padding: 8px 12px;
-        font-size: 14px;
-        line-height: 1.5;
-        text-align: left;
-        border-bottom: 1px solid var(--gh-border);
-        max-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    th {
-        background-color: #161B22;
-        font-weight: 600;
-    }
-
-    tr:last-child td {
-        border-bottom: none;
-    }
-
+    
     button {
-        background-color: #21262D;
-        color: var(--gh-text);
-        border: 1px solid var(--gh-border);
-        padding: 5px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin: 2px;
+        padding: 4px 8px;
+        font-size: 0.9em;
     }
+}
 
-    button:hover {
-        background-color: var(--gh-btn-hover);
-        border-color: #8B949E;
-        transform: scale(1.05);
-    }
-
-    button[onclick="doModify(this)"] {
-        color: var(--gh-primary);
-        border-color: var(--gh-primary);
-    }
-
-    button[onclick="doDelete(this)"] {
-        color: var(--gh-danger);
-        border-color: var(--gh-danger);
-    }
-
-    input {
-        background-color: #0D1117;
-        border: 1px solid var(--gh-border);
-        color: var(--gh-text);
-        padding: 5px 8px;
-        border-radius: 4px;
-        width: 90%;
-        font-size: 13px;
-        transition: border-color 0.2s ease;
-    }
-
-    input:focus {
-        outline: none;
-        border-color: var(--gh-primary);
-        box-shadow: 0 0 0 3px rgba(17, 88, 199, 0.3);
-    }
-
-    #add_new_user_table_row td {
-        padding: 8px 12px;
-        background: #161b22;
-    }
-    
-    #add_new_user_table_row input,
-    #add_new_user_table_row select {
-        width: 100%;
-        box-sizing: border-box;
-        background: #0d1117;
-        border: 1px solid #30363d;
-        color: #c9d1d9;
-        padding: 6px;
-    }
-    
-    #add_new_user_table_row select {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238B949E'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 8px center;
-        background-size: 16px;
-    }
-
-    .action-row td {
-        padding: 12px !important;
-        background: #161b22 !important;
-        border-top: 2px solid var(--gh-border);
-    }
-    
-    .action-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .button-group {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    
-    .range-delete-group {
-        display: flex;
-        gap: 8px;
-        flex-grow: 1;
-        max-width: 400px;
-    }
-    
-    .input-group {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-grow: 1;
-    }
-    
-    .input-group input {
-        width: 120px;
-        flex-grow: 1;
-        padding: 6px 8px;
-    }
-    
-    .separator {
-        color: var(--gh-text);
-        padding: 0 4px;
-    }
-    
-    /* 按钮扩展样式 */
-    .btn-success {
-        color: var(--gh-success) !important;
-        border-color: var(--gh-success) !important;
-    }
-    
-    .btn-danger {
-        color: var(--gh-danger) !important;
-        border-color: var(--gh-danger) !important;
-    }
-    
-    .btn-warning {
-        color: #d29922 !important;
-        border-color: #d29922 !important;
-    }
-    
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 768px) {
-        table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
-        th, td {
-            min-width: 120px;
-        }
-        
-        button {
-            padding: 4px 8px;
-            margin: 2px 0;
-            display: block;
-            width: 100%;
-        }
-
-        .action-group {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        
-        .range-delete-group {
-            max-width: none;
-        }
-        
-        .input-group input {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 480px) {
-        body {
-            padding: 10px;
-        }
-        
-        table {
-            border: 0;
-        }
-        
-        thead {
-            display: none;
-        }
-        
-        tr {
-            display: block;
-            margin-bottom: 15px;
-            border: 1px solid var(--gh-border);
-            border-radius: 6px;
-        }
-        
-        td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            border: none;
-            max-width: none;
-            white-space: normal;
-        }
-        
-        td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            margin-right: 10px;
-            color: var(--gh-primary);
-        }
-
-        .button-group {
-            flex-direction: column;
-        }
-        
-        .button-group button {
-            width: 100%;
-        }
-        
-        .range-delete-group form {
-            flex-direction: column;
-        }
-        
-        .input-group {
-            width: 100%;
-        }
-    }
+::placeholder {
+  color: #6e7681;
+  opacity: 1;
+}
 </style>
 <body>
     <div th:if="${#lists.size(AllUsers) != 0}">
@@ -295,6 +194,7 @@
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">用户名</th>
+                    <th scope="col">头像</th>
                     <th scope="col">密码（密文前 16 位）</th>
                     <th scope="col">全名</th>
                     <th scope="col">电话号码</th>
@@ -307,13 +207,35 @@
             <tbody>
                 <tr th:each="user : ${AllUsers}">
                     <th data-label="ID" scope="row" th:text="${user.id}" th:id="'user_id_' + ${user.id}"></th>
+
+                    <!-- [0] -->
                     <td data-label="用户名" th:text="${user.userName}" th:id="'username_' + ${user.id}"></td>
+
+                    <!-- [1] -->
+                    <td data-label="头像">
+                        <img th:src="@{'/api/user_info/user_overview_avatar/' + ${user.userName}}"
+                             alt="头像"  style="width: 25px; height: 25px; border-radius: 50%;">
+                    </td>
+
+                    <!-- [2] -->
                     <td data-label="密码" th:text="${user.password}" th:id="'password_' + ${user.id}"></td>
+
+                    <!-- [3] -->
                     <td data-label="全名" th:text="${user.fullName}" th:id="'fullName_' + ${user.id}"></td>
+
+                    <!-- [4] -->
                     <td data-label="电话号码" th:text="${user.telephoneNumber}" th:id="'telephoneNumber_' + ${user.id}"></td>
+
+                    <!-- [5] -->
                     <td data-label="邮箱" th:text="${user.email}" th:id="'email_' + ${user.id}"></td>
+
+                    <!-- [6] -->
                     <td data-label="注册日期" th:text="${user.registerDateTime}" th:id="'registerDateTime_' + ${user.id}"></td>
+
+                    <!-- [7] -->
                     <td data-label="角色" th:text="${user.roles}" th:id="'roles_' + ${user.id}"></td>
+
+                    <!-- [8] -->
                     <td data-label="操作" th:id="'operator_' + ${user.id}">
                         <button type="button" data-click-count="0" onclick="doModify(this)">✍️ 修改</button>
                         <button type="button" onclick="doDelete(this)">🗑️ 删除</button>
@@ -383,7 +305,6 @@
     </div>
 </body>
 <script>
-    var DONOTIFY_OLD_USERNAME;
 
     const USER_ROLES  = {"roleId" : 2, "roleName" : "ROLE_USER"};
     const ADMIN_ROLES = {"roleId" : 1, "roleName" : "ROLE_ADMIN"};
@@ -411,6 +332,100 @@
         return newRoles;
     }
 
+    /*
+        进行头像修改。
+    */
+    async function doAvatarModify(userName, index) 
+    {
+        // 文件大小不得超过 8 MB
+        const MAX_FILE_SIZE = 8 * 1024 * 1024;
+        
+        // 支持的文件类型数组
+        const ALLOWED_FILE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+
+        const avatarModifyButton = document.getElementById(`cell_${index}`);
+
+        avatarModifyButton.addEventListener('change', 
+            async (event) => 
+            {
+                const file          = event.target.files[0];  // 获取上传的第一个文件？
+                const statusElement = document.getElementById('upload-status');
+
+                if (!file) { return; }
+                
+                // 检查文件格式
+                if (!ALLOWED_FILE_TYPES.includes(file.type)) 
+                {
+                    statusElement.textContent = '仅支持 PNG/JPED/WEBP 格式的图片。';
+                    statusElement.style.color = '#F47067';
+
+                    return;
+                }
+                
+                // 检查文件大小
+                if (file.size >= MAX_FILE_SIZE)
+                {
+                    statusElement.textContent = `文件大小应小于 ${MAX_FILE_SIZE / 1024 / 1024} MB!`;
+                    statusElement.style.color = '#F47067';
+
+                    return;
+                }
+
+                try 
+                {
+                    statusElement.textContent = '头像上传中';
+                    statusElement.style.color = 'inherit';
+
+                    const fileByteArray = new Uint8Array(await file.arrayBuffer());
+
+                    const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+                    // 发送请求
+                    const response 
+                        = await fetch(`/api/admin/set_user_overview_avatar/${userName}`,
+                        {
+                            method: 'POST',
+                            headers: 
+                            {
+                                'Content-Type': 'application/octet-stream',
+                                [csrfHeader]: csrfToken
+                            },
+                            body: fileByteArray
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(await response.text());
+                    }
+
+                    statusElement.textContent = '头像更新成功！';
+                    statusElement.style.color = '#57ab5a';
+
+                    // 1.5 秒后清除状态
+                    setTimeout(
+                        () => { statusElement.textContent = ''; }, 1500
+                    );
+                }
+                catch (error)
+                {
+                    console.error('Upload failed:', error);
+                    statusElement.textContent = `上传失败: ${error.message}`;
+                    statusElement.style.color = '#f47067';
+                }
+            }
+        );
+    }
+
+    const OLDUSER_DATA = {
+        "oldUserName" : null,
+        "oldPassword" : null,
+        "oldFullName" : null,
+        "oldTelephoneNumber" : null,
+        "oldEmail" : null,
+        "oldRoles" : null
+    };
+
     async function doModify(button) 
     {
         button.addEventListener(
@@ -430,17 +445,38 @@
                 switch (count)
                 {
                     case 1:
+                        const oldCellTexts = Array.from(cells).map((cell) => cell.textContent);
+
+                        OLDUSER_DATA.oldUserName = oldCellTexts[0];
+                        OLDUSER_DATA.oldPassword = null;
+                        OLDUSER_DATA.oldFullName = oldCellTexts[3];
+                        OLDUSER_DATA.oldTelephoneNumber = oldCellTexts[4];
+                        OLDUSER_DATA.oldEmail = oldCellTexts[5];
+                        OLDUSER_DATA.oldRoles = oldCellTexts[7];
+
                         cells.forEach((cell, index) => 
                         {
                             switch (index)
                             {
-                                case 0:
-                                    DONOTIFY_OLD_USERNAME = cell.textContent;
+                                case 0: // 变换成用户名输入框
                                     cell.innerHTML 
                                     = `<input type="text" id="cell_${index}" placeholder=${cell.textContent}></input>`;
                                     break;
+
+                                case 1:
+                                    cell.innerHTML  // 变换成头像修改的操作按钮
+                                    = `<input type="file" id="cell_${index}"
+                                              accept="image/png, image/jpeg, image/webp"
+                                              onclick="doAvatarModify('${OLDUSER_DATA.oldUserName}', ${index})" hidden>
+                                       <button class="gh-button" type="button" 
+                                               onclick="document.getElementById('cell_${index}').click()">
+                                            <span class="button-text">📌 更换头像</span>
+                                       </button>
+                                       <div id="upload-status"></div>`;
+
+                                    break;
                                 
-                                case 5:
+                                case 6: // 注册日期（不可修改）
                                     cell.innerHTML 
                                         = `<input type="text" 
                                             id="cell_${index}"
@@ -448,20 +484,20 @@
                                           </input>`;
                                     break;
 
-                                case 6:
-                                    cell.innerHTML
+                                case 7: // 变换成用户角色选项栏
+                                    cell.innerHTML 
                                           = `<select id="cell_${index}">
                                                 <option value="ROLE_USER">普通用户</option>
                                                 <option value="ROLE_ADMIN">管理员</option>
                                                 <option value="ROLE_ADMIN ROLE_USER">管理员 + 普通用户</option>
                                             </select>`;
                                 
-                                case 7:
+                                case 8:
                                     break;
                                 
                                 default:
                                     cell.innerHTML 
-                                    = `<input type="text" id="cell_${index}" placeholder=${cell.textContent}></input>`;
+                                        = `<input type="text" id="cell_${index}" placeholder=${cell.textContent}></input>`;
                                     break;
                             }
                         });
@@ -470,24 +506,17 @@
 
                         break;
                     
-                    case 2:
-                        let newUserName         = document.getElementById('cell_0').value;
-                        let newPassword         = document.getElementById('cell_1').value;
-                        let newFullName         = document.getElementById('cell_2').value;
-                        let newTelephoneNumber  = document.getElementById('cell_3').value;
-                        let newEmail            = document.getElementById('cell_4').value;
-                        let newRolesText        = document.getElementById('cell_6').value;
-                        let newRoles            = createUserRolesJson(newRolesText);
-                
+                    case 2:                
                         const submitData = 
                         {
-                            "oldUserName" : DONOTIFY_OLD_USERNAME, 
-                            "newUserName" : newUserName, 
-                            "newPassword" : newPassword,
-                            "newFullName" : newFullName,
-                            "newTelephoneNumber" : newTelephoneNumber, 
-                            "newEmail" : newEmail,
-                            "newRoles" : newRoles
+                            "oldUserName"           : OLDUSER_DATA.oldUserName,
+                            "newUserName"           : document.getElementById('cell_0').value || OLDUSER_DATA.oldUserName, 
+                            // 如果新密码没填这一字段就为空，后端会进行相应的处理
+                            "newPassword"           : document.getElementById('cell_2').value || OLDUSER_DATA.oldPassword,
+                            "newFullName"           : document.getElementById('cell_3').value || OLDUSER_DATA.oldFullName,
+                            "newTelephoneNumber"    : document.getElementById('cell_4').value || OLDUSER_DATA.oldTelephoneNumber,
+                            "newEmail"              : document.getElementById('cell_5').value || OLDUSER_DATA.oldEmail,
+                            "newRoles"              : createUserRolesJson(document.getElementById('cell_7').value) || OLDUSER_DATA.oldRoles
                         };
 
                         const submitDataJson = JSON.stringify(submitData);
@@ -542,6 +571,7 @@
             }
         );
     }
+
     async function doDelete(button) 
     {
         // 向上查找离 button 最近的父级 tr 标签
@@ -628,19 +658,38 @@
                     case 1:
                         addNewUserRowElement.innerHTML 
                             = `
-                                <td data-label="ID"><input type="text" placeholder="用户 ID（自动生成）" readonly></input></td>
+                                <td data-label="ID">
+                                    <input type="text" placeholder="用户 ID（自动生成）" readonly></input>
+                                </td>
 
-                                <td data-label="用户名"><input type="text" id="new_username" placeholder="新用户名"></input></td>
+                                <td data-label="用户名">
+                                    <input type="text" id="new_username" placeholder="新用户名"></input>
+                                </td>
 
-                                <td data-label="密码"><input type="password" id="new_password" placeholder="密码"></input></td>
+                                <td data-label="头像">
+                                    <img src="/api/admin/get_default_avatar" alt="默认头像" 
+                                    style="width: 25px; height: 25px; border-radius: 50%;"></img>
+                                </td>
 
-                                <td data-label="全名"><input type="text" id="new_fullname" placeholder="用户全名"></input></td>
+                                <td data-label="密码">
+                                    <input type="password" id="new_password" placeholder="密码"></input>
+                                </td>
 
-                                <td data-label="电话号码"><input type="tel" id="new_telephone" placeholder="电话号码（+86）"></input></td>
+                                <td data-label="全名">
+                                    <input type="text" id="new_fullname" placeholder="用户全名"></input>
+                                </td>
 
-                                <td data-label="邮箱"><input type="email" id="new_email" placeholder="邮箱"></input></td>
+                                <td data-label="电话号码">
+                                    <input type="tel" id="new_telephone" placeholder="电话号码（+86）"></input>
+                                </td>
+
+                                <td data-label="邮箱">
+                                    <input type="email" id="new_email" placeholder="邮箱"></input>
+                                </td>
                                 
-                                <td data-label="注册日期"><input type="text" id="new_register_date" placeholder="注册时间（自动生成）" readonly></input></td>
+                                <td data-label="注册日期">
+                                    <input type="text" id="new_register_date" placeholder="注册时间（自动生成）" readonly></input>
+                                </td>
 
                                 <td data-label="角色"> 
                                     <select id="new_roles">
