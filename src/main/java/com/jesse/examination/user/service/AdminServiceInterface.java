@@ -22,4 +22,8 @@ public interface AdminServiceInterface
     Long deleteUsersByIdRange(Long begin, Long end);
 
     Long truncateAllUsers();
+
+    byte[] getDefaultAvatar();
+
+    void modifyUserAvatar(String userName, byte[] imageDataBytes);
 }
