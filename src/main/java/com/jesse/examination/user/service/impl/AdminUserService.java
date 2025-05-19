@@ -9,6 +9,7 @@ import com.jesse.examination.user.repository.AdminUserEntityRepository;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import com.jesse.examination.user.service.utils.impl.UserArchiveManager;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +26,7 @@ import static java.lang.String.format;
 /**
  * 管理员操作用户数据接口。
  */
+@Slf4j
 @Service
 @Transactional
 public class AdminUserService implements AdminServiceInterface
@@ -173,39 +175,53 @@ public class AdminUserService implements AdminServiceInterface
             }
         }
 
-        if (!Objects.equals(userQueryResult.getFullName(), adminModifyUserDTO.getNewFullName())) {
-            if (this.adminUserEntityRepository.existsByFullName(adminModifyUserDTO.getNewFullName())) {
+        if (!Objects.equals(userQueryResult.getFullName(), adminModifyUserDTO.getNewFullName()))
+        {
+            if (this.adminUserEntityRepository.existsByFullName(adminModifyUserDTO.getNewFullName()))
+            {
                 throw new DuplicateUserException(
                         format(
-                                "New user name: [%s] already exist!",
+                                "New user full name: [%s] already exist!",
                                 adminModifyUserDTO.getNewFullName()
                         )
                 );
             }
         }
 
-        // 修改成新的用户信息
-        userQueryResult.setUsername(adminModifyUserDTO.getNewUserName());
-        userQueryResult.setPassword(
-                this.passwordEncoder.encode(
-                        adminModifyUserDTO.getNewPassword()
-                )
-        );
+        // 前端如果并没有留空密码这一栏，再进行存储
+        if (!Objects.equals(adminModifyUserDTO.getNewPassword(), null))
+        {
+            userQueryResult.setPassword(
+                    this.passwordEncoder.encode(
+                            adminModifyUserDTO.getNewPassword()
+                    )
+            );
+        }
+
         userQueryResult.setFullName(adminModifyUserDTO.getNewFullName());
         userQueryResult.setTelephoneNumber(adminModifyUserDTO.getNewTelephoneNumber());
         userQueryResult.setEmail(adminModifyUserDTO.getNewEmail());
         userQueryResult.setRoles(adminModifyUserDTO.getNewRoles());
 
-        // 修改用户存档路径
-        try
+        // 检查管理员有没有修改用户的用户名，如果有再去修改成新用户名和存档路径。
+        if (!Objects.equals(userQueryResult.getUsername(), adminModifyUserDTO.getNewUserName()))
         {
-            userArchiveManager.renameUserArchiveDir(
-                    adminModifyUserDTO.getOldUserName(),
-                    adminModifyUserDTO.getNewUserName()
-            );
-        }
-        catch (DirectoryRenameException exception) {
-            throw new RuntimeException(exception.getMessage());
+            // 修改成新的用户名
+            userQueryResult.setUsername(adminModifyUserDTO.getNewUserName());
+
+            // 修改用户存档路径
+            try
+            {
+                userArchiveManager.renameUserArchiveDir(
+                        adminModifyUserDTO.getOldUserName(),
+                        adminModifyUserDTO.getNewUserName()
+                );
+            }
+            catch (DirectoryRenameException exception)
+            {
+                log.error(exception.getMessage());
+                throw new RuntimeException(exception.getMessage());
+            }
         }
 
         return this.adminUserEntityRepository.saveAndFlush(userQueryResult).getId();
@@ -301,5 +317,26 @@ public class AdminUserService implements AdminServiceInterface
         this.adminUserEntityRepository.flush();
 
         return (long) existsIds.size();
+    }
+
+    @Override
+    public byte[] getDefaultAvatar() {
+        return this.userArchiveManager.getDefaultAvatarImage();
+    }
+
+    @Override
+    public void modifyUserAvatar(String userName, byte[] imageDataBytes)
+    {
+        try
+        {
+            this.userArchiveManager.setUserAvatarImage(
+                    userName, imageDataBytes
+            );
+        }
+        catch (IOException exception)
+        {
+            log.error(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 }
