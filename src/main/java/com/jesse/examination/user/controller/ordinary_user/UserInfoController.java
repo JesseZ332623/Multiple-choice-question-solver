@@ -101,7 +101,7 @@ public class UserInfoController
             log.error(exception.getMessage());
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(exception.getMessage());
+                                 .body(exception.getMessage());
         }
     }
 
