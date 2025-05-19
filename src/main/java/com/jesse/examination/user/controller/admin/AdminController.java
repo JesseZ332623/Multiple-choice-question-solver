@@ -6,7 +6,9 @@ import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -235,6 +237,45 @@ public class AdminController
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(exception.getMessage());
+        }
+    }
+
+    @GetMapping(path = "/get_default_avatar")
+    public ResponseEntity<?> getDefaultAvatar()
+    {
+        byte[] imageData
+                = this.adminServiceInterface.getDefaultAvatar();
+
+        var headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.IMAGE_PNG);
+
+        return  new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+    }
+
+    @PostMapping(path = "/set_user_overview_avatar/{userName}")
+    public ResponseEntity<?>
+    modifyUserAvatar(
+            @PathVariable String userName,
+            @RequestBody  byte[] imageDataBytes
+    )
+    {
+        try
+        {
+            this.adminServiceInterface.modifyUserAvatar(
+                    userName, imageDataBytes
+            );
+
+            return ResponseEntity.ok(
+                    format(
+                            "Modify user: %s avatar complete!", userName
+                    )
+            );
+        }
+        catch (RuntimeException exception)
+        {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body(exception.getMessage());
         }
     }
 }
