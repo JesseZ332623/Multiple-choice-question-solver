@@ -115,7 +115,6 @@
         padding: 5px 16px;
         font-size: 14px;
         cursor: pointer;
-        transition: background-color 80ms ease-out;
         margin-top: 1rem;
     }
 
@@ -236,7 +235,7 @@
                 // 检查文件大小
                 if (file.size >= MAX_FILE_SIZE)
                 {
-                    statusElement.textContent = `文件大小应小于 ${MAX_FILE_SIZE / 1024/ 1024} MB!`;
+                    statusElement.textContent = `文件大小应小于 ${MAX_FILE_SIZE / 1024 / 1024} MB!`;
                     statusElement.style.color = '#F47067';
 
                     return;
@@ -275,7 +274,7 @@
 
                     // 1.5 秒后清除状态
                     setTimeout(
-                        () => { statusElement.textContent = ''; location.reload(); }, 
+                        () => { statusElement.textContent = ''; location.reload(); },
                         1500
                     );
                 }
