@@ -49,7 +49,7 @@
 
 - 管理员界面（当前只写了用户数据管理页面）
   - <https://localhost:8081/admin/all_users>
-  ![image](https://github.com/user-attachments/assets/ddd62054-2722-478a-9702-2d8eea628f38)
+ ![image](https://github.com/user-attachments/assets/7452a86b-f69c-4aef-84bd-e3d81bb00dd6)
 
 #### Date：2025.05.13
 
