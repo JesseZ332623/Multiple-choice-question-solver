@@ -10,6 +10,8 @@ import java.io.IOException;
 */
 public interface UserArchiveManagerInterface
 {
+    byte[] getDefaultAvatarImage();
+
     /**
      * 获取指定用户头像数据。
      */
