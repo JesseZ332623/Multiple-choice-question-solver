@@ -21,7 +21,7 @@
 - 从 release 处下载编译好的 .jar 包并运行：
 
   ```bash
-      java -jar [your-jar-path/examination-1.3.0-SNAPSHOT.jar]
+  java -jar [your-jar-path/examination-1.3.0-SNAPSHOT.jar]
   ```
 
 ### 访问
