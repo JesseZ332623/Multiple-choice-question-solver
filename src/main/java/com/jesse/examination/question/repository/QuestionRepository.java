@@ -1,11 +1,8 @@
 package com.jesse.examination.question.repository;
 
-import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.question.entity.questionentity.QuestionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.List;
 
