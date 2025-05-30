@@ -2,7 +2,9 @@ package com.jesse.examination.question.repository;
 
 import com.jesse.examination.question.entity.questionentity.QuestionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -70,6 +72,30 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
             nativeQuery = true
     )
     List<QuestionProjectionWithCorrectOption> findQuestionWithCorrectOption();
+
+    /**
+     * 往问题表中插入一个新的问题和正确答案。
+     *
+     * @param content 问题内容
+     * @param answer  问题答案
+     *
+     * @return 返回受影响的行数
+     */
+    @Modifying
+    @Query(
+            value = """
+                    INSERT INTO questions(content, answer)
+                    VALUES (:questionContent, :questionAnswer)
+                    """,
+            /* 此处是 SQL 原生查询，
+             * 所以必须使用 nativeQuery = true 告知 JPA。
+             */
+            nativeQuery = true
+    )
+    Integer addNewQuestion(
+            @Param(value = "questionContent") String content,
+            @Param(value = "questionAnswer")  String answer
+    );
 
     interface QuestionProjectionWithCorrectOption
     {
