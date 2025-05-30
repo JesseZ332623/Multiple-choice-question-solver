@@ -1,0 +1,176 @@
+:root {
+  --gh-bg-color: #0d1117;
+  --gh-border-color: #30363d;
+  --gh-text-color: #c9d1d9;
+  --gh-header-bg: #161b22;
+  --gh-button-bg: #21262d;
+  --gh-button-hover: #30363d;
+  --gh-accent-blue: #1f6feb;
+  --gh-accent-red: #d41310;
+  --gh-accent-green: #01911e;
+}
+
+body {
+  background-color: var(--gh-bg-color);
+  color: var(--gh-text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  padding: 20px;
+  max-width: 1780px;
+  margin: 0 auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--gh-border-color);
+  border-radius: 8px;
+  overflow: scroll;
+  margin: auto;
+  background-color: var(--gh-header-bg);
+}
+
+caption {
+  text-align: center;
+  padding: 12px;
+  font-weight: 600;
+  background-color: var(--gh-header-bg);
+  border-bottom: 1.5px solid var(--gh-border-color);
+}
+
+th, td {
+  padding: 14px 12px;
+  text-align: center;
+  border: 1px solid var(--gh-border-color);
+  position: relative;
+}
+
+/* 为每个单元格添加微妙的投影 */
+th:not(:first-child),
+td:not(:first-child) {
+  box-shadow: inset 1px 0 0 var(--gh-border-color);
+}
+
+th {
+  background-color: var(--gh-header-bg);
+  font-weight: 480;
+  font-size: 14px;
+}
+
+tr:hover {
+  background-color: rgba(110, 118, 129, 0.1);
+}
+
+button {
+  background-color: var(--gh-button-bg);
+  color: var(--gh-text-color);
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin: 2px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  font-family: inherit;
+}
+
+button:hover {
+  background-color: var(--gh-button-hover);
+  border-color: #8b949e;
+  transition-duration: 0.1s;
+}
+
+.btn-success {
+  background-color: var(--gh-accent-green);
+  border-color: #2ea043;
+}
+
+.btn-danger {
+  background-color: var(--gh-accent-red);
+  border-color: #f85149;
+}
+
+.btn-warning {
+  background-color: #b88010;
+  border-color: #c08714;
+}
+
+input, select {
+  background-color: var(--gh-header-bg);
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  color: var(--gh-text-color);
+  padding: 6px 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--gh-accent-blue);
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 1;
+  max-width: 120px;
+}
+
+.action-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.gh-button {
+  background-color: rgba(31, 111, 235, 0.1);
+  border: 1px solid rgba(31, 111, 235, 0.4);
+}
+
+.gh-button:hover {
+  background-color: rgba(31, 111, 235, 0.2);
+}
+
+#upload-status {
+  font-size: 0.85em;
+  margin-top: 4px;
+}
+
+img {
+  vertical-align: middle;
+  background-color: var(--gh-header-bg);
+  border: 1px solid var(--gh-border-color);
+}
+
+@media (max-width: 768px) 
+{
+    table {
+        border-spacing: 0 6px; /* 移动端减少垂直间距 */
+    }
+
+    td, th {
+        padding: 12px 10px;
+        font-size: 0.9em;
+    }
+    
+    button {
+        padding: 4px 8px;
+        font-size: 0.9em;
+    }
+}
+
+::placeholder {
+  color: #6e7681;
+  opacity: 1;
+}
