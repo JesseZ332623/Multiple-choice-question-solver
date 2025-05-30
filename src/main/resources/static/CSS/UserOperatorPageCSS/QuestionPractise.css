@@ -1,0 +1,249 @@
+:root {
+  --gh-border: #30363d;
+  --header-pos-top: 1.1rem;
+  --header-pos-right: 30px;
+  --header-spacing: 0px; /* 新增间距变量 */
+}
+
+body {
+  background-color: #0d1117;
+  /* GitHub 暗黑模式背景 */
+  color: #c9d1d9;
+  /* GitHub 主要文字颜色 */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+h1 {
+  color: #e6edf3;
+  /* GitHub 标题颜色 */
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+#total {
+  color: #58a6ff;
+  /* GitHub 强调色（蓝色） */
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.question-container {
+  background-color: #161b22;
+  /* GitHub 次级背景色 */
+  border-radius: 6px;
+  /* GitHub 使用更小的圆角 */
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+p {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+}
+
+li {
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #58a6ff;
+  /* GitHub 蓝色边框 */
+  border-radius: 50%;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+input[type="radio"]:checked {
+  background-color: #58a6ff;
+  /* GitHub 蓝色填充 */
+  border-color: #58a6ff;
+  box-shadow: inset 0 0 0 3px #161b22;
+}
+
+label {
+  font-size: 16px;
+  color: #c9d1d9;
+  /* GitHub 文字颜色 */
+  cursor: pointer;
+}
+
+label:hover {
+  color: #e6edf3;
+  /* GitHub 悬停文字颜色 */
+}
+
+.submit-btn {
+  background-color: #238636;
+  /* GitHub 绿色按钮 */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.submit-btn:hover {
+  background-color: #2ea043;
+  /* GitHub 绿色悬停 */
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  background-color: #30363d;
+  /* GitHub 禁用背景 */
+  color: #6e7681;
+  /* GitHub 禁用文字 */
+  cursor: not-allowed;
+}
+
+.feedback {
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.correct {
+  color: #2ea043;
+  /* GitHub 绿色用于正确 */
+}
+
+.incorrect {
+  color: #f97583;
+  /* GitHub 红色用于错误 */
+}
+
+.no_answer {
+  color: #6e7681;
+  /* GitHub 中性灰色 */
+}
+
+.total_submit_button {
+  background-color: #238636;
+  /* GitHub 绿色按钮 */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-top: 20px;
+}
+
+.total_submit_button:hover {
+  background-color: #2ea043;
+}
+
+.total_submit_button:active {
+  transform: scale(0.98);
+}
+
+.practise_score {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #161b22;
+  /* GitHub 次级背景 */
+  border-radius: 6px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.practise_score span {
+  display: block;
+}
+
+.user-badge {
+  position: fixed;
+  background-color: var(--gh-bg);
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--gh-border);
+  font-size: 14px;
+  top: var(--header-pos-top);
+  right: calc(var(--header-pos-right) + var(--header-spacing));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.user-badge img {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 110, 123, 0.4);
+  object-fit: cover;
+  position: relative;
+}
+
+/* 返回链接专项样式 */
+#return_to_frontpage {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--gh-text);
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.8rem;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  background: rgba(201, 209, 217, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+#return_to_frontpage:hover {
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.4);
+  background: rgba(88, 166, 255, 0.1);
+  transform: translate(-50%, -2px);
+  box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+}
+
+#return_to_frontpage::before {
+  content: "←";
+  font-weight: 600;
+  color: var(--gray);
+  transition: color 0.3s ease;
+}
+
+#return_to_frontpage:hover::before {
+  color: #58a6ff;
+}
