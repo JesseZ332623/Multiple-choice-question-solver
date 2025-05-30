@@ -45,8 +45,8 @@ public class EmailSenderController
     */
     public final static String VERIFYCODE_KEY = "VerifyCodeFor";
 
-    /** 验证码的有效期为 90 秒。 */
-    private final static int CODE_VALID_TIME = 90;
+    /** 验证码的有效期为 3 分钟。 */
+    private final static int CODE_VALID_TIME = 3;
 
     private final EmailSenderInterface  emailSender;
     private final AdminServiceInterface emailQueryService;
@@ -66,10 +66,12 @@ public class EmailSenderController
         emailContent.setTextBody(
                 format(
                         "用户：%s 您的验证码是：[%s]，" +
-                                "请在 %d 秒内完成验证，超过 %d 秒后验证码自动失效！",
+                        "请在 %d 分钟内完成验证，超过 %d 分钟后验证码自动失效！",
                         userName, varifyCode, CODE_VALID_TIME, CODE_VALID_TIME
                 )
         );
+
+        // 暂时没有附件
         emailContent.setAttachmentPath(null);
 
         return emailContent;
@@ -113,11 +115,11 @@ public class EmailSenderController
 
             /*
              * 将验证码存入 Redis 数据库，
-             * 并设置有效期为 90 秒，超过该时间 Redis 会自动删除。
+             * 并设置有效期为 CODE_VALID_TIME 分钟，超过该时间 Redis 会自动删除。
              */
             this.redisTemplate.opsForValue().set(
                     VERIFYCODE_KEY + userName, varifyCode,
-                    CODE_VALID_TIME, TimeUnit.SECONDS
+                    CODE_VALID_TIME, TimeUnit.MINUTES
             );
 
             EmailContentDTO emailContent = getEmailContentDTO(userName, userEmail, varifyCode);
