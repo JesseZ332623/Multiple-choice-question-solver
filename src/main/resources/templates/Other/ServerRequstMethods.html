@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>服务器支持的请求方法</title>
+    <link rel="stylesheet" 
+          th:href="@{/CSS/OtherCSS/ServerRequstMethods.css}">
+</head>
+<body>
+    <div id="request_methd_table">
+        <table>
+            <caption>服务器支持的请求方法</caption>
+            <tbody>
+                <tr>
+                    <td><strong class="method get" data-tooltip="GET方法用于从服务器获取数据，不会修改数据。">GET</strong></td>
+                    <td><strong class="method post" data-tooltip="POST方法用于向服务器提交数据，通常用于创建新资源。">POST</strong></td>
+                    <td><strong class="method put" data-tooltip="PUT方法用于更新服务器上的现有资源。">PUT</strong></td>
+                    <td><strong class="method delete" data-tooltip="DELETE方法用于删除服务器上的资源。">DELETE</strong></td>
+                    <td><strong class="method options" data-tooltip="OPTIONS方法用于查询服务器支持的HTTP方法。">OPTIONS</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+</body>
+<script type="text/javascript" 
+           th:src="@{/JS/OtherScript/ServerRequstMethods.js}"></script>
+</html>
