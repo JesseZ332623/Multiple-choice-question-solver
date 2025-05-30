@@ -1,0 +1,218 @@
+:root {
+  --gh-dark: #0d1117;
+  --gh-border: #30363d;
+  --gh-text: #c9d1d9;
+  --green: #2ea043;
+  --red: #f85149;
+  --gray: #8b949e;
+  --yellow: #e3b341;
+  --header-pos-top: 1.1rem;
+  --header-pos-right: 30px;
+  --header-spacing: 0px; /* 新增间距变量 */
+}
+
+body {
+  background-color: var(--gh-dark);
+  color: var(--gh-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  margin: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.result-container {
+  background-color: #161b22;
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transform: translateY(-20px);
+  opacity: 0;
+  animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #58a6ff;
+  text-align: center;
+  position: relative;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.stat-item {
+  padding: 1.2rem;
+  border-radius: 8px;
+  background: var(--gh-dark);
+  border: 1px solid var(--gh-border);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+}
+
+.correct {
+  color: var(--green);
+}
+.error {
+  color: var(--red);
+}
+.unanswered {
+  color: var(--gray);
+}
+.rate {
+  color: var(--yellow);
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-item {
+  opacity: 0;
+  animation: itemAppear 0.4s ease forwards;
+}
+
+@keyframes itemAppear {
+  to {
+    opacity: 1;
+  }
+}
+
+.stat-item:nth-child(1) {
+  animation-delay: 0.2s;
+}
+.stat-item:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.stat-item:nth-child(3) {
+  animation-delay: 0.6s;
+}
+.stat-item:nth-child(4) {
+  animation-delay: 0.8s;
+}
+
+.mistake-rate {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 1rem;
+  background: linear-gradient(45deg, #490202, #2c0101);
+  border-radius: 8px;
+  animation: pulse 2s infinite;
+}
+
+/* 新增样式 */
+#user_name {
+  position: fixed;
+  background-color: var(--gh-bg);
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  border: 1px solid var(--gh-border);
+  font-size: 14px;
+  top: var(--header-pos-top);
+  right: calc(var(--header-pos-right) + var(--header-spacing));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(4px);
+}
+
+#user_name img {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 110, 123, 0.4);
+  object-fit: cover;
+  position: relative;
+}
+
+#error_message {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--red);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+  transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  z-index: 1000;
+}
+
+#error_message.show {
+  top: 2rem;
+}
+
+/* 返回链接专项样式 */
+#return_to_frontpage {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--gh-text);
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.8rem;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  background: rgba(201, 209, 217, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  backdrop-filter: blur(4px);
+}
+
+#return_to_frontpage:hover {
+  color: #58a6ff;
+  border-color: rgba(88, 166, 255, 0.4);
+  background: rgba(88, 166, 255, 0.1);
+  transform: translate(-50%, -2px);
+  box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+}
+
+#return_to_frontpage::before {
+  content: "←";
+  font-weight: 600;
+  color: var(--gray);
+  transition: color 0.3s ease;
+}
+
+#return_to_frontpage:hover::before {
+  color: #58a6ff;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
