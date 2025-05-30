@@ -1,0 +1,177 @@
+/* GitHub 暗黑主题配色 */
+:root {
+  --gh-bg-color: #0d1117;
+  --gh-border-color: #30363d;
+  --gh-text-color: #c9d1d9;
+  --gh-accent-color: #58a6ff;
+  --gh-btn-bg: #238636;
+  --gh-btn-hover: #2ea043;
+  --gh-error-color: #f85149;
+}
+
+body {
+  background-color: var(--gh-bg-color);
+  color: var(--gh-text-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form {
+  background-color: #161b22;
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  padding: 2rem;
+  width: 340px;
+  box-shadow: 0 8px 24px rgba(1, 4, 9, 0.5);
+}
+
+.login-form-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-form-header h1 {
+  font-size: 24px;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label.required::after {
+  content: "*";
+  color: var(--gh-error-color);
+  margin-left: 3px;
+}
+
+.form-control {
+  background-color: #010409;
+  border: 1px solid var(--gh-border-color);
+  border-radius: 6px;
+  color: var(--gh-text-color);
+  font-size: 14px;
+  padding: 5px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  height: 32px;
+  margin-top: 4px;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  border-color: var(--gh-accent-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(46, 160, 67, 0.3);
+}
+
+.form-control.invalid {
+  border-color: var(--gh-error-color);
+}
+
+.error-message {
+  color: var(--gh-error-color);
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 18px;
+  display: none;
+}
+
+.btn {
+  background-color: var(--gh-btn-bg);
+  color: white;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 6px;
+  width: 100%;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--gh-btn-hover);
+  border-color: #3fb950;
+}
+
+.btn:active {
+  background-color: #238636;
+  transition: none;
+}
+
+/* GitHub 风格的聚焦状态 */
+*:focus-visible {
+  outline: 2px solid var(--gh-accent-color);
+  outline-offset: 2px;
+}
+
+/* 新增链接样式 */
+a {
+  color: var(--gh-accent-color);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+  display: block;
+  margin: 1rem 0;
+  position: relative;
+}
+
+a:hover {
+  color: #79c0ff; /* GitHub 悬停蓝 */
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--gh-accent-color);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* 微调原有表单间距 */
+.login-form-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 新增发送验证码按钮样式 */
+#send_verify_code {
+  background-color: var(--gh-btn-bg);
+  color: white;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 14px;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#send_verify_code:hover {
+  background-color: var(--gh-btn-hover);
+  border-color: rgba(240, 246, 252, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(1, 4, 9, 0.5);
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s cubic-bezier(0.3, 0.9, 0.5, 1.5), box-shadow 0.2s ease;
+}
+
+#send_verify_code:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(1, 4, 9, 0.3);
+  transition: none;
+}
+
+#send_verify_code:disabled {
+  background-color: #555;
+  cursor: not-all-allowed;
+}
