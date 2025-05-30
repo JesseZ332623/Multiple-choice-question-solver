@@ -1,0 +1,122 @@
+:root {
+  --gh-bg: #0d1117;
+  --gh-border: #30363d;
+  --gh-text: #c9d1d9;
+  --gh-code-bg: #161b22;
+}
+
+body {
+  background-color: var(--gh-bg);
+  color: var(--gh-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 20px;
+  margin: 0;
+}
+
+#request_methd_table {
+  max-width: 600px;
+  margin: 20px auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+table {
+  width: 100%;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  background-color: var(--gh-code-bg);
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+caption {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+  background-color: var(--gh-code-bg);
+  border-bottom: 1px solid var(--gh-border);
+}
+
+td {
+  padding: 8px 16px;
+  border: none;
+}
+
+.method {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  margin: 2px;
+  transition: transform 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.method:hover {
+  transform: scale(1.05);
+}
+
+.get {
+  background-color: #24292f;
+  color: #00cc66;
+}
+.post {
+  background-color: #24292f;
+  color: #ffff33;
+}
+.put {
+  background-color: #24292f;
+  color: #66b2ff;
+}
+.delete {
+  background-color: #24292f;
+  color: #ff1111;
+}
+.options {
+  background-color: #24292f;
+  color: #ff66b3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 修复后的 tooltip 样式 */
+.tooltip {
+  display: none;
+  position: absolute;
+  background-color: var(--gh-code-bg);
+  color: var(--gh-text);
+  padding: 8px 12px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  max-width: 250px;
+  white-space: nowrap;
+  z-index: 1000;
+  font-size: 13px;
+  line-height: 1.4;
+  border: 1px solid var(--gh-border); /* 添加边框 */
+}
+
+.tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+  border-width: 6px 8px 6px 0;
+  border-style: solid;
+  border-color: transparent var(--gh-code-bg);
+}
