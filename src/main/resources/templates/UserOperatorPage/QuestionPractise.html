@@ -373,7 +373,7 @@
 
         const recordJson = 
         {
-            "userName"      : document.getElementById('user_name_text').textContent,
+            "userName"      : document.getElementById('user_name_text').textContent.trim(),
             "submitDate"    : getCurrentISOTimeStrWithoutZone(),
             "correctCount"  : TotalCorrect,
             "errorCount"    : TotalMistake,
@@ -391,7 +391,7 @@
         );
     }
 
-    async function updateCorrectTimes(questionId) 
+    async function updateCorrectTimes(questionId)
     {
         try 
         {
@@ -400,7 +400,7 @@
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
             const questionPosData = {
-                "userName"   : document.getElementById('user_name').textContent,
+                "userName"   : document.getElementById('user_name_text').textContent.trim(),
                 "questionId" : questionId
             };
 
