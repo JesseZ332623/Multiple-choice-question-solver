@@ -4,7 +4,6 @@ import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.redis.dto.QuestionPosDTO;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.ArrayList;
