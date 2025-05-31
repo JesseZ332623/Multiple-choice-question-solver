@@ -3,11 +3,14 @@ package com.jesse.examination.scorerecord.service.impl;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.repository.ScoreRecordRepository;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.lang.String.format;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -141,5 +144,17 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
         this.scoreRecordRepository.flush();
 
         return currentRows;
+    }
+
+    @Override
+    public ScoreRecordEntity
+    findLatestScoreRecordByName(String userName) 
+    {
+        return this.scoreRecordRepository
+                .findLatestScoreRecordByName(userName.trim())
+                .orElseThrow(() -> new NoSuchElementException(
+                    format("用户 %s 还没有最新的成绩记录哦！", userName)
+                )
+        );
     }
 }
