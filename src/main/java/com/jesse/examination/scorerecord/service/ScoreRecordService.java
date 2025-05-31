@@ -2,8 +2,10 @@ package com.jesse.examination.scorerecord.service;
 
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScoreRecordService
 {
@@ -45,6 +47,12 @@ public interface ScoreRecordService
             @NotNull
             List<ScoreRecordEntity> scoreRecordEntities
     );
+
+    /**
+     * 找出指定用户最新的一条成绩记录。
+     */
+    ScoreRecordEntity
+    findLatestScoreRecordByName(String userName);
 
     /**
      * 清空 score_record 表。
