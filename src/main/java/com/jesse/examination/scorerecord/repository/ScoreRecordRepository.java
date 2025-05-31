@@ -1,10 +1,12 @@
 package com.jesse.examination.scorerecord.repository;
 
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -32,6 +34,23 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, 
     )
     Integer deleteAllScoreRecordByUserName(
             @Param(value = "userName") String userName
+    );
+
+    /**
+     * 找出指定用户最新的一条成绩记录。
+     */
+    @Query(value = """
+                    SELECT score_id, user_name, 
+                           MAX(submit_date) AS submit_date,
+                           correct_count, error_count,
+                           no_answer_count, mistake_rate
+                    FROM   score_record
+                    WHERE  user_name = :userName;
+                   """,
+           nativeQuery = true)
+    Optional<ScoreRecordEntity>
+    findLatestScoreRecordByName(
+        @Param(value = "userName") String userName
     );
 
     /**
