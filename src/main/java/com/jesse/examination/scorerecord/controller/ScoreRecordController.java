@@ -2,17 +2,20 @@ package com.jesse.examination.scorerecord.controller;
 
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.NoSuchElementException;
 
 import static java.lang.String.format;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/score_record", produces = "application/json")
 public class ScoreRecordController
@@ -109,19 +112,14 @@ public class ScoreRecordController
         try
         {
             ScoreRecordEntity latestScoreRecord
-                    = this.scoreRecordService.findAllScoreRecordByUserName(userName)
-                                             .stream()
-                                             .max(Comparator.comparing(ScoreRecordEntity::getSubmitDate))
-                                             .orElseThrow(
-                                                     () -> new NoSuchElementException(
-                                                             "暂时还没有最新成绩记录哦！"
-                                                     )
-                                             );
+                    = this.scoreRecordService.findLatestScoreRecordByName(userName);
 
             return ResponseEntity.ok(latestScoreRecord);
         }
-        catch (Exception exception)
+        catch (NoSuchElementException exception)
         {
+            log.error(exception.getMessage());
+			
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body(exception.getMessage());
         }
@@ -248,6 +246,8 @@ public class ScoreRecordController
         }
         catch (Exception exception)
         {
+            // log.error(exception.getMessage());
+
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(exception.getMessage());
         }
