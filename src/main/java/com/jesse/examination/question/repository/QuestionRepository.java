@@ -60,14 +60,15 @@ public interface QuestionRepository extends JpaRepository<QuestionEntity, Intege
      */
     @Query(
             value = """
-                  SELECT
-                       questions.id        AS QuestionID,
-                       questions.content   AS QuestionContent,
-                       questions.answer    AS CorrectAnswer,
-                       options.content     AS CorrectOptionContent
-                  FROM questions
-                  INNER JOIN options ON options.question_id = questions.answer
-                  GROUP BY questions.id
+                    SELECT questions.id      AS questionId, 
+                           questions.content AS questionContent, 
+                           questions.answer  AS correctAnswer,
+                           options.content   AS correctOptionContent 
+                    FROM questions
+                    INNER JOIN options
+                    ON questions.id = options.question_id
+                    AND
+                    questions.answer = options.option_key
                   """,
             nativeQuery = true
     )
