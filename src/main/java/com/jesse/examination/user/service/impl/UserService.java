@@ -216,6 +216,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
                                  userLoginDTO.getUserName()
                     );
 
+            // 加载用户存档
             userArchiveManager.readUserArchive(userLoginDTO.getUserName());
         }
     }
