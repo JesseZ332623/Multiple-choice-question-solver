@@ -16,7 +16,7 @@ body {
   margin: 0;
 }
 
-#request_methd_table {
+#request_method_table {
   max-width: 600px;
   margin: 20px auto;
   animation: fadeIn 0.3s ease-out;
@@ -43,6 +43,15 @@ caption {
 td {
   padding: 8px 16px;
   border: none;
+}
+
+img {
+    width: 65%;
+    height: 65%;
+    margin: 15px 0 0 0;
+    border: 1px dashed #c9d1d9;
+    display: block;
+    margin: 0 auto;
 }
 
 .method {
@@ -93,7 +102,6 @@ td {
   }
 }
 
-/* 修复后的 tooltip 样式 */
 .tooltip {
   display: none;
   position: absolute;
@@ -120,3 +128,4 @@ td {
   border-style: solid;
   border-color: transparent var(--gh-code-bg);
 }
+
