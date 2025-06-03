@@ -25,5 +25,5 @@ public class RootController
             method = RequestMethod.OPTIONS,
             path = "/"
     )
-    public String getAllowedMethod() { return "Other/ServerOptions"; }
+    public String getAllowedMethod() { return "Other/ServerRequestMethods"; }
 }
