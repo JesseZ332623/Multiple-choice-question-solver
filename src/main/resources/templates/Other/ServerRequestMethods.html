@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>服务器支持的请求方法</title>
+        <link rel="stylesheet"
+              th:href="@{/CSS/OtherCSS/ServerRequestMethods.css}">
+    </head>
+    <body>
+        <div id="request_method_table">
+            <table>
+                <caption>服务器支持的请求方法</caption>
+                <tbody>
+                    <tr>
+                        <td><strong class="method get" data-tooltip="GET方法用于从服务器获取数据，不会修改数据。">GET</strong></td>
+                        <td><strong class="method post" data-tooltip="POST方法用于向服务器提交数据，通常用于创建新资源。">POST</strong></td>
+                        <td><strong class="method put" data-tooltip="PUT方法用于更新服务器上的现有资源。">PUT</strong></td>
+                        <td><strong class="method delete" data-tooltip="DELETE方法用于删除服务器上的资源。">DELETE</strong></td>
+                        <td><strong class="method options" data-tooltip="OPTIONS方法用于查询服务器支持的HTTP方法。">OPTIONS</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="tooltip" class="tooltip"></div>
+        <div>
+            <img src="https://raw.githubusercontent.com/JesseZ332623/Multiple-choice-question-solver/a11103b93d5341cb4f5399ad6844c420b0928680/documents/%E5%BA%94%E7%94%A8%E6%89%80%E6%9C%89%E7%AB%AF%E7%82%B9%E6%A0%91%E5%9E%8B%E5%9B%BE.svg"
+                 alt="项目端点树型图一览">
+        </div>
+    </body>
+    <script type="text/javascript"
+            th:src="@{/JS/OtherScript/ServerRequestMethods.js}"></script>
+</html>
