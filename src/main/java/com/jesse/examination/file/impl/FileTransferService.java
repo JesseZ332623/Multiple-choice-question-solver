@@ -229,7 +229,12 @@ public class FileTransferService implements FileTransferServiceInterface
         Path completeFilePath = dir.resolve(fileName);
 
         // 写入数据
-        Files.writeString(completeFilePath, fileData);
+        Files.writeString(
+                completeFilePath, fileData,
+                StandardOpenOption.CREATE,              // 不存在则创建
+                StandardOpenOption.TRUNCATE_EXISTING,   // 存在则清空
+                StandardOpenOption.WRITE                // 写入模式
+        );
     }
 
     /**
@@ -254,7 +259,12 @@ public class FileTransferService implements FileTransferServiceInterface
         Path completeFilePath = dir.resolve(fileName);
 
         // 将数据写入文件
-        Files.write(completeFilePath, fileByteData);
+        Files.write(
+                completeFilePath, fileByteData,
+                StandardOpenOption.CREATE,              // 不存在则创建
+                StandardOpenOption.TRUNCATE_EXISTING,   // 存在则清空
+                StandardOpenOption.WRITE                // 写入模式
+        );
     }
 
     /**
