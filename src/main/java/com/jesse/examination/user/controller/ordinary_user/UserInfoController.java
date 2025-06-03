@@ -139,15 +139,17 @@ public class UserInfoController
     {
         try
         {
-            this.userService.userLogin(userLoginDTO);
-
             /*
              * 为了防止固定会话攻击，每次登录都会强制创建新的 Session。
              */
             HttpSession session = request.getSession(false);
+
             if (!Objects.equals(session, null)) {
                 session.invalidate();
             }
+
+            // 正式登录
+            this.userService.userLogin(userLoginDTO);
 
             // 将用户名和这个 session 相关联。
             session = request.getSession(true);
