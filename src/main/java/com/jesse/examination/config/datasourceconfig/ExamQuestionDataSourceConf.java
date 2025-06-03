@@ -32,7 +32,8 @@ import java.util.Objects;
         basePackages = {
                 "com.jesse.examination.question.repository",
                 "com.jesse.examination.scorerecord.repository",
-                "com.jesse.examination.user.repository"
+                "com.jesse.examination.user.repository",
+                "com.jesse.examination.email.repo"
         },
         entityManagerFactoryRef = "examManagerFactory",
         transactionManagerRef   = "examTransactionManager"
@@ -80,7 +81,8 @@ public class ExamQuestionDataSourceConf
                 "com.jesse.examination.question.entity.questionentity",
                 "com.jesse.examination.question.entity.optionentity",
                 "com.jesse.examination.scorerecord.entity",
-                "com.jesse.examination.user.entity"
+                "com.jesse.examination.user.entity",
+                "com.jesse.examination.email.entity"
         );
 
         // 设定 JPA 提供厂商
