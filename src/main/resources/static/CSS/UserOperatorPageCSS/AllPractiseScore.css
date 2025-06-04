@@ -18,7 +18,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   padding: 20px;
-  max-width: 800px;
+  max-width: 925px;
   margin: 0 auto;
 }
 
@@ -142,6 +142,10 @@ p {
   color: #8b949e;
   font-size: 13px;
   margin-bottom: 20px;
+}
+
+#mistake_rate_chatrs {
+	animation: tableFade 0.3s ease-out both;
 }
 
 .user-badge {
