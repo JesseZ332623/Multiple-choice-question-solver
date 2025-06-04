@@ -1,15 +1,21 @@
-async function truncateRecord(button) 
+/**
+ * 清空某用户的所有答题成绩记录。 
+ * 
+ * @param {HTMLElement} button 触发这个动作的按钮元素
+*/
+async function truncateRecord(button)
 {
     try 
     {
         // 从 meta 标签获取 CSRF Token
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-        var userName = document.getElementById('user_name_text').textContent;
+        var userName     = document.getElementById('user_name_text').textContent;
 
         button.classList.add('loading');
 
-        if (confirm('这是一个敏感操作，您确定要删除所有练习记录吗？')) {
+        if (confirm('这是一个敏感操作，您确定要删除所有练习记录吗？'))
+        {
             const response = await fetch(
                 `/api/score_record/delete_by_username/${userName}`,
                 {
@@ -21,7 +27,8 @@ async function truncateRecord(button)
                 }
             );
 
-            if (!response.ok) {
+            if (!response.ok) 
+            {
                 const errorDetail = await response.text().catch(() => null);
 
                 throw new Error(`
@@ -29,15 +36,17 @@ async function truncateRecord(button)
                         Detail: ${errorDetail || 'Unknow'}`
                 );
             }
-            else {
+            else 
+            {
                 alert(
                     await response.text().catch(() => null)
                 );
+
                 location.reload();
             }
         }
     }
-    catch (error) 
+    catch (error)
     {
         alert(error);
         console.error(error);
