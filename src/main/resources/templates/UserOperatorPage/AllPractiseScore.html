@@ -7,7 +7,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>练习结果查询</title>
     <link rel="stylesheet" th:href="@{/CSS/UserOperatorPageCSS/AllPractiseScore.css}">
-    <script type="text/javascript" 
+    <script type="text/javascript"
             th:src="@{/JS/UserOperatorPageScript/AllPractiseScore.js}">
     </script>
 </head>
@@ -20,6 +20,9 @@
     
     <div>
         <p th:text="'练习次数: ' + ${#lists.size(AllScoreRecord)}"></p>
+        <span id="record_amount"
+              style="display: none;"
+              th:text="${AllScoreRecord.size()}"></span>
     </div>
     
     <div>
@@ -43,14 +46,24 @@
                 <tr th:each="record,iter : ${AllScoreRecord}" style="--i: ${iter.index}">
                     <td th:text="${record.scoreId}"></td>
                     <td th:text="${record.userName}"></td>
-                    <td th:text="${record.submitDate.toString()}"></td>
+                    <td th:text="${record.submitDate.toString()}"
+                        th:id="'submit_date_' + ${iter.index}"></td>
                     <td th:text="${record.errorCount}"></td>
                     <td th:text="${record.correctCount}"></td>
                     <td th:text="${record.noAnswerCount}"></td>
-                    <td th:text="${record.mistakeRate} + '%'"></td>
+                    <td th:text="${record.mistakeRate} + '%'"
+                        th:id="'mistake_rate_' + ${iter.index}"></td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <div id="mistake_rate_chatrs" 
+         style="width: 100%; height: 500px"></div>
 </body>
+
+<script type="text/javascript"
+        th:src="@{/JS/Echarts/echarts.js}"></script>
+<script type="text/javascript"
+        th:src="@{/JS/Echarts/MistakeRateChartsRender.js}"></script>
 </html>
