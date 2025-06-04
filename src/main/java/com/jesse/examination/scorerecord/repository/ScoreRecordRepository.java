@@ -12,7 +12,6 @@ import java.util.List;
 
 public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, Integer>
 {
-
     /**
      * 查找指定 userName 的所有成绩记录，存于一个列表中。
      */
@@ -40,12 +39,10 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, 
      * 找出指定用户最新的一条成绩记录。
      */
     @Query(value = """
-                    SELECT score_id, user_name, 
-                           MAX(submit_date) AS submit_date,
-                           correct_count, error_count,
-                           no_answer_count, mistake_rate
-                    FROM   score_record
-                    WHERE  user_name = :userName;
+                    SELECT * FROM score_record
+                    WHERE user_name = :userName
+                          AND
+                          submit_date = (SELECT MAX(submit_date) FROM score_record)
                    """,
            nativeQuery = true)
     Optional<ScoreRecordEntity>
