@@ -1,6 +1,6 @@
 getScoreSattlement();
 
-async function getScoreSattlement() 
+async function getScoreSattlement()
 {
     try 
     {
