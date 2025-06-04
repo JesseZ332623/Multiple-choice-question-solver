@@ -152,7 +152,6 @@ public class EmailSenderController
 
             /*
              * 若在用户发送验证码前，上一回的验证码存在，需要删除。
-             *
              */
             if (this.redisTemplate.opsForValue().get(entireVarifyKey) != null)
             {
