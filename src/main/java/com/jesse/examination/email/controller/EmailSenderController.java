@@ -2,10 +2,8 @@ package com.jesse.examination.email.controller;
 
 import com.jesse.examination.email.dto.EmailContentDTO;
 import com.jesse.examination.email.entity.EmailAuthTableEntity;
-import com.jesse.examination.email.repo.EmailAuthTableRepo;
 import com.jesse.examination.email.service.EmailAuthServiceInterface;
 import com.jesse.examination.email.service.EmailSenderInterface;
-import com.jesse.examination.email.service.impl.EmailAuthService;
 import com.jesse.examination.email.service.impl.EmailSender;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import lombok.extern.slf4j.Slf4j;
@@ -90,14 +88,14 @@ public class EmailSenderController
      */
     private void saveEmailAuthInfoToRedis()
     {
-        EmailAuthTableEntity emailAuth
-                = this.emailAuthService.getAuthInfoById(1);
-
         if (
                 this.redisTemplate.opsForValue().get(ENTERPRISE_EMAIL_ADDRESS) != null &&
                 this.redisTemplate.opsForValue().get(SERVICE_AUTH_CODE) != null
         )
         {
+            EmailAuthTableEntity emailAuth
+                    = this.emailAuthService.getAuthInfoById(1);
+
             // 往 Redis 中存入发送者的邮箱
             this.redisTemplate.opsForValue().set(
                     ENTERPRISE_EMAIL_ADDRESS, emailAuth.getEmail()
