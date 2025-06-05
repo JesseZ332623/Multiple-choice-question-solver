@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hibernate 查询统计</title>
+    <link rel="stylesheet" 
+          th:href="@{/CSS/Statistics/HibernateStatistics.css}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hibernate 查询统计</h1>
+            <p class="description">监控 Hibernate ORM 框架的查询性能与缓存效率</p>
+        </header>
+        <table class="stats-table">
+            <thead>
+                <th>总查询次数</th>
+                <th>实体加载次数</th>
+                <th>集合加载次数</th>
+                <th>二级缓存命中次数</th>
+                <th>查询缓存命中次数</th>
+                <th>连接获取次数</th>
+            </thead>
+            <tbody id="hibernate_statistics_data">
+                <tr>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                    <td>?</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="footer">
+            <p>最后更新: <span id="last-update" class="last-update">尚未更新</span></p>
+            <p>监控间隔: 2000 ms</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" 
+        th:src="@{/JS/Statistics/HibernateStatistics.js}"></script>
+</html>
