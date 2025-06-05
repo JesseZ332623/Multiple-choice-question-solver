@@ -158,6 +158,8 @@ public class UserService implements UserServiceInterface, UserDetailsService
 
         // 存入
         this.userEntityRepository.save(newUser);
+
+        // 创建新用户的存档
         this.userArchiveManager.createNewArchiveForUser(userRegistrationDTO.getUserName());
     }
 
