@@ -1,0 +1,134 @@
+/* GitHub 暗黑主题配色风格 */
+:root {
+  --github-bg: #0d1117;
+  --github-card-bg: #161b22;
+  --github-border: #30363d;
+  --github-text: #c9d1d9;
+  --github-text-secondary: #8b949e;
+  --github-accent: #58a6ff;
+  --github-green: #3fb950;
+}
+
+body {
+  background-color: var(--github-bg);
+  color: var(--github-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  padding: 20px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--github-border);
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin: 0 0 10px 0;
+  color: var(--github-accent);
+}
+
+.description {
+  color: var(--github-text-secondary);
+  font-size: 0.95rem;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--github-card-bg);
+  border: 1px solid var(--github-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.stats-table caption {
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 15px;
+  text-align: left;
+  background-color: rgba(22, 27, 34, 0.8);
+  border-bottom: 1px solid var(--github-border);
+}
+
+.stats-table th {
+  background-color: rgba(22, 27, 34, 0.9);
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--github-accent);
+  border-bottom: 1px solid var(--github-border);
+}
+
+.stats-table td {
+  padding: 15px;
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.stats-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid var(--github-border);
+}
+
+.stats-table tbody tr:hover td {
+  background-color: rgba(48, 54, 61, 0.3);
+}
+
+.update-animation {
+  animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: rgba(59, 185, 80, 0.2);
+  }
+  50% {
+    background-color: rgba(59, 185, 80, 0.4);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.footer {
+  margin-top: 25px;
+  text-align: center;
+  color: var(--github-text-secondary);
+  font-size: 0.85rem;
+  padding-top: 15px;
+  border-top: 1px solid var(--github-border);
+}
+
+.last-update {
+  color: var(--github-green);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .stats-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .stats-table th,
+  .stats-table td {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+}
