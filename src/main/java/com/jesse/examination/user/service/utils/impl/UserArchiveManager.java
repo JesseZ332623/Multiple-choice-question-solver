@@ -83,7 +83,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
      * <ol>
      *      <li>为该用户创建默认的头像</li>
      *      <li>创建用户所有问题答对次数记录文件</li>
-     *      <li>将默认的用户所有问题答对次数列表写入 Redis 数据库</li>
      * </ol>
      *
      * @param userName 指定用户名
@@ -103,14 +102,16 @@ public class UserArchiveManager implements UserArchiveManagerInterface
                 )
         );
 
-        this.redisService.saveQuestionCorrectTimeList(
-                userName,
-                RedisServiceInterface.createDefaultQuestionCorrectTimesList(
-                        this.questionService.getQuestionCount()
-                )
-        );
-
-
+        // 此处，创建新用户存档时不需要也不应该把问题答对次数的数据存入 Redis，
+        // 这个操作应该放在用户登录时再完成。
+//        this.redisService
+//            .deleteAllQuestionCorrectTimesByUser(userName);
+//      this.redisService.saveQuestionCorrectTimeList(
+//                userName,
+//                RedisServiceInterface.createDefaultQuestionCorrectTimesList(
+//                        this.questionService.getQuestionCount()
+//                )
+//        );
     }
 
     /**
@@ -134,7 +135,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     @Override
     public void readUserArchive(String userName)
     {
-
         List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
                 = this.fileTransferService.readUserCorrectTimesDataFile(userName);
 
