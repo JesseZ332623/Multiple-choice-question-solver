@@ -213,7 +213,6 @@ public class UserInfoController
 
             log.info("User [{}] logout, see you later~", logoutUserName);
 
-
             return ResponseEntity.ok()
                     .body(
                             format(
