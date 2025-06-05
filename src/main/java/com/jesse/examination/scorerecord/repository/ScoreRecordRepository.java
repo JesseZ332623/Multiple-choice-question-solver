@@ -42,7 +42,11 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, 
                     SELECT * FROM score_record
                     WHERE user_name = :userName
                           AND
-                          submit_date = (SELECT MAX(submit_date) FROM score_record)
+                          submit_date = (
+                            SELECT MAX(submit_date)
+                            FROM   score_record
+                            WHERE  user_name = :userName
+                          )
                    """,
            nativeQuery = true)
     Optional<ScoreRecordEntity>
