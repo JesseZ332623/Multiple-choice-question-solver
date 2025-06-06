@@ -147,7 +147,8 @@ public class AdminController
      * </p>
      */
     @DeleteMapping(path = "/delete/{userName}")
-    public ResponseEntity<?> deleteUserByUserName(@PathVariable String userName)
+    public ResponseEntity<?>
+    deleteUserByUserName(@PathVariable String userName)
     {
         try
         {
@@ -183,9 +184,7 @@ public class AdminController
      */
     @DeleteMapping(path = "/delete/range/{begin}_{end}")
     public ResponseEntity<?>
-    deleteUsersByIdRange(
-            @PathVariable Long begin,
-            @PathVariable Long end)
+    deleteUsersByIdRange(@PathVariable Long begin, @PathVariable Long end)
     {
         try
         {
@@ -211,7 +210,7 @@ public class AdminController
     }
 
     /**
-     * 管理员删除全部用户，服务器以 JSON 作为响应。
+     * 管理员删除全部用户，服务器响应一个字符串报告结果。
      *
      * <p>
      *     链接：
