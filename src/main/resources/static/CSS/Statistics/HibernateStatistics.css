@@ -116,6 +116,34 @@ h1 {
   font-weight: 500;
 }
 
+#clear_button_container {
+	width: inherit;
+	height: 45px;
+}
+
+#clear_button {
+  background-color:var(--github-green);
+  color: #ffffff;
+  border: 1px solid #444c56;
+  border-radius: 8px;
+  padding: 8px 12px 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  /* margin-top: 1rem; */
+  /* margin-left: auto; */
+  margin-bottom: 10px;
+  float: right;
+}
+
+#clear_button:hover {
+	background-color: #47d35a;
+}
+
+#statistics_charts {
+  margin: 15px 0 0 0;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 10px;
