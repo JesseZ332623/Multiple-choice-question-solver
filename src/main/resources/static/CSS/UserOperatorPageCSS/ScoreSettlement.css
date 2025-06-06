@@ -154,12 +154,12 @@ body {
   top: -100%;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--red);
+  background: var(--yellow);
   color: white;
   padding: 1rem 2rem;
   border-radius: 12px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+  box-shadow: 0 4px 12px rgba(247, 230, 0, 0.3);
   transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
   z-index: 1000;
 }
