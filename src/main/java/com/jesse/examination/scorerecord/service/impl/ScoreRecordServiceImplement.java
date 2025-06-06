@@ -148,7 +148,7 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
 
     @Override
     public ScoreRecordEntity
-    findLatestScoreRecordByName(String userName) 
+    findLatestScoreRecordByName(String userName)
     {
         return this.scoreRecordRepository
                 .findLatestScoreRecordByName(userName.trim())
