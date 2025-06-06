@@ -25,6 +25,9 @@ import static java.lang.String.format;
 
 /**
  * 管理员操作用户数据接口。
+ * 将 @Transactional 注解在类头，
+ * 意味着这个类的每一个公共方法都会视为一个事务，
+ * 在方法开始时 Start Transactional，在方法结束时 COMMIT 或者 ROLLBACK。
  */
 @Slf4j
 @Service
@@ -57,7 +60,8 @@ public class AdminUserService implements AdminServiceInterface
      * @throws DuplicateUserException
      *         当用户名和用户全名冲突的时候所抛的异常
      */
-    private void userNameCheckOut(String userName, String fullName)
+    private void
+    userNameCheckOut(String userName, String fullName)
     {
         if (this.adminUserEntityRepository.existsByUsername(userName))
         {
@@ -78,7 +82,8 @@ public class AdminUserService implements AdminServiceInterface
      * 通过用户名查找用户实体。
      */
     @Override
-    public UserEntity findUserByUserName(String userName)
+    public UserEntity
+    findUserByUserName(String userName)
     {
         return this.adminUserEntityRepository.findUserByUsername(userName)
                 .orElseThrow(
@@ -112,8 +117,8 @@ public class AdminUserService implements AdminServiceInterface
      * @return 返回新用户的 ID
      */
     @Override
-    public
-    Long addNewUser(@NotNull AdminAddNewUserDTO adminAddNewUserDTO) throws IOException
+    public Long
+    addNewUser(@NotNull AdminAddNewUserDTO adminAddNewUserDTO) throws IOException
     {
         this.userNameCheckOut(
                 adminAddNewUserDTO.getUserName(),
@@ -233,7 +238,8 @@ public class AdminUserService implements AdminServiceInterface
      * @return 删除的用户 ID。
      */
     @Override
-    public Long deleteUserByUserName(String userName)
+    public Long
+    deleteUserByUserName(String userName)
     {
         UserEntity userQueryResult
                 = this.adminUserEntityRepository.findUserByUsername(userName)
@@ -259,7 +265,8 @@ public class AdminUserService implements AdminServiceInterface
      * @return 返回实际删除的数据条数
      */
     @Override
-    public Long deleteUsersByIdRange(Long begin, Long end)
+    public Long
+    deleteUsersByIdRange(Long begin, Long end)
     {
         List<Long> existsIds
                 = this.adminUserEntityRepository.findIdByIdBetween(begin, end);
@@ -293,19 +300,13 @@ public class AdminUserService implements AdminServiceInterface
     @Override
     public Long truncateAllUsers()
     {
-        List<Long> existsIds
-            = this.adminUserEntityRepository.findAllUserId();
+        // 查询所有的用户名存于列表
+        List<String> existsNames
+            = this.adminUserEntityRepository.findAllUserName();
 
         // 逐个删除用户存档
-        for (Long id : existsIds)
-        {
-            this.userArchiveManager
-                    .deleteUserArchive(
-                            this.adminUserEntityRepository
-                                .findById(id)
-                                .orElseThrow()
-                                .getUsername()
-                    );
+        for (String userName : existsNames) {
+            this.userArchiveManager.deleteUserArchive(userName);
         }
 
         this.adminUserEntityRepository.deleteAll(); // 删除所有用户
@@ -316,16 +317,20 @@ public class AdminUserService implements AdminServiceInterface
         // 刷新（管理员的操作要立即生效）
         this.adminUserEntityRepository.flush();
 
-        return (long) existsIds.size();
+        return (long) existsNames.size();
     }
 
+    /**
+     * 在创建新用户时，获取默认的用户头像。
+     */
     @Override
     public byte[] getDefaultAvatar() {
         return this.userArchiveManager.getDefaultAvatarImage();
     }
 
     @Override
-    public void modifyUserAvatar(String userName, byte[] imageDataBytes)
+    public void
+    modifyUserAvatar(String userName, byte[] imageDataBytes)
     {
         try
         {
