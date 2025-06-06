@@ -1,4 +1,4 @@
-package com.jesse.examination.hibernate;
+package com.jesse.examination.hibernate.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
