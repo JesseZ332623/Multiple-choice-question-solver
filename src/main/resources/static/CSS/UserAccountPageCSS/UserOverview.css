@@ -34,8 +34,8 @@ h1 {
 }
 
 #user_overview img {
-  width: 128px;
-  height: 128px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
   border: 3px solid var(--gh-avatar-border);
   margin-bottom: 1.5rem;
