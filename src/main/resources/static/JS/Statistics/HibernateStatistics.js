@@ -1,5 +1,5 @@
 getHibernateStatisticsData();
-executeRepeatedly(2000);
+executeRepeatedly(1000);
 
 /**
  * 该检测数据指定时间就要刷新一次。 
@@ -48,7 +48,11 @@ function addAnimationWithCondition(tdNode, newValue)
         setTimeout(() => {
             tdNode.classList.remove('update-animation'); }, 1000
         );
+
+        return true;
     }
+
+    return false;
 }
 
 /**
@@ -59,14 +63,22 @@ function addAnimationWithCondition(tdNode, newValue)
  */
 function setDataToElements(statisticsData, tdNodes)
 {
-    addAnimationWithCondition(tdNodes[0], statisticsData.queryTimes);
-    addAnimationWithCondition(tdNodes[1], statisticsData.entityLoadTimes);
-    addAnimationWithCondition(tdNodes[2], statisticsData.setLoadTimes);
-    addAnimationWithCondition(tdNodes[3], statisticsData.queryCacheHitTimes);
-    addAnimationWithCondition(tdNodes[4], statisticsData.connectObtainTimes);
-    addAnimationWithCondition(tdNodes[5], statisticsData.l2CacheHitTimes);
+    const isupdate = new Array();
 
-    document.getElementById('last-update').textContent = new Date().toUTCString();
+    isupdate.push(addAnimationWithCondition(tdNodes[0], statisticsData.queryTimes));
+    isupdate.push(addAnimationWithCondition(tdNodes[1], statisticsData.entityLoadTimes));
+    isupdate.push(addAnimationWithCondition(tdNodes[2], statisticsData.setLoadTimes));
+    isupdate.push(addAnimationWithCondition(tdNodes[3], statisticsData.queryCacheHitTimes));
+    isupdate.push(addAnimationWithCondition(tdNodes[4], statisticsData.connectObtainTimes));
+    isupdate.push(addAnimationWithCondition(tdNodes[5], statisticsData.l2CacheHitTimes));
+
+    const now = new Date().toUTCString();
+
+    if(isupdate.includes(true)) {
+        appendRenderHibernateStatisticsCharts(now, statisticsData);
+    }
+
+    document.getElementById('last-update').textContent = now;
 }
 
 /**
@@ -116,5 +128,50 @@ async function getHibernateStatisticsData()
     catch (error)
     {
         console.log(error.message);
+    }
+}
+
+/**
+ * 清空统计信息。
+ * 
+ * @param {Element} button 按钮元素
+*/
+async function clearStatisticsData(button) 
+{
+    try 
+    {
+        const CSRFToken = getCSRFToken();
+
+        const response = await fetch(
+            '/api/hibernate/clear_statistics_data', {
+                method: 'PUT',
+                headers: {
+                        [CSRFToken.csrfHeader] : CSRFToken.csrfToken
+                    }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`清理统计数据失败 status: ${response.statusText}`);
+        }
+
+        button.textContent = '☑️ 完成！';
+
+        console.info(await response.text());
+
+        setTimeout(
+            () => button.textContent = '清理统计数据',
+            1000
+        );
+    }
+    catch (error)
+    {
+        console.error(error.message);
+        button.textContent = `❌ ${error.message}`;
+
+        setTimeout(
+            () => button.textContent = '清理统计数据',
+            1000
+        );
     }
 }
