@@ -21,7 +21,7 @@
 - 从 release 处下载编译好的 .jar 包并运行：
 
   ```bash
-  java -jar [your-jar-path/examination-1.3.0-SNAPSHOT.jar]
+  java -jar [your-jar-path/examination-version-SNAPSHOT.jar]
   ```
 
 ### 访问
@@ -30,7 +30,6 @@
 可以访问以下 URL（仅列出部分主要的、以视图作为响应的 GET 请求方法）：
 
 - 用户注册页面
-  
   - <https://localhost:8081/user_info/register>
   ![image](https://github.com/user-attachments/assets/a569dbf7-d3d0-40b4-9670-55c239f38497)
 
@@ -53,6 +52,10 @@
 - 管理员界面（当前只写了用户数据管理页面）
   - <https://localhost:8081/admin/all_users>
  ![image](https://github.com/user-attachments/assets/7452a86b-f69c-4aef-84bd-e3d81bb00dd6)
+
+- Hibernate 查询统计页面
+  - <https://localhost:8081/hibernate/query_statistics>
+  ![image](https://github.com/user-attachments/assets/e46892bf-93c5-4d0f-b942-d9b8c3aad59a)
 
 #### Date：2025.06.03
 
