@@ -1,8 +1,13 @@
-var RECORD_AMOUNT
+// 总数据条数
+var TOTAL_RECORD_AMOUNT
     = Number.parseInt(document.getElementById('record_amount').textContent);
 
+// 一页的数据条数
+var ONE_PAGE_AMOUNT 
+    = Number.parseInt(document.getElementById('one_page_amount').textContent);;
+
 // 当存在 3 条及以上的记录时，图表渲染才有意义。
-if (RECORD_AMOUNT >= 3) {
+if (TOTAL_RECORD_AMOUNT >= 3) {
     renderMistakeRateCharts();
 }
 
@@ -16,7 +21,7 @@ function renderMistakeRateCharts()
     const mistakeRateMap = new Map();
     
     // 收集数据，X 轴为日期，Y 轴为错误率百分比
-    for (let index = 0; index < RECORD_AMOUNT; ++index)
+    for (let index = 0; index < ONE_PAGE_AMOUNT; ++index)
     {
         const submitDate 
                 = document.getElementById(`submit_date_${index}`).textContent;
@@ -30,6 +35,9 @@ function renderMistakeRateCharts()
     }
 
     console.log(mistakeRateMap);
+
+    const mistakeRateMapKeyArray   = Array.from(mistakeRateMap.keys());
+    const mistakeRateMapValueArray = Array.from(mistakeRateMap.values());
 
     // 图表渲染位置
     const renderElement    = document.getElementById('mistake_rate_chatrs');
@@ -84,10 +92,11 @@ function renderMistakeRateCharts()
     const option = {
         backgroundColor: '#0d1117',
         title: {
-            text: `Mistake Rate of [${userName}]`,
+            text: `
+                    [${mistakeRateMapKeyArray.at(0)}] to [${mistakeRateMapKeyArray.at(mistakeRateMapKeyArray.length - 1)}]`,
             textStyle: {
                 color: '#ffffff',
-                fontSize: 20
+                fontSize: 16
             },
             top:  '2%',            // 增加顶部间距
             left: 'center'
@@ -102,11 +111,11 @@ function renderMistakeRateCharts()
             textStyle: {
                 color: '#8b949e'
             },
-            top: '12%',           // 下移图例位置
+            top: '16%',           // 下移图例位置
             itemGap: 15           // 增加图例项间距
         },
         grid: {                   // 新增grid配置控制绘图区域
-            top: '20%',
+            top: '25%',
             bottom: '15%',
             containLabel: true
         },
@@ -123,7 +132,7 @@ function renderMistakeRateCharts()
                 fontSize: 10,     // 缩小字号
                 top: '12%'
             },
-            data: Array.from(mistakeRateMap.keys())
+            data: mistakeRateMapKeyArray
         },
         yAxis: {
             type: 'value',
@@ -177,7 +186,7 @@ function renderMistakeRateCharts()
                     color: '#1f6feb00'
                 }])
             },
-            data: Array.from(mistakeRateMap.values())
+            data: mistakeRateMapValueArray
         }]
     };
 
