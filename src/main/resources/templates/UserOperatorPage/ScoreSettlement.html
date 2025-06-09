@@ -7,7 +7,8 @@
     <title>成绩结算</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
           rel="stylesheet">
-    <link th:href="@{/CSS/UserOperatorPageCSS/ScoreSettlement.css}" rel="stylesheet">
+    <link th:href="@{/CSS/UserOperatorPageCSS/ScoreSettlement.css}" 
+          rel="stylesheet">
 </head>
 <body>
     <div id="user_name" class="user-badge">
@@ -55,6 +56,14 @@
                 <div>
                     <div id="mistake_rate" class="stat-value">?%</div>
                     <div class="stat-label">错误率</div>
+                </div>
+            </div>
+
+            <div class="stat-item submit_date">
+                <i class="fas fa-clock stat-icon"></i>
+                <div>
+                    <div class="stat-lable">提交日期</div>
+                    <div id="submit_date_value" class="stat-value">?</div>
                 </div>
             </div>
         </div>
