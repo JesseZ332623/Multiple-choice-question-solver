@@ -2,6 +2,8 @@ package com.jesse.examination.scorerecord.repository;
 
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,8 +21,29 @@ public interface ScoreRecordRepository extends JpaRepository<ScoreRecordEntity, 
             value = "SELECT * FROM score_record WHERE(user_name = :userName)",
             nativeQuery = true
     )
-    List<ScoreRecordEntity> findAllScoreRecordByUserName(
+    List<ScoreRecordEntity>
+    findAllScoreRecordByUserName(
             @Param(value = "userName") String userName
+    );
+
+    /**
+     * <p>分页的查找查找指定 userName 的所有成绩记录，存于一个列表中。</p>
+     *
+     * <p>
+     *     这个 @Query 注解比较特殊，
+     *     使用了 JPQL 而非原生 SQL，因此不要设置 nativeQuery = true
+     * </p>
+     */
+    @Query(
+            value = """
+                    SELECT s FROM ScoreRecordEntity s
+                    WHERE (s.userName = :userName)
+                    """
+    )
+    Page<ScoreRecordEntity>
+    findPaginatedScoreRecordByUserName(
+            @Param(value = "userName") String userName,
+            Pageable pageable
     );
 
     /**
