@@ -31,6 +31,8 @@ async function getScoreSattlement()
                                     = `${responseJson.mistakeRate} %`;
         document.getElementById('combinded_mistake_rate').innerText
                                     = `${responseJson.mistakeRate} %`;
+        document.getElementById('submit_date_value').innerText
+                                    = `${responseJson.submitDate}`;
     }
     catch (error) 
     {
