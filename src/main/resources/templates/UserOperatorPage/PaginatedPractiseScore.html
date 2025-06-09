@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>练习结果分页查询</title>
+    <link rel="stylesheet" th:href="@{/CSS/UserOperatorPageCSS/PaginatedPractiseScore.css}">
+</head>
+
+<body>
+    <span style="display: none;" th:text="${EntityCount}" id="record_amount"></span>
+    <span style="display: none;" th:text="${CurrentPage}" id="current_page"></span>
+    <span style="display: none;" th:text="${PageCount}" id="page_count"></span>
+    <span style="display: none;" th:text="${OnePageAmount}" id="one_page_amount"></span>
+    <div id="user_name" class="user-badge">
+        <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
+        <span th:text="${UserName}" id="user_name_text"></span>
+    </div>
+    
+    <div>
+        <button id="clean_record" type="button" onclick="truncateRecord(this)">
+            清空练习记录
+        </button>
+        <table>
+            <caption>练习记录</caption>
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">用户</th>
+                    <th scope="col">练习提交时间</th>
+                    <th scope="col">错误数</th>
+                    <th scope="col">正确数</th>
+                    <th scope="col">未答数</th>
+                    <th scope="col">错误率</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="record,iter : ${PaginatedScoreRecord}" style="--i: ${iter.index}">
+                    <td th:text="${record.scoreId}"></td>
+                    <td th:text="${record.userName}"></td>
+                    <td th:text="${record.submitDate.toString()}"
+                        th:id="'submit_date_' + ${iter.index}"></td>
+                    <td th:text="${record.errorCount}"></td>
+                    <td th:text="${record.correctCount}"></td>
+                    <td th:text="${record.noAnswerCount}"></td>
+                    <td th:text="${record.mistakeRate} + '%'"
+                        th:id="'mistake_rate_' + ${iter.index}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="mistake_rate_chatrs" style="width: 100%; height: 500px"></div>
+
+    <div id="pagination_operator">
+        <p th:text="'一页展示 ' + ${OnePageAmount} + ' 条数据, ' + '共 ' + ${EntityCount} + ' 条数据'"></p>
+        <p th:text="'当前位于：' + ${CurrentPage} + ' / ' + ${PageCount} + ' 页'"></p>
+        <button type="button" onclick="toPreviousPage()">上一页</button>
+        <button type="button" onclick="toNextPage()">    下一页</button>
+        <button type="button" onclick="toFirstPage()">   跳转至第一页</button>
+        <button type="button" onclick="toLastPage()">    跳转至最后一页</button><br>
+        <input  type="number" placeholder="跳转至：" id="jump_input"><span> 页</span>
+        <button type="button" 
+                onclick="jumpToDesignatedPage()">
+            GO
+        </button>
+    </div>
+</body>
+
+<script type="text/javascript"
+        th:src="@{/JS/UserOperatorPageScript/PaginatedPractiseScore.js}"></script>
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+<script type="text/javascript"
+        th:src="@{/JS/Echarts/MistakeRateChartsRender.js}"></script>
+</html>
