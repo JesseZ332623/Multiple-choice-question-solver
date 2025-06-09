@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="_UrblQMBphAFoHFJ3hvH" name="第 1 页">
-        <mxGraphModel dx="4171" dy="3029" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#000000)" math="0" shadow="1">
+        <mxGraphModel dx="3574" dy="2625" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#000000)" math="0" shadow="1">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -259,8 +259,8 @@
                         <mxPoint x="490" y="200" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="74" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(0, 204, 102));&quot;&gt;all_score_record&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;fontStyle=0;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="745" y="140" width="220" height="50" as="geometry"/>
+                <mxCell id="74" value="&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;font style=&quot;color: light-dark(rgb(206, 145, 120), rgb(0, 204, 102));&quot;&gt;paginated_score_record&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;fontStyle=0;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="745" y="140" width="275" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="76" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontFamily=Lucida Console;" parent="1" source="45" target="140" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -307,7 +307,7 @@
                 <mxCell id="97" value="&lt;div style=&quot;&quot;&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;admin&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="-340" y="2470" width="150" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="98" value="" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontFamily=Lucida Console;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" target="97" edge="1" source="5">
+                <mxCell id="98" value="" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontFamily=Lucida Console;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="5" target="97" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="-690" y="1060" as="sourcePoint"/>
                         <mxPoint x="-510" y="1970" as="targetPoint"/>
@@ -538,37 +538,37 @@
                         <mxPoint x="748" y="1418" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="172" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;div style=&quot;line-height: 19px;&quot;&gt;&lt;span&gt;&lt;font style=&quot;color: light-dark(rgb(206, 145, 120), rgb(0, 204, 102));&quot;&gt;query_statistics&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" vertex="1" parent="1">
+                <mxCell id="172" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;div style=&quot;line-height: 19px;&quot;&gt;&lt;span&gt;&lt;font style=&quot;color: light-dark(rgb(206, 145, 120), rgb(0, 204, 102));&quot;&gt;query_statistics&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="-80" y="2620" width="230" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="173" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;span&gt;&lt;font face=&quot;Lucida Console&quot; style=&quot;color: light-dark(rgb(206, 145, 120), rgb(255, 255, 255));&quot;&gt;hibernate&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" vertex="1" parent="1">
+                <mxCell id="173" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;span&gt;&lt;font face=&quot;Lucida Console&quot; style=&quot;color: light-dark(rgb(206, 145, 120), rgb(255, 255, 255));&quot;&gt;hibernate&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="-340" y="2620" width="150" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="174" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;" edge="1" parent="1" source="173" target="172">
+                <mxCell id="174" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;" parent="1" source="173" target="172" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="-180" y="2534.52" as="sourcePoint"/>
                         <mxPoint x="-60" y="2534.52" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="175" value="" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;" edge="1" parent="1" source="5" target="173">
+                <mxCell id="175" value="" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;" parent="1" source="5" target="173" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="-740" y="1890" as="sourcePoint"/>
                         <mxPoint x="-490" y="2600" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="176" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;div style=&quot;line-height: 19px;&quot;&gt;&lt;span&gt;&lt;font style=&quot;color: light-dark(rgb(206, 145, 120), rgb(0, 204, 102));&quot;&gt;query_statistics&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" vertex="1" parent="1">
+                <mxCell id="176" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;div style=&quot;line-height: 19px;&quot;&gt;&lt;span&gt;&lt;font style=&quot;color: light-dark(rgb(206, 145, 120), rgb(0, 204, 102));&quot;&gt;query_statistics&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="737.5" y="-410" width="230" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="177" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;span&gt;&lt;font face=&quot;Lucida Console&quot; style=&quot;color: light-dark(rgb(206, 145, 120), rgb(255, 255, 255));&quot;&gt;hibernate&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" vertex="1" parent="1">
+                <mxCell id="177" value="&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;line-height: 19px; white-space: pre;&quot;&gt;&lt;span&gt;&lt;font face=&quot;Lucida Console&quot; style=&quot;color: light-dark(rgb(206, 145, 120), rgb(255, 255, 255));&quot;&gt;hibernate&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Lucida Console;fontSize=19;verticalAlign=middle;textShadow=0;fontColor=light-dark(#000000,#FFFFFF);strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="400" y="-410" width="150" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="178" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;" edge="1" parent="1" source="177" target="176">
+                <mxCell id="178" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;" parent="1" source="177" target="176" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="560" y="-495.48" as="sourcePoint"/>
                         <mxPoint x="680" y="-495.48" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="179" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="9" target="177">
+                <mxCell id="179" value="" style="endArrow=classic;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeWidth=2;fontFamily=Lucida Console;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="9" target="177" edge="1">
                     <mxGeometry width="50" height="50" relative="1" as="geometry">
                         <mxPoint x="-230" y="730" as="sourcePoint"/>
                         <mxPoint x="400" y="-380" as="targetPoint"/>
