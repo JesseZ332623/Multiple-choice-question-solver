@@ -105,7 +105,7 @@ public class ScoreRecordController
      * @param userName 指定用户
      */
     @GetMapping(path = "/score_settlement/{userName}")
-    public ResponseEntity<?> scoreSettlement(
+    public ResponseEntity<?> getLatestScoreSettlement(
             @PathVariable String userName
     )
     {
