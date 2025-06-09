@@ -1,5 +1,5 @@
 // 最多渲染 30 个点
-var MAX_POINTS = 30;
+var MAX_POINTS = 15;
 
 // 图表渲染位置
 const STATISTICS_CHARTS_ELEMENT
@@ -210,7 +210,6 @@ function appendRenderHibernateStatisticsCharts(recordTimeString, newStatisticsDa
 
     // 先获取所有所有在表单中的数据
     const updateTimeArray          = chartOption.xAxis[0].data;
-
     const queryTimesArray          = chartOption.series[0].data;
     const entityLoadTimesArray     = chartOption.series[1].data;
     const setLoadTimesArray        = chartOption.series[2].data;

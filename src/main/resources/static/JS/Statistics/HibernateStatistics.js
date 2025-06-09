@@ -74,11 +74,11 @@ function setDataToElements(statisticsData, tdNodes)
 
     const now = new Date().toUTCString();
 
+    document.getElementById('last-update').textContent = now;
+
     if(isupdate.includes(true)) {
         appendRenderHibernateStatisticsCharts(now, statisticsData);
     }
-
-    document.getElementById('last-update').textContent = now;
 }
 
 /**
