@@ -2,6 +2,8 @@ package com.jesse.examination.scorerecord.service;
 
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -29,6 +31,14 @@ public interface ScoreRecordService
      */
     List<ScoreRecordEntity>
     findAllScoreRecordByUserName(String userName);
+
+    /**
+     * 分页的查找查找指定 userName 的所有成绩记录，存于一个列表中。
+     */
+    Page<ScoreRecordEntity>
+    findPaginatedScoreRecordByUserName(
+            String userName, Pageable pageable
+    );
 
     /**
      * 删除指定 userName 的所有成绩记录，返回删除的行数。
