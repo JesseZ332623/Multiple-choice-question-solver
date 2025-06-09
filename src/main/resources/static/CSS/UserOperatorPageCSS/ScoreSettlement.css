@@ -6,9 +6,15 @@
   --red: #f85149;
   --gray: #8b949e;
   --yellow: #e3b341;
+  --cyan: rgb(28, 224, 192);
   --header-pos-top: 1.1rem;
   --header-pos-right: 30px;
-  --header-spacing: 0px; /* 新增间距变量 */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
@@ -16,14 +22,17 @@ body {
   color: var(--gh-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
     sans-serif;
-  margin: 2rem;
+  padding: 2rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
 }
 
 .result-container {
+  width: 70%;
+  max-width: 1200px;
   background-color: #161b22;
   border: 1px solid var(--gh-border);
   border-radius: 12px;
@@ -32,6 +41,7 @@ body {
   transform: translateY(-20px);
   opacity: 0;
   animation: slideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  margin-top: 20px;
 }
 
 .title {
@@ -45,12 +55,12 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
 .stat-item {
-  padding: 1.2rem;
+  padding: 1rem;
   border-radius: 8px;
   background: var(--gh-dark);
   border: 1px solid var(--gh-border);
@@ -58,6 +68,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  min-height: 100px;
 }
 
 .stat-item:hover {
@@ -67,19 +78,47 @@ body {
 
 .stat-icon {
   font-size: 1.5rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
 }
 
 .correct {
   color: var(--green);
 }
+
 .error {
   color: var(--red);
 }
+
 .unanswered {
   color: var(--gray);
 }
+
 .rate {
   color: var(--yellow);
+}
+
+.submit_date {
+  color: var(--cyan);
+}
+#submit_date_value {
+  font-size: 13px;
 }
 
 @keyframes slideIn {
@@ -103,14 +142,21 @@ body {
 .stat-item:nth-child(1) {
   animation-delay: 0.2s;
 }
+
 .stat-item:nth-child(2) {
   animation-delay: 0.4s;
 }
+
 .stat-item:nth-child(3) {
   animation-delay: 0.6s;
 }
+
 .stat-item:nth-child(4) {
   animation-delay: 0.8s;
+}
+
+.stat-item:nth-child(5) {
+  animation-delay: 1s;
 }
 
 .mistake-rate {
@@ -123,16 +169,15 @@ body {
   animation: pulse 2s infinite;
 }
 
-/* 新增样式 */
 #user_name {
   position: fixed;
-  background-color: var(--gh-bg);
+  background-color: var(--gh-dark);
   padding: 0.6rem 1.2rem;
   border-radius: 6px;
   border: 1px solid var(--gh-border);
   font-size: 14px;
   top: var(--header-pos-top);
-  right: calc(var(--header-pos-right) + var(--header-spacing));
+  right: var(--header-pos-right);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -146,7 +191,6 @@ body {
   border-radius: 50%;
   border: 1px solid rgba(99, 110, 123, 0.4);
   object-fit: cover;
-  position: relative;
 }
 
 #error_message {
@@ -168,7 +212,6 @@ body {
   top: 2rem;
 }
 
-/* 返回链接专项样式 */
 #return_to_frontpage {
   position: fixed;
   bottom: 2rem;
@@ -214,5 +257,68 @@ body {
   }
   50% {
     opacity: 0.7;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+  .result-container {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .stats-grid {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
+  }
+
+  .result-container {
+    padding: 1.2rem;
+  }
+
+  .stat-item {
+    min-height: 90px;
+  }
+
+  .stat-icon {
+    font-size: 1.3rem;
+  }
+
+  .stat-value {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-item {
+    min-height: auto;
+  }
+
+  #user_name {
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 12px;
+    padding: 0.4rem 0.8rem;
+  }
+
+  #user_name img {
+    height: 20px;
+    width: 20px;
   }
 }
