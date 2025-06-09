@@ -40,7 +40,7 @@ public class PractiseScoreViewController {
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/score_record/all_score_record">
+     *      <a href="https://localhost:8081/score_record/paginated_score_record">
      *          (GET Method) 渲染某用户第一页的五条练习记录，以视图作为响应。
      *      </a>
      * </p>
