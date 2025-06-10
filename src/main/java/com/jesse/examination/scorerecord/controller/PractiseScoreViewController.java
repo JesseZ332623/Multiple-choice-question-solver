@@ -25,8 +25,12 @@ import static java.lang.String.format;
 @Slf4j
 @Controller
 @RequestMapping(path = "/score_record")
-public class PractiseScoreViewController {
+public class PractiseScoreViewController
+{
     private final ScoreRecordService scoreRecordService;
+
+    // 一页最大行数为 18
+    private static final int MAX_COLUMN_SIZE = 20;
 
     @Autowired
     public PractiseScoreViewController(ScoreRecordService scoreRecordService) {
@@ -53,7 +57,7 @@ public class PractiseScoreViewController {
     @GetMapping(path = "paginated_score_record")
     public String getAllPractiseScoreView(
             @RequestParam(name = "page", defaultValue = "1")   int page,
-            @RequestParam(name = "size", defaultValue = "10")  int size,
+            @RequestParam(name = "size", defaultValue = "15")  int size,
             Model              model,
             HttpServletRequest request
     )
@@ -70,7 +74,7 @@ public class PractiseScoreViewController {
             }
 
             page = Math.max(0, page);               // 页数不得为负
-            size = Math.min(15, Math.max(1, size)); // 每一页最多不超过 15 条
+            size = Math.min(MAX_COLUMN_SIZE, Math.max(1, size)); // 每一页最多不超过 20 条
 
             // 从 Session 处获取用户名
             String userName = (String) session.getAttribute("user");
