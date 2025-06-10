@@ -9,13 +9,19 @@
           rel="stylesheet">
     <link th:href="@{/CSS/UserOperatorPageCSS/ScoreSettlement.css}" 
           rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/UserBadge.css}">
 </head>
 <body>
     <div id="user_name" class="user-badge">
-        <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
-        <span th:text="${UserName}" id="user_name_text"></span>
+        <a th:href="@{'/user_info/overview/' + ${UserName}}">
+            <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
+            <span th:text="${UserName}" id="user_name_text"></span>
+        </a>
     </div>
+
     <div id="error_message"></div>
+
     <div>
         <a id="return_to_frontpage" href="/user_info/user_front_page">回首页</a>
     </div>
