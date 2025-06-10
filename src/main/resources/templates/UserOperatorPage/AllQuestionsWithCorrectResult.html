@@ -6,14 +6,27 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>题目与正确答案列表</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/CSS/UserOperatorPageCSS/AllQuestionsWithCorrectResult.css}" 
-          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/UserBadge.css}">
+    <link rel="stylesheet" th:href="@{/CSS/UserOperatorPageCSS/AllQuestionsWithCorrectResult.css}">
 </head>
     <body>
+        <div id="user_name" class="user-badge" style="float: right;">
+            <a th:href="@{'/user_info/overview/' + ${UserName}}">
+                <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
+                <span th:text="${UserName}" id="user_name_text"></span>
+            </a>
+        </div>
+
         <h1>
             <i class="fas fa-list-alt"></i>
             题目与正确答案列表
-        </h1>
+        </h1>  
+        
+        <div>
+            <a id="return_to_frontpage" 
+            href="/user_info/user_front_page">回首页</a>
+        </div>
 
         <p class="total-count"
         th:text="'总题数: ' + ${#lists.size(AllQuestionWithCorrectOption)}"></p>
