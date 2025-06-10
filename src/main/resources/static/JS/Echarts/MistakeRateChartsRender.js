@@ -90,10 +90,14 @@ function renderMistakeRateCharts()
      *   - data         待展示数据（Array 类型）
     */
     const option = {
+        lazyUpdate: true,
+        animation: true,
+        animationDuration: 800,       // 动画时长（毫秒）
+        progressiveChunkMode: 'mod',
+        animationEasing: 'cubicOut',
         backgroundColor: '#0d1117',
         title: {
-            text: `
-                    [${mistakeRateMapKeyArray.at(0)}] to [${mistakeRateMapKeyArray.at(mistakeRateMapKeyArray.length - 1)}]`,
+            text: `[${mistakeRateMapKeyArray.at(0)}] to [${mistakeRateMapKeyArray.at(mistakeRateMapKeyArray.length - 1)}]`,
             textStyle: {
                 color: '#ffffff',
                 fontSize: 16
