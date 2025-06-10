@@ -2,7 +2,19 @@ var TOTAL_QUESTION_AMOUNT = Number(document.getElementById("total_questions").te
 var TotalCorrect = 0;
 var TotalMistake = 0;
 
-function checkAnswer(button) 
+/*
+    不建议如此偷懒，未来会增加自动 + 手动答题存档功能。
+*/
+// window.addEventListener(
+//     'beforeunload', 
+//     (event) => {
+//         if (TotalCorrect !== 0 || TotalMistake !== 0) {
+//             event.preventDefault();
+//         }
+//     }
+// );
+
+function checkAnswer(button)
 {
     // 通过按钮元素向上查找父容器
     const container = button.closest('.question-container');
@@ -22,7 +34,7 @@ function checkAnswer(button)
     }
 
     // 验证答案（不区分大小写）
-    const isCorrect = selected.toUpperCase() === correctAnswer.toUpperCase();
+    const isCorrect = (selected.toUpperCase() === correctAnswer.toUpperCase());
 
     if (isCorrect) 
     {
@@ -54,20 +66,25 @@ function getCurrentISOTimeStrWithoutZone() {
     return new Date().toISOString().split('.')[0].replace('Z', ' ');
 }
 
-function totalSubmit(button) {
-    var noAnswer = TOTAL_QUESTION_AMOUNT - (TotalCorrect + TotalMistake);
+function totalSubmit(button)
+{
+    // 首先立刻禁用所有的选择按钮。
+    document.querySelectorAll('input[type="radio"]')
+            .forEach((radio) => { radio.disabled = true; });
+
+    var noAnswer    = TOTAL_QUESTION_AMOUNT - (TotalCorrect + TotalMistake);
     var mistakeRate = (TotalMistake + noAnswer) / TOTAL_QUESTION_AMOUNT * 100;
 
     const practiseScoreDOM = document.getElementById('practise_score');
 
     const recordJson =
     {
-        "userName": document.getElementById('user_name_text').textContent.trim(),
-        "submitDate": getCurrentISOTimeStrWithoutZone(),
-        "correctCount": TotalCorrect,
-        "errorCount": TotalMistake,
-        "noAnswerCount": noAnswer,
-        "mistakeRate": mistakeRate.toFixed(2)
+        "userName"      : document.getElementById('user_name_text').textContent.trim(),
+        "submitDate"    : getCurrentISOTimeStrWithoutZone(),
+        "correctCount"  : TotalCorrect,
+        "errorCount"    : TotalMistake,
+        "noAnswerCount" : noAnswer,
+        "mistakeRate"   : mistakeRate.toFixed(2)
     };
 
     addNewScoreRecord(recordJson, button);      // 将成绩数据写入数据表
@@ -76,12 +93,14 @@ function totalSubmit(button) {
         () => {
             button.disabled = false;
             window.location = '../score_record/current_score_settlement';
-        }, 2500
+        }, 1500
     );
 }
 
-async function updateCorrectTimes(questionId) {
-    try {
+async function updateCorrectTimes(questionId)
+{
+    try 
+    {
         // 从 meta 标签获取 CSRF Token
         const csrfToken = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
@@ -119,14 +138,17 @@ async function updateCorrectTimes(questionId) {
 				response: ${await response.text().catch(() => null)}`
         );
     }
-    catch (error) {
+    catch (error) 
+    {
         alert(error);
         console.error(error);
     }
 }
 
-async function addNewScoreRecord(recordJson, button) {
-    try {
+async function addNewScoreRecord(recordJson, button) 
+{
+    try 
+    {
         // 从 meta 标签获取 CSRF Token
         const csrfToken = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
