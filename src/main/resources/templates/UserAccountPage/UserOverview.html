@@ -7,12 +7,18 @@
     <title th:text="${UserOverview.getUserName()} + ' 的主页'"></title>
     <link rel="stylesheet" 
           th:href="@{/CSS/UserAccountPageCSS/UserOverview.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
     <script type="text/javascript" 
             th:src="@{/JS/UserAccountPageScript/UserOverview.js}">
     </script>
 </head>
 <body>
     <h1 th:text="${UserOverview.getUserName()} + ' 的主页'"></h1>
+
+    <div>
+        <a id="return_to_frontpage" 
+           href="/user_info/user_front_page">回首页</a>
+    </div>
 
     <div id="user_overview">
         <img id="avatar-image" th:src="@{'/api/user_info/user_overview_avatar/' + ${UserOverview.getUserName}}" alt="头像">
