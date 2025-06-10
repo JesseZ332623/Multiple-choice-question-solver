@@ -7,17 +7,22 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" 
           th:href="@{/CSS/UserOperatorPageCSS/QuestionPractise.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/UserBadge.css}">
     <title>题目练习</title>
 </head>
 
 <body>
-    <div id="user_name" class="user-badge">
-        <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
-        <span th:text="${UserName}" id="user_name_text"></span>
+    <div id="user_name" class="user-badge" style="float: right;">
+        <a th:href="@{'/user_info/overview/' + ${UserName}}">
+            <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
+            <span th:text="${UserName}" id="user_name_text"></span>
+        </a>
     </div>
 
     <div>
-        <a id="return_to_frontpage" href="/user_info/user_front_page">回首页</a>
+        <a id="return_to_frontpage" 
+           href="/user_info/user_front_page">回首页</a>
     </div>
 
     <h1>选择题练习</h1>
@@ -29,26 +34,31 @@
     </div>
 
     <div th:each="question : ${QuestionPractise}" class="question-container"
-        th:data-question-id="${question.questionId}" th:data-correct-answer="${question.correctAnswer}">
+         th:data-question-id="${question.questionId}" 
+         th:data-correct-answer="${question.correctAnswer}">
         <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
         <div th:if="${question.options != null}">
             <ul>
                 <li th:each="entry : ${question.options.entrySet()}">
                     <input type="radio" th:id="'option_' + ${entry.getKey()}"
-                        th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
-                    <span th:for="'option_' + ${entry.getKey()}" th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span>
-                    <br>
+                           th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
+                    <span th:for="'option_' + ${entry.getKey()}"
+                          th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span><br>
                 </li>
             </ul>
         </div>
-        <button type="button" class="submit-btn" th:data-qid="${question.questionId}" onclick="checkAnswer(this)">
+        <button type="button" class="submit-btn" 
+                th:data-qid="${question.questionId}" 
+                onclick="checkAnswer(this)">
             确认
         </button>
-        <div class="feedback" th:id="'feedback_' + ${question.questionId}"></div>
+        <div class="feedback" 
+             th:id="'feedback_' + ${question.questionId}"></div>
     </div>
 
     <div>
-        <button type="button" class="total_submit_button" onclick="totalSubmit(this)">
+        <button type="button" 
+                class="total_submit_button" onclick="totalSubmit(this)">
             所有题目均已完成，交卷
         </button>
         <div class="practise_score" id="practise_score"></div>
