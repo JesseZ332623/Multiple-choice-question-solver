@@ -1,5 +1,5 @@
-// 最多渲染 30 个点
-var MAX_POINTS = 15;
+// 最多渲染 20 个点
+var MAX_POINTS = 20;
 
 // 图表渲染位置
 const STATISTICS_CHARTS_ELEMENT
@@ -8,6 +8,7 @@ const STATISTICS_CHARTS_ELEMENT
 // 初始堆叠折线图属性，先写好表总体样式、X 和 Y 轴的数据类别以及空数据。
 const INIT_CHART_OPTION
     = {
+    lazyUpdate: true,
     large: true,                    // 大数据模式
     progressiveChunkMode: 'mod',    // 分块渲染模式
     backgroundColor: '#0d1117',
