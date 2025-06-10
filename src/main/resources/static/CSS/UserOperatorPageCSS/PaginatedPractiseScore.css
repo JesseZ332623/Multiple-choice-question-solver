@@ -13,6 +13,17 @@
   --header-spacing: 0px; /* 新增间距变量 */
 }
 
+@keyframes tableFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 body {
   background-color: var(--gh-bg);
   color: var(--gh-text);
@@ -21,7 +32,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   padding: 20px;
-  max-width: 925px;
+  max-width: 865px;
   margin: 0 auto;
 }
 
@@ -32,18 +43,7 @@ table {
   border: 1px solid var(--gh-border);
   border-radius: 6px;
   overflow: hidden;
-  animation: tableFade 0.5s ease-in;
-}
-
-@keyframes tableFade {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  animation: tableFade 0.6s ease-in;
 }
 
 caption {
@@ -93,12 +93,12 @@ tr {
   color: white;
   border: 1px solid rgba(240, 246, 252, 0.1);
   padding: 6px 12px;
+  margin: 0 0 40px 0;
   font-size: 13px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
   float: right;
-  margin-bottom: 15px;
   top: calc(var(--header-pos-top) + 15px);
   left: -9px;
   right: calc(var(--header-pos-right) + var(--header-spacing));
@@ -148,37 +148,12 @@ p {
 }
 
 #mistake_rate_chatrs {
-  animation: tableFade 0.3s ease-out both;
-}
-
-.user-badge {
-  position: fixed;
-  background-color: var(--gh-bg);
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--gh-border);
-  font-size: 14px;
-  top: var(--header-pos-top);
-  right: calc(var(--header-pos-right) + var(--header-spacing));
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(4px);
-}
-
-.user-badge img {
-  height: 25px;
-  width: 25px;
-  border-radius: 50%;
-  border: 1px solid rgba(99, 110, 123, 0.4);
-  object-fit: cover;
-  position: relative;
+  animation: tableFade 0.6s ease-in;
 }
 
 #pagination_operator button 
 {
-  background-color: var(--gh-btn-blue);
+  background-color: var(--gh-btn-bg);
   color: white;
   border: 1px solid rgba(240, 246, 252, 0.1);
   padding: 5px 10px 5px 10px;
