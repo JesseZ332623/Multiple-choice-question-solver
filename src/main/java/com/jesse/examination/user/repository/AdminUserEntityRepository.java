@@ -1,6 +1,8 @@
 package com.jesse.examination.user.repository;
 
 import com.jesse.examination.user.entity.UserEntity;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +20,17 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     findUserByUsername(String userName);
 
     /**
+     * 通过实体图 (EntityGraph)，配合实体的懒加载，
+     * 用一句 SQL 就能查询出所有的用户信息，避免频繁的数据库操作。
+     * 这里还要使用 DISTINCT 确保在用户过多的情况下避免笛卡尔积爆炸，
+     * 未来随着用户数量的增涨还会添加分页查询策略。
+     */
+    @NotNull
+    @Query(value = "SELECT DISTINCT u FROM UserEntity u")
+    @EntityGraph(attributePaths = "roles")
+    List<UserEntity> findAll();
+
+    /**
      * 查询在 [startId, endId] 范围内，
      * 实际存在多少个数据，将数据行 id 返回并存入一个列表中。
      */
@@ -25,7 +38,9 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
                     SELECT users.user_id FROM users
                     WHERE users.user_id
                     BETWEEN :startId AND :endId
-                    """, nativeQuery = true)
+                    """,
+            nativeQuery = true
+    )
     List<Long> findIdByIdBetween(
             @Param(value = "startId") Long startId,
             @Param(value = "endId")   Long endId
