@@ -6,8 +6,9 @@
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水课选择题刷题器</title>
+    <title>选择题刷题器</title>
     <link rel="stylesheet" th:href="@{/CSS/UserOperatorPageCSS/UserFrontPage.css}">
+    <link rel="stylesheet" th:href="@{/CSS/General/UserBadge.css}">
     <script type="text/javascript" 
             th:src="@{/JS/UserOperatorPageScript/UserFrontPage.js}"></script>
 </head> 
@@ -17,7 +18,7 @@
         <header class="page-header">
             <h1 class="page-title">
                 <span>📚</span>
-                <span>水课选择题刷题器</span>
+                <span>选择题刷题器</span>
             </h1>
             <div class="user-badge">
                 <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" 
