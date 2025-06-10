@@ -45,7 +45,7 @@ public class UserEntity implements UserDetails
     @Column(name = "register_datetime", nullable = false)
     private LocalDateTime registerDateTime;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name               = "user_role_relation",
             joinColumns        = @JoinColumn(name = "user_id"),
