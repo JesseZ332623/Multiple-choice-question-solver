@@ -65,7 +65,7 @@ public class AdminViewController
     }
 
     @GetMapping(path = "all_users")
-    public String getAllUsersView(Model model)
+    public String getAllUsersView(@NotNull Model model)
     {
         List<UserEntity> allUserList
                 = this.adminUserServiceInterface.findAllUsers();
