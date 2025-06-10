@@ -3,8 +3,20 @@ var TOTAL_RECORD_AMOUNT
     = Number.parseInt(document.getElementById('record_amount').textContent);
 
 // 一页的数据条数
-var ONE_PAGE_AMOUNT 
-    = Number.parseInt(document.getElementById('one_page_amount').textContent);;
+var ONE_PAGE_AMOUNT
+    = Number.parseInt(document.getElementById('one_page_amount').textContent);
+
+// 最后一页的数据条数
+var RECORD_AMOUNT_OF_LAST_PAGE
+    = TOTAL_RECORD_AMOUNT % ONE_PAGE_AMOUNT;
+
+// 当前的页码
+var CURRENT_PAGE
+    = Number.parseInt(document.getElementById('current_page').textContent);
+
+// 总页码数
+var PAGE_COUNT
+    = Number.parseInt(document.getElementById('page_count').textContent);
 
 // 当存在 3 条及以上的记录时，图表渲染才有意义。
 if (TOTAL_RECORD_AMOUNT >= 3) {
@@ -16,12 +28,25 @@ if (TOTAL_RECORD_AMOUNT >= 3) {
 */
 function renderMistakeRateCharts() 
 {
-    let userName = document.getElementById('user_name_text').textContent;
+    let userName 
+        = document.getElementById('user_name_text').textContent;
+
+    let pageAmount = 0;
+
+    // 来到最后一页并且有不足于 ONE_PAGE_AMOUNT 条的数据时。
+    if (CURRENT_PAGE === PAGE_COUNT && 
+        RECORD_AMOUNT_OF_LAST_PAGE !== 0) {
+        pageAmount = RECORD_AMOUNT_OF_LAST_PAGE;
+    }
+    else {
+        // 否则说明数据恰好被页分完
+        pageAmount = ONE_PAGE_AMOUNT;
+    }
 
     const mistakeRateMap = new Map();
     
     // 收集数据，X 轴为日期，Y 轴为错误率百分比
-    for (let index = 0; index < ONE_PAGE_AMOUNT; ++index)
+    for (let index = 0; index < pageAmount; ++index)
     {
         const submitDate 
                 = document.getElementById(`submit_date_${index}`).textContent;
