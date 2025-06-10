@@ -47,53 +47,6 @@ body {
   font-weight: 600;
 }
 
-.user-badge {
-  background-color: var(--gh-card-bg);
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: 1px solid var(--gh-border);
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.user-badge:hover {
-  background-color: rgba(88, 166, 255, 0.08);
-  border-color: #58a6ff;
-}
-
-.user-badge a {
-  color: var(--gh-text);
-  text-decoration: none;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: color 0.2s ease;
-}
-
-.user-badge a:hover {
-  color: var(--gh-blue);
-  text-decoration: none;
-}
-
-.user-badge img {
-  height: 30px;
-  width: 30px;
-  border-radius: 50%;
-  border: 1px solid rgba(99, 110, 123, 0.4);
-  object-fit: cover;
-  transition: transform 0.2s ease;
-}
-
-.user-badge:hover img {
-  transform: scale(1.15);
-}
-
 /* 卡片网格布局 */
 .card-grid {
   display: grid;
