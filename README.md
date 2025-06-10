@@ -47,7 +47,7 @@
 
 - 用户练习成绩展示页面
   - <https://localhost:8081/score_record/all_score_record>
-  ![image](https://github.com/user-attachments/assets/86fdd6f1-40dd-4285-ad52-5131ab00268c)
+  ![练习结果分页查询-1](https://github.com/user-attachments/assets/3b37b6a6-9e18-4df7-a073-9e611095c325)
 
 - 管理员界面（当前只写了用户数据管理页面）
   - <https://localhost:8081/admin/all_users>
