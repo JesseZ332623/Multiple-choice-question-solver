@@ -159,10 +159,8 @@ async function clearStatisticsData(button)
 
         console.info(await response.text());
 
-        setTimeout(
-            () => button.textContent = '清理统计数据',
-            1000
-        );
+        setTimeout(() => button.textContent = '清理统计数据', 350);
+        setTimeout(() => window.location.reload(), 750);
     }
     catch (error)
     {
