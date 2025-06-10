@@ -12,28 +12,27 @@ function handleClear()
         const csrfToken = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-        let userName = document.getElementById('user_name').textContent;
+        let userName = document.getElementById('user_name_text').textContent;
 
-        // 使用更现代的fetch API
         fetch(`/api/redis/clean_correct_times/${userName}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 [csrfHeader]: csrfToken
             }
-        })
-            .then(response => {
+        }).then(response => {
                 if (response.ok) {
                     location.reload(); // 简单重载页面
                 } else {
                     throw new Error('清除失败');
                 }
-            })
-            .catch(error => {
+        }).catch(error => {
                 alert(error.message);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-eraser"></i> 清除所有答对次数';
-            });
+        });
+
+        alert('清除完成！');
     }
 }
 
