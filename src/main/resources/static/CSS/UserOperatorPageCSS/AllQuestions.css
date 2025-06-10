@@ -31,7 +31,7 @@ h1 {
   font-weight: 600;
   border-bottom: 1px solid var(--gh-border);
   padding-bottom: 0.5em;
-  font-size: 24px;
+  font-size: 32px;
   width: 100%;
   max-width: 880px;
   margin: 0 auto 20px;
@@ -181,38 +181,25 @@ h1 {
   color: var(--red);
 }
 
-.user-badge {
-  position: fixed;
-  background-color: var(--gh-bg);
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  border: 1px solid var(--gh-border);
-  font-size: 14px;
-  top: var(--header-pos-top);
-  right: calc(var(--header-pos-right) + var(--header-spacing));
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(4px);
-}
-
 /* 清除按钮 */
 .clear-button {
-  position: fixed;
+  position: relative;
   top: var(--header-pos-top);
   right: var(--header-pos-right);
   background: rgba(248, 81, 73, 0.1);
   color: var(--red);
   border: 1px solid var(--gh-border);
   border-radius: 6px;
-  padding: 0.6rem 1.2rem;
+  padding: 0.8rem 1.2rem;
+  margin-left: 28px;
+  margin-bottom: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 1000;
   backdrop-filter: blur(4px);
   font-family: var(--font-stack);
   font-size: 14px;
+  float: left;
 }
 
 .clear-button:hover {
