@@ -65,16 +65,8 @@ public class AllQuestionViewController
                         = this.redisService.readQuestionCorrectTimeList(loginUserName);
 
             model.addAttribute("UserName", loginUserName);
-
-            model.addAttribute(
-                    "AllQuestions",
-                    allQuestionQueryResult
-            );
-
-            model.addAttribute(
-                    "QuestionCorrectTimes",
-                    allQuestionCorrectTimes
-            );
+            model.addAttribute("AllQuestions", allQuestionQueryResult);
+            model.addAttribute("QuestionCorrectTimes", allQuestionCorrectTimes);
 
             return "UserOperatorPage/AllQuestions";
         }
@@ -108,13 +100,21 @@ public class AllQuestionViewController
      * </p>
      */
     @GetMapping(path = "all_questions_with_correct_option")
-    public String getAllQuestionWithCorrectOptionView(Model model)
+    public String
+    getAllQuestionWithCorrectOptionView(
+            Model model,
+            HttpServletRequest request
+    )
     {
         try
         {
+            HttpSession session       = request.getSession(false);
+            String      loginUserName = (String) session.getAttribute("user");
+
             var allQuestionWithCorrectOptionQueryResult =
                 this.questionService.getAllQuestionWithCorrectOption();
 
+            model.addAttribute("UserName", loginUserName);
             model.addAttribute(
                     "AllQuestionWithCorrectOption",
                     allQuestionWithCorrectOptionQueryResult
