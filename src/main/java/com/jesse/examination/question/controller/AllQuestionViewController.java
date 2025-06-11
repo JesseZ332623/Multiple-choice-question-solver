@@ -58,17 +58,26 @@ public class AllQuestionViewController
             HttpSession session       = request.getSession(false);
             String      loginUserName = (String) session.getAttribute("user");
 
-            List<QuestionInfoDTO> allQuestionQueryResult
-                    = this.questionService.getAllQuestionInfo();
+            if (loginUserName != null)
+            {
+                List<QuestionInfoDTO> allQuestionQueryResult
+                        = this.questionService.getAllQuestionInfo();
 
-            List<QuestionCorrectTimesDTO> allQuestionCorrectTimes
+                List<QuestionCorrectTimesDTO> allQuestionCorrectTimes
                         = this.redisService.readQuestionCorrectTimeList(loginUserName);
 
-            model.addAttribute("UserName", loginUserName);
-            model.addAttribute("AllQuestions", allQuestionQueryResult);
-            model.addAttribute("QuestionCorrectTimes", allQuestionCorrectTimes);
+                model.addAttribute("UserName", loginUserName);
+                model.addAttribute("AllQuestions", allQuestionQueryResult);
+                model.addAttribute("QuestionCorrectTimes", allQuestionCorrectTimes);
 
-            return "UserOperatorPage/AllQuestions";
+                return "UserOperatorPage/AllQuestions";
+            }
+            else
+            {
+                throw new RuntimeException(
+                        "No login! Couldn't preview questions!"
+                );
+            }
         }
         catch (Exception exception)
         {
@@ -111,16 +120,25 @@ public class AllQuestionViewController
             HttpSession session       = request.getSession(false);
             String      loginUserName = (String) session.getAttribute("user");
 
-            var allQuestionWithCorrectOptionQueryResult =
-                this.questionService.getAllQuestionWithCorrectOption();
+            if (loginUserName != null)
+            {
+                var allQuestionWithCorrectOptionQueryResult =
+                        this.questionService.getAllQuestionWithCorrectOption();
 
-            model.addAttribute("UserName", loginUserName);
-            model.addAttribute(
-                    "AllQuestionWithCorrectOption",
-                    allQuestionWithCorrectOptionQueryResult
-            );
+                model.addAttribute("UserName", loginUserName);
+                model.addAttribute(
+                        "AllQuestionWithCorrectOption",
+                        allQuestionWithCorrectOptionQueryResult
+                );
 
-            return "UserOperatorPage/AllQuestionsWithCorrectResult";
+                return "UserOperatorPage/AllQuestionsWithCorrectResult";
+            }
+            else
+            {
+                throw new RuntimeException(
+                        "No login! Couldn't preview questions!"
+                );
+            }
         }
         catch (Exception exception)
         {
