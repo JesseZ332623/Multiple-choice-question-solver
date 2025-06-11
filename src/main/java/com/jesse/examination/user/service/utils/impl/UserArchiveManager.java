@@ -135,6 +135,12 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     @Override
     public void readUserArchive(String userName)
     {
+        /*
+            本应用明确了一个用户只能在一个设备登录，
+            所以重复 写入 / 读取 的事情应该不存在了。
+        */
+        // this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
+
         List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
                 = this.fileTransferService.readUserCorrectTimesDataFile(userName);
 
