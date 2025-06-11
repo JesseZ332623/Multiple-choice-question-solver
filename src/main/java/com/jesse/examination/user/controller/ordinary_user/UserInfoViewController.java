@@ -1,6 +1,8 @@
 package com.jesse.examination.user.controller.ordinary_user;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -18,5 +20,14 @@ public class UserInfoViewController
     String modifyView() { return "UserAccountPage/UserModify"; }
 
     @GetMapping(path = "/delete")
-    String deleteView() { return "UserAccountPage/UserDelete"; }
+    String deleteView(HttpServletRequest request, Model model)
+    {
+        model.addAttribute(
+                "UserName",
+                (String) request.getSession(false)
+                                .getAttribute("user")
+        );
+
+        return "UserAccountPage/UserDelete";
+    }
 }
