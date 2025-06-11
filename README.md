@@ -44,7 +44,7 @@
 
 - 普通用户首页
   - <https://localhost:8081/user_info/user_front_page>
-  ![image](https://github.com/user-attachments/assets/9fd8e17a-a748-4056-9f23-654e962747e0)
+  ![image](https://github.com/user-attachments/assets/38449497-4205-4034-811d-ed65d2ceba95)
 
 - 用户练习成绩展示页面
   - <https://localhost:8081/score_record/all_score_record>
