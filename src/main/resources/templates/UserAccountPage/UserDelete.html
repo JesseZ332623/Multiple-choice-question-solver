@@ -7,30 +7,48 @@
     <title>用户账号信息删除</title>
     <link rel="stylesheet" 
           th:href="@{/CSS/UserAccountPageCSS/UserDelete.css}">
-    
+    <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
 </head>
 <body>
+    <span th:text="${UserName}" id="user_name_text" style="display: none;"></span>
+    <div>
+        <a id="return_to_frontpage" 
+           href="/user_info/user_front_page">回首页</a>
+    </div>
+
     <div class="delete_form">
         <div class="delete_form_header">
-            <h1>删除账号</h1>
+            <h1>❌ 删除账号</h1>
         </div>
 
         <form id="delete_form">
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-
             <div class="form-group">
-                <label for="user_name" class="required">用户名</label>
-                <input type="text" id="user_name" class="form-control" required>
-                <div class="error-message" id="usernameError"></div>
+                <p th:text="'用户名: ' + ${UserName}"
+                   style="font-size: 20px;">
+                </p>
             </div>
 
             <div class="form-group">
                 <label for="password" class="required">密码</label>
-                <input type="password" id="password" class="form-control" required>
-                <div class="error-message" id="passwordError"></div>
+                <input type="password" 
+                       id="password" 
+                       class="form-control" required>
+                <div class="error-message" id="password_error"></div>
             </div>
 
-            <button type="button" onclick="doDeleteAccount()">删除账号</button>
+            <div class="form-group">
+                <label for="varify_code" class="required">验证码</label>
+                <input type="text" 
+                       id="varify_code"
+                       class="form-control" required>
+                <button type="button" 
+                        id="send_verify_code"
+                        onclick="doObtainVarifyCode()">获取验证码</button>
+                <div id="notify_message"></div>
+                <div class="error-message" id="varify_code_error"></div>
+            </div>
+
+            <button type="button" id="delete_button" onclick="doDeleteAccount()">删除账号</button>
             <p id="cancel"></p>
         </form>
     </div>
