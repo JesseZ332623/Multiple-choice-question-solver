@@ -3,6 +3,7 @@ package com.jesse.examination.user.service.impl;
 import com.jesse.examination.email.controller.EmailSenderController;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
+import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.entity.UserEntity;
@@ -40,6 +41,12 @@ public class UserService implements UserServiceInterface, UserDetailsService
     private final RoleEntityRepository        roleEntityRepository;
     private final BCryptPasswordEncoder       passwordEncoder;
     private final UserArchiveManagerInterface userArchiveManager;
+
+    /**
+     * 某用户登录状态确认 Redis 键，
+     * 拼合后为： LOGIN_STATUS_OF_[USER_NAME]
+     */
+    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_";
 
     @Autowired
     public UserService(
@@ -175,6 +182,32 @@ public class UserService implements UserServiceInterface, UserDetailsService
     @Override
     public void userLogin(@NotNull UserLoginDTO userLoginDTO)
     {
+        var redisTemplate         = this.userArchiveManager.getRedisTemplate();
+        String userLoginStatusKey = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+
+        // 检查该用户的登录状态键是否存在
+        boolean loginStatusKeyExist = redisTemplate.hasKey(userLoginStatusKey);
+        Boolean isLogin;
+
+        // 若存在，检查登录状态
+        if (loginStatusKeyExist) {
+            isLogin = (Boolean) redisTemplate.opsForValue().get(userLoginStatusKey);
+        }
+        else // 反之认为它是第一回登录
+        {
+            isLogin = false;
+            redisTemplate.opsForValue().set(userLoginStatusKey, false);
+        }
+
+        // 若该用户已经登录了，
+        // 在别的设备上就不允许登录，直接甩出异常。
+        if (isLogin != null && isLogin.equals(true))
+        {
+            throw new RuntimeException(
+                    format("User %s already login!", userLoginDTO.getUserName())
+            );
+        }
+
         UserEntity userQueryRes = this.userEntityRepository
                 .findUserByUsername(userLoginDTO.getUserName())
                 .orElseThrow(() -> new UsernameNotFoundException(
@@ -217,10 +250,13 @@ public class UserService implements UserServiceInterface, UserDetailsService
                             EmailSenderController.VERIFYCODE_KEY +
                                  userLoginDTO.getUserName()
                     );
-
-            // 加载用户存档
-            userArchiveManager.readUserArchive(userLoginDTO.getUserName());
         }
+
+        // 加载用户存档
+        userArchiveManager.readUserArchive(userLoginDTO.getUserName());
+
+        // 设置登录状态为已登录
+        redisTemplate.opsForValue().set(userLoginStatusKey, true);
     }
 
     /**
@@ -229,7 +265,12 @@ public class UserService implements UserServiceInterface, UserDetailsService
     @Override
     public void userLogout(String userName)
     {
-        // 暂时没什么别的操作，就是存储用户的存档。
+        // 设置登录状态为未登录
+        this.userArchiveManager
+            .getRedisTemplate().opsForValue()
+            .set(LOGIN_STATUS_KEY + userName, false);
+
+        // 存储用户的存档。
         this.userArchiveManager.saveUserArchive(userName);
     }
 
@@ -311,20 +352,69 @@ public class UserService implements UserServiceInterface, UserDetailsService
     }
 
     /**
-     * 用户进行登录验证后删除自己。
+     * 用户删除自己的账户。
      *
-     * @param userLoginDTO 用户在删除前需要验证一次账户
+     * @param userDeleteDTO 在删除自己前需要密码与验证码
+     * @param userName      从前端的会话中可知用户名
      *
      * @throws UsernameNotFoundException 检查到用户不存在时抛出
      */
     @Override
-    public void deleteUser(@NotNull UserLoginDTO userLoginDTO)
+    public void deleteUser(
+            @NotNull
+            UserDeleteDTO userDeleteDTO, String userName
+    )
     {
-        this.userLogin(userLoginDTO);       // 登录验证，不能想删谁就删谁
+        // 和登录操作一样，按用户名查出该用户的全部账户信息
+        UserEntity userQueryRes = this.userEntityRepository
+                .findUserByUsername(userName)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        format("User name: [%s] not found!", userName))
+                );
 
-        this.userEntityRepository
-                .deleteUserByUsername(userLoginDTO.getUserName());
-        this.userArchiveManager.deleteUserArchive(userLoginDTO.getUserName());
+        /*
+         * 将用户前端输入的密码通过同样的方式加密后与数据库中的密文进行逐字节的比较，
+         * 如果不相等则抛出异常。
+         */
+        if (!this.passwordEncoder.matches(
+                userDeleteDTO.getPassword(), userQueryRes.getPassword()))
+        {
+            throw new PasswordMismatchException("Incorrect password!");
+        }
+
+        // 从 Redis 数据库中查询该用户的验证码
+        String userVerifyCode
+                = (String) this.userArchiveManager
+                .getRedisTemplate()
+                .opsForValue()
+                .get(EmailSenderController.VERIFYCODE_KEY + userName);
+
+        // 与从页面表单上收集的验证码做比较
+        if (!Objects.equals(userDeleteDTO.getVarifyCode(), userVerifyCode))
+        {
+            throw new VarifyCodeMismatchException(
+                    "Code value incorrect or has been invalid."
+            );
+        }
+        else
+        {
+            // 需要注意的是，如果用户删除成功了，对应的验证码也应该删掉。
+            this.userArchiveManager
+                    .getRedisTemplate()
+                    .delete(EmailSenderController.VERIFYCODE_KEY + userName);
+        }
+
+        // 完成上述所有验证操作后，开始执行删除操作。
+        // 删除这个用户的登录状态数据
+        this.userArchiveManager
+            .getRedisTemplate()
+            .delete(LOGIN_STATUS_KEY + userName);
+
+        // 删除用户账户信息
+        this.userEntityRepository.deleteUserByUsername(userName);
+
+        // 删除用户存档信息
+        this.userArchiveManager.deleteUserArchive(userName);
     }
 
     /**
