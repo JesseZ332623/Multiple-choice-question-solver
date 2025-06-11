@@ -5,6 +5,8 @@
   --gh-text-color: #c9d1d9;
   --gh-accent-color: #58a6ff;
   --gh-btn-danger-bg: #da3636;
+  --gh-btn-bg: #238636;
+  --gh-btn-hover: #2ea043;
   --gh-btn-danger-hover: #f85149;
   --gh-error-color: #f85149;
 }
@@ -44,7 +46,6 @@ body {
   color: var(--gh-error-color); /* 使用危险操作红色 */
 }
 
-/* 复用登录页面的表单控件样式 */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -86,8 +87,36 @@ label.required::after {
   display: none;
 }
 
+#send_verify_code {
+  background-color: var(--gh-btn-bg);
+  color: white;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 125px;
+  padding: 6px 0px 6px 0px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+#send_verify_code:hover {
+  background-color: var(--gh-btn-hover);
+  border-color: #3fb950;
+}
+
+#send_verify_code:active {
+  background-color: #238636;
+  transition: none;
+}
+
+/* #notify_message {
+  color: var(--gh-btn-bg);
+} */
+
 /* 危险操作按钮样式 */
-button[type="button"] {
+#delete_button {
   background-color: var(--gh-btn-danger-bg);
   color: white;
   border: 1px solid rgba(218, 54, 54, 0.3);
@@ -100,12 +129,12 @@ button[type="button"] {
   transition: all 0.2s;
 }
 
-button[type="button"]:hover {
+#delete_button:hover {
   background-color: var(--gh-btn-danger-hover);
   border-color: rgba(248, 81, 73, 0.4);
 }
 
-button[type="button"]:active {
+#delete_button:active {
   background-color: #b62424;
 }
 
