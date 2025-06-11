@@ -44,9 +44,9 @@ public class EmailSenderController
     private final static String SERVICE_AUTH_CODE = "SERVICE_AUTH_CODE";
 
     /**
-     * 规定用户验证码在 Redis 中对应的键的格式是：VerifyCodeFor[user-name]
+     * 规定用户验证码在 Redis 中对应的键的格式是：VERIFY_CODE_FOR_[USER_NAME]
      */
-    public final static String VERIFYCODE_KEY = "VerifyCodeFor";
+    public final static String VERIFYCODE_KEY = "VERIFY_CODE_FOR_";
 
     /** 验证码的有效期为 3 分钟。 */
     private final static int CODE_VALID_TIME = 3;
@@ -59,6 +59,10 @@ public class EmailSenderController
 
     /**
      * 根据传入的参数，组合成一封验证码邮件的全部内容。
+     *
+     * @param userName   用户名
+     * @param userEmail  用户邮箱
+     * @param varifyCode 生成的验证码
      */
     private static @NotNull EmailContentDTO
     getEmailContentDTO(String userName, String userEmail, String varifyCode)
