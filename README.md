@@ -12,7 +12,8 @@
 - 详见：[应用模块描述](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E5%BA%94%E7%94%A8%E6%A8%A1%E5%9D%97%E6%8F%8F%E8%BF%B0.md)
 
 ### 应用数据 E-R 图
- - 详见：[E-R 图](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E9%A1%B9%E7%9B%AE%20E-R%20%E5%9B%BE.png)
+
+- 详见：[E-R 图](https://github.com/JesseZ332623/Multiple-choice-question-solver/blob/master/documents/%E9%A1%B9%E7%9B%AE%20E-R%20%E5%9B%BE.png)
 
 ## 如何使用？
 
