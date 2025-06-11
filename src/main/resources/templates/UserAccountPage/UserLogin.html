@@ -5,7 +5,7 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>用户登录</title>
-    <link rel="stylesheet" 
+    <link rel="stylesheet"
           th:href="@{/CSS/UserAccountPageCSS/UserLogin.css}">
     <script type="text/javascript"
             th:src="@{/JS/UserAccountPageScript/UserLogin.js}"></script>
@@ -18,17 +18,16 @@
         </div>
         
         <form class="login-form-body" id="loginForm">
-            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
             <div class="form-group">
                 <label for="user_name" class="required">用户名</label>
                 <input type="text" id="user_name" name="username" class="form-control" required>
-                <div class="error-message" id="user_nameError"></div>
+                <div class="error-message" id="user_name_error"></div>
             </div>
 
             <div class="form-group">
                 <label for="password" class="required">密码</label>
                 <input type="password" id="password" name="username" class="form-control" required>
-                <div class="error-message" id="passwordError"></div>
+                <div class="error-message" id="password_error"></div>
             </div>
             
             <!-- 验证码发送与校验区域，用户无需显式的填写邮箱，后端会查询出来的 -->
