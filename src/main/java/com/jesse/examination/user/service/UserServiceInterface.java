@@ -1,6 +1,7 @@
 package com.jesse.examination.user.service;
 
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
+import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
@@ -12,7 +13,6 @@ import java.io.IOException;
 
 public interface UserServiceInterface
 {
-
     /**
      * 获取指定用户头像数据。
      */
@@ -73,5 +73,8 @@ public interface UserServiceInterface
      *
      * @throws UsernameNotFoundException 检查到用户不存在时抛出
      */
-    void deleteUser(@NotNull UserLoginDTO userLoginDTO);
+    void deleteUser(
+            @NotNull
+            UserDeleteDTO userLoginDTO, String userName
+    );
 }
