@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="view-point" content="width=device-width, initial-scale=1.8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" 
@@ -30,13 +31,15 @@
     <strong th:if="${#lists.size(QuestionPractise) == 0}">题库里面还没有问题呢，去添加一些吧！</strong>
 
     <div id="total">
-        <p id="total_questions" th:text="'总题数：' + ${#lists.size(QuestionPractise)}"></p>
+        <p id="total_questions" 
+           th:text="'总题数：' + ${#lists.size(QuestionPractise)}">
+        </p>
     </div>
 
-    <div th:each="question : ${QuestionPractise}" class="question-container"
+    <div th:each="question, iter: ${QuestionPractise}" class="question-container"
          th:data-question-id="${question.questionId}" 
          th:data-correct-answer="${question.correctAnswer}">
-        <p th:text="${question.questionId} + '.' + ${question.questionContent}"></p>
+        <p th:text="${iter.index + 1} + '.  ' + ${question.questionContent}"></p>
         <div th:if="${question.options != null}">
             <ul>
                 <li th:each="entry : ${question.options.entrySet()}">
