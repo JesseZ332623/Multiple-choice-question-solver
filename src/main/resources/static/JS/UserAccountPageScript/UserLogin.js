@@ -1,8 +1,10 @@
+const isNumeric = (str) => { return /^\d+$/.test(str); };
+
 // 增强版验证逻辑
 const validators = {
-    user_name: value => value.length >= 3 || '用户名至少需要3个字符',
-    password: value => value.length >= 8 || '密码至少需要8个字符',
-    verify_code: value => value.length >= 0 || '验证码不得为空'
+    user_name:   value => value.length >= 3 || '用户名至少需要3个字符',
+    password:    value => value.length >= 8 || '密码至少需要8个字符',
+    verify_code: value => (value.length === 8 && isNumeric(value)) || '请输入正确格式的验证码'
 };
 
 function showError(elementId, message) 
@@ -10,6 +12,11 @@ function showError(elementId, message)
     const el = document.getElementById(elementId);
     el.textContent = message;
     el.style.display = 'block';
+
+    setTimeout(
+        () => {el.textContent = ''; el.style.display = 'none'; },
+        3000
+    );
 }
 
 function showNotify(message) 
@@ -17,6 +24,11 @@ function showNotify(message)
     const el = document.getElementById('notifyMessage');
     el.textContent = message;
     el.style.color = `#58A6FF`;
+
+    setTimeout(
+        () => {el.textContent = ''; el.style.display = 'none'; },
+        3000
+    );
 }
 
 async function doObtainVarifyCode() 
@@ -26,11 +38,11 @@ async function doObtainVarifyCode()
     document.getElementById('notifyMessage').textContent = '';
 
     // 从 meta 标签获取 CSRF Token
-    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
     // 从表单中拿到用户名
-    let userName = document.getElementById('user_name').value.trim();
+    let userName  = document.getElementById('user_name').value.trim();
     const sendBtn = document.getElementById('send_verify_code');
 
     if (!userName) {
@@ -73,9 +85,10 @@ async function doLogin()
 
     let isValid = true;
 
-    for (const [id, validator] of Object.entries(validators)) {
-        const input = document.getElementById(id);
-        const errorEl = document.getElementById(`${id}Error`);
+    for (const [id, validator] of Object.entries(validators)) 
+    {
+        const input   = document.getElementById(id);
+        const errorEl = document.getElementById(`${id}_error`);
 
         if (!input.value) {
             input.classList.add('invalid');
@@ -101,8 +114,8 @@ async function doLogin()
 
     const loginData =
     {
-        userName: document.getElementById('user_name').value,
-        password: document.getElementById('password').value,
+        userName:   document.getElementById('user_name').value,
+        password:   document.getElementById('password').value,
         verifyCode: document.getElementById('verify_code').value
     };
 
@@ -112,7 +125,7 @@ async function doLogin()
 
     try {
         // 从 meta 标签获取 CSRF Token
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
         const response = await fetch(
@@ -124,7 +137,6 @@ async function doLogin()
                     [csrfHeader]: csrfToken
                 },
                 body: loginDataJson
-                //credentials: 'include'
             }
         );
 
@@ -136,8 +148,7 @@ async function doLogin()
         alert(`登录成功，欢迎用户：${loginData.userName}！`);
 
         // 重置表单
-        document.querySelectorAll('input')
-            .forEach(input => input.value = '');
+        document.querySelectorAll('input').forEach(input => input.value = '');
 
         window.location.href = '/user_info/user_front_page';
     }
@@ -147,7 +158,9 @@ async function doLogin()
         console.error(error);
 
         // 重置表单
-        document.querySelectorAll('input')
-            .forEach(input => input.value = '');
+        document.querySelectorAll('input').forEach(input => input.value = '');
+
+        // 看起来验证码的按钮需要重新打开？
+        document.getElementById('send_verify_code').disabled = false;
     }
 }
