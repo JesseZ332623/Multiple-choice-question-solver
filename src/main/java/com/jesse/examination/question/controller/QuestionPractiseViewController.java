@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +37,7 @@ public class QuestionPractiseViewController
      *
      * <p>
      *      链接：
-     *      <a href="https://localhost:8081/practise">
+     *      <a href="https://localhost:8081/question/practise">
      *          (GET Method) 进行所有选择题的练习，以视图作为响应。
      *      </a>
      * </p>
@@ -48,22 +50,34 @@ public class QuestionPractiseViewController
     {
         try
         {
-            List<QuestionInfoDTO> allQuestionQueryResult
-                    = this.questionService.getAllQuestionInfo();
-
             HttpSession session = request.getSession(false);
 
-            if (!Objects.equals(session, null))
+            // 检查用户是否登录，否则不给浏览页面
+            if (session.getAttribute("user") != null)
             {
+                List<QuestionInfoDTO> allQuestionQueryResult
+                        = this.questionService.getAllQuestionInfo();
+
+                // shuffle() 算法会打乱原有的顺序，所以应该拷贝一份？
+                List<QuestionInfoDTO> shuffleAllQuestions
+                        = new ArrayList<>(allQuestionQueryResult);
+                Collections.shuffle(shuffleAllQuestions);
+
                 model.addAttribute(
                         "UserName",
                         session.getAttribute("user")
                 );
+
+                model.addAttribute("QuestionPractise", shuffleAllQuestions);
+
+                return "UserOperatorPage/QuestionPractise";
             }
-
-            model.addAttribute("QuestionPractise", allQuestionQueryResult);
-
-            return "UserOperatorPage/QuestionPractise";
+            else
+            {
+                throw new RuntimeException(
+                        "No login! Couldn't preview questions!"
+                );
+            }
         }
         catch (Exception exception)
         {
