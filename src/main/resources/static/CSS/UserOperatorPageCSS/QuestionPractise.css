@@ -29,12 +29,19 @@ h1 {
   font-weight: 600;
   font-size: 18px;
   margin-bottom: 20px;
+  border-bottom: solid 1px var(--gh-border);
 }
 
 .question-container {
+  max-width: 33%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  align-items: center;
   background-color: #161b22;
   /* GitHub 次级背景色 */
-  border-radius: 6px;
+  border-radius: 8px;
+  border: solid 1px var(--gh-border);
   /* GitHub 使用更小的圆角 */
   padding: 20px;
   margin-bottom: 20px;
@@ -181,4 +188,31 @@ label:hover {
 
 .practise_score span {
   display: block;
+}
+
+
+@media (max-width: 1500px) {
+   .question-container {
+    max-width: 53%;
+  }
+}
+
+@media (max-width: 1024px) {
+   .question-container {
+    max-width: 63%;
+  }
+}
+
+@media (max-width: 768px) 
+{
+  .question-container {
+    max-width: 73%;
+  }
+}
+
+@media (max-width: 480px) 
+{
+  .question-container {
+    max-width: 83%;
+  }
 }
