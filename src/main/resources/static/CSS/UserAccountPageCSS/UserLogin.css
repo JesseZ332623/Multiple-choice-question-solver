@@ -175,3 +175,13 @@ a:focus-visible {
   background-color: #555;
   cursor: not-all-allowed;
 }
+
+/*新增用户角色单选框简易样式*/
+#ordinary_user_radio + label::before {
+  transition: all 0.3s ease;
+}
+
+#ordinary_user_radio:checked + label::before {
+  border-color: #3498db;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+}
