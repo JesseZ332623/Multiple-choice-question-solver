@@ -14,6 +14,7 @@ import com.jesse.examination.user.repository.RoleEntityRepository;
 import com.jesse.examination.user.repository.UserEntityRepository;
 import com.jesse.examination.user.service.UserServiceInterface;
 import com.jesse.examination.user.service.utils.UserArchiveManagerInterface;
+import com.jesse.examination.user.service.utils.impl.LoginChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +45,9 @@ public class UserService implements UserServiceInterface, UserDetailsService
 
     /**
      * 某用户登录状态确认 Redis 键，
-     * 拼合后为： LOGIN_STATUS_OF_[USER_NAME]
+     * 拼合后为： LOGIN_STATUS_OF_USER_[USER_NAME]
      */
-    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_";
+    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_USER_";
 
     @Autowired
     public UserService(
@@ -180,33 +181,15 @@ public class UserService implements UserServiceInterface, UserDetailsService
      * @throws VarifyCodeMismatchException 验证码不匹配时抛出
      */
     @Override
-    public void userLogin(@NotNull UserLoginDTO userLoginDTO)
+    public void
+    userLogin(@NotNull UserLoginDTO userLoginDTO)
     {
-        var redisTemplate         = this.userArchiveManager.getRedisTemplate();
-        String userLoginStatusKey = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+        var redisTemplate = this.userArchiveManager.getRedisTemplate();
 
-        // 检查该用户的登录状态键是否存在
-        boolean loginStatusKeyExist = redisTemplate.hasKey(userLoginStatusKey);
-        Boolean isLogin;
-
-        // 若存在，检查登录状态
-        if (loginStatusKeyExist) {
-            isLogin = (Boolean) redisTemplate.opsForValue().get(userLoginStatusKey);
-        }
-        else // 反之认为它是第一回登录
-        {
-            isLogin = false;
-            redisTemplate.opsForValue().set(userLoginStatusKey, false);
-        }
-
-        // 若该用户已经登录了，
-        // 在别的设备上就不允许登录，直接甩出异常。
-        if (isLogin != null && isLogin.equals(true))
-        {
-            throw new RuntimeException(
-                    format("User %s already login!", userLoginDTO.getUserName())
-            );
-        }
+        String adminLoginStatusKey
+                = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+        String varifyCodeKey
+                = EmailSenderController.VERIFYCODE_KEY + userLoginDTO.getUserName();
 
         UserEntity userQueryRes = this.userEntityRepository
                 .findUserByUsername(userLoginDTO.getUserName())
@@ -214,49 +197,25 @@ public class UserService implements UserServiceInterface, UserDetailsService
                         format("User name: [%s] not found!", userLoginDTO.getUserName()))
                 );
 
-        /*
-         * 将用户前端输入的密码通过同样的方式加密后与数据库中的密文进行逐字节的比较，
-         * 如果不相等则抛出异常。
-        */
-        if (!this.passwordEncoder.matches(
-                userLoginDTO.getPassword(), userQueryRes.getPassword()))
-        {
-            throw new PasswordMismatchException("Incorrect password!");
-        }
+        LoginChecker.checkLoginStatus(
+                redisTemplate, adminLoginStatusKey
+        );
 
-        // 从 Redis 数据库中查询该用户的验证码
-        String userVerifyCode
-                = (String) this.userArchiveManager
-                               .getRedisTemplate()
-                               .opsForValue()
-                               .get(
-                                       EmailSenderController.VERIFYCODE_KEY +
-                                       userLoginDTO.getUserName()
-                               );
+        LoginChecker.passwordCheck(
+                this.passwordEncoder,
+                userLoginDTO.getPassword(), userQueryRes.getPassword()
+        );
 
-        // 与从页面表单上收集的验证码做比较
-        if (!Objects.equals(userLoginDTO.getVerifyCode(), userVerifyCode))
-        {
-            throw new VarifyCodeMismatchException(
-                    "Code value incorrect or has been invalid."
-            );
-        }
-        else
-        {
-            // 需要注意的是，如果用户登录成功了，对应的验证码也应该删掉。
-            this.userArchiveManager
-                    .getRedisTemplate()
-                    .delete(
-                            EmailSenderController.VERIFYCODE_KEY +
-                                 userLoginDTO.getUserName()
-                    );
-        }
+        LoginChecker.varifyCodeCheck(
+                redisTemplate,
+                varifyCodeKey, userLoginDTO.getVerifyCode()
+        );
 
-        // 加载用户存档
+        // 所有验证通过之后，加载用户存档。
         userArchiveManager.readUserArchive(userLoginDTO.getUserName());
 
-        // 设置登录状态为已登录
-        redisTemplate.opsForValue().set(userLoginStatusKey, true);
+        // 所有检查完毕后，设置登录状态为已登录
+        redisTemplate.opsForValue().set(adminLoginStatusKey, true);
     }
 
     /**
