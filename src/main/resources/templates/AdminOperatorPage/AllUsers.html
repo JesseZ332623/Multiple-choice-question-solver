@@ -9,6 +9,11 @@
           th:href="@{/CSS/AdminOperatorPageCSS/AllUsers.css}">
 </head>
 <body>
+    <div>
+        <button type="button" style="margin-bottom: 10px;"
+                id="logout_btn" onclick="adminLogout()"
+                th:text="'管理员' + ${UserName} + '登出'"></button>
+    </div>
     <div th:if="${#lists.size(AllUsers) != 0}">
         <table>
             <caption 
