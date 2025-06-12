@@ -92,9 +92,10 @@ public class EmailSenderController
      */
     private void saveEmailAuthInfoToRedis()
     {
+        // 先检查 Redis 中是否存在指定数据
         if (
-                this.redisTemplate.opsForValue().get(ENTERPRISE_EMAIL_ADDRESS) != null &&
-                this.redisTemplate.opsForValue().get(SERVICE_AUTH_CODE) != null
+                !this.redisTemplate.hasKey(ENTERPRISE_EMAIL_ADDRESS) &&
+                !this.redisTemplate.hasKey(SERVICE_AUTH_CODE)
         )
         {
             EmailAuthTableEntity emailAuth
