@@ -1,38 +1,54 @@
 // 优化后的处理函数
-function handleClear() 
+async function handleClear() 
 {
     if (confirm('确定要清除所有题目的答对次数吗？此操作不可恢复！')) 
     {
         // 添加加载状态
-        const btn = document.getElementById('clearButton');
-        btn.disabled = true;
+        const btn     = document.getElementById('clearButton');
+        btn.disabled  = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 处理中...';
 
-        // 从 meta 标签获取 CSRF Token
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        try 
+        {
+            // 从 meta 标签获取 CSRF Token
+            const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-        let userName = document.getElementById('user_name_text').textContent;
+            let userName = document.getElementById('user_name_text').textContent;
 
-        fetch(`/api/redis/clean_correct_times/${userName}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            }
-        }).then(response => {
-                if (response.ok) {
-                    location.reload(); // 简单重载页面
-                } else {
-                    throw new Error('清除失败');
+            const response = await fetch(
+                `/api/redis/clean_correct_times/${userName}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    }
                 }
-        }).catch(error => {
-                alert(error.message);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-eraser"></i> 清除所有答对次数';
-        });
+            );
 
-        alert('清除完成！');
+            if (!response.ok) 
+            {
+                throw new Error(
+                    `清除失败！状态码：${response.status}, 原因：${await response.text()}`
+                );
+            }
+
+            alert('已将所有问题的答对次数设置为 0！');
+        }
+        catch (error)
+        {
+            console.error(error);
+            alert(error.message);
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-eraser"></i> 清除所有答对次数';
+        }
+        finally 
+        {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-eraser"></i> 清除所有答对次数';
+        }
     }
 }
 
