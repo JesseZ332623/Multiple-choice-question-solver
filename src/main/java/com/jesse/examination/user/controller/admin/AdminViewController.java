@@ -1,10 +1,14 @@
 package com.jesse.examination.user.controller.admin;
 
+import com.jesse.examination.errorhandle.ControllerErrorMessage;
+import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.admindto.AdminDisplayUsersDTO;
 import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import com.jesse.examination.user.service.impl.AdminUserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,16 +69,50 @@ public class AdminViewController
     }
 
     @GetMapping(path = "all_users")
-    public String getAllUsersView(@NotNull Model model)
+    public String getAllUsersView(
+            @NotNull Model     model,
+            HttpServletRequest request
+    )
     {
-        List<UserEntity> allUserList
-                = this.adminUserServiceInterface.findAllUsers();
+        try
+        {
+            HttpSession session       = request.getSession(false);
+            String      loginUserName = (String) session.getAttribute("user");
 
-        List<AdminDisplayUsersDTO> allDisplayUsers
-                = this.columnValueProcess(allUserList);
+            if (loginUserName != null)
+            {
+                List<UserEntity> allUserList
+                        = this.adminUserServiceInterface.findAllUsers();
 
-        model.addAttribute("AllUsers", allDisplayUsers);
+                List<AdminDisplayUsersDTO> allDisplayUsers
+                        = this.columnValueProcess(allUserList);
 
-        return "AdminOperatorPage/AllUsers";
+                model.addAttribute("UserName", loginUserName);
+                model.addAttribute("AllUsers", allDisplayUsers);
+
+                return "AdminOperatorPage/AllUsers";
+            }
+            else
+            {
+                throw new RuntimeException(
+                        "No admin login! Couldn't preview users!"
+                );
+            }
+        }
+        catch (RuntimeException exception)
+        {
+            ControllerErrorMessage errorMessage
+                    = ErrorMessageGenerator.getErrorMessage(
+                    this.getClass().getSimpleName(),
+                    "getAllUsersView",
+                    exception.getMessage()
+            );
+
+            log.error(errorMessage.toString());
+
+            model.addAttribute("ErrorMessage", errorMessage);
+
+            return "ErrorPage/Controller_ErrorPage";
+        }
     }
 }
