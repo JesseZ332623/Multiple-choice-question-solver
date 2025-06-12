@@ -1,4 +1,38 @@
-const USER_ROLES = { "roleId": 2, "roleName": "ROLE_USER" };
+async function adminLogout() 
+{
+    try 
+    {
+        const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        const response = await fetch(
+            '/api/admin/logout',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type' : 'application/json',
+                    [csrfHeader]: csrfToken
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        alert(await response.text());
+
+        window.location.href = '/user_info/login';
+    }
+    catch (error)
+    {
+        console.error(error);
+        alert(error.message);
+    }
+}
+
+
+const USER_ROLES  = { "roleId": 2, "roleName": "ROLE_USER" };
 const ADMIN_ROLES = { "roleId": 1, "roleName": "ROLE_ADMIN" };
 
 function createUserRolesJson(newRolesText) 
@@ -66,7 +100,7 @@ async function doAvatarModify(userName, index)
 
                 const fileByteArray = new Uint8Array(await file.arrayBuffer());
 
-                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+                const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
                 // 发送请求
