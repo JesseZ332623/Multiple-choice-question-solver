@@ -35,7 +35,7 @@ async function doObtainVarifyCode()
 {
     // 每次调用前，先清空错误和通知的内容。
     document.getElementById('verify_codeError').textContent = '';
-    document.getElementById('notifyMessage').textContent = '';
+    document.getElementById('notifyMessage').textContent    = '';
 
     // 从 meta 标签获取 CSRF Token
     const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
@@ -76,7 +76,40 @@ async function doObtainVarifyCode()
     }
 }
 
-async function doLogin() 
+const USER_ROLE_SELECT = {
+    ROLE_NOT_SELECT : -1,
+    ADMIN_USER      :  0,
+    ORDINARY_USER   :  1
+};
+/**
+ * 检查用户的角色，有三种情况：
+ * 
+ * @returns ROLE_NOT_SELECT 用户没有选择角色
+ *          ADMIN_USER      管理员
+ *          ORDINARY_USER   普通用户
+*/
+function checkUserRole() 
+{
+    const roleRadios = document.getElementsByName('role');
+
+    if (
+        roleRadios.item(0).checked === false &&
+        roleRadios.item(1).checked === false
+    ) {
+        showError('role_select_error', '请选择你的身份！');
+        return USER_ROLE_SELECT.ROLE_NOT_SELECT; 
+    }
+
+    for (const radio of roleRadios) 
+    {
+        if (radio.checked && radio.id === 'ordinary_user_radio') {
+            return USER_ROLE_SELECT.ORDINARY_USER;
+        }
+        else { return USER_ROLE_SELECT.ADMIN_USER; }
+    }
+}
+
+async function doLogin()
 {
     const form = document.getElementById('loginForm');
     const errorElements = document.querySelectorAll('.error-message');
@@ -110,10 +143,13 @@ async function doLogin()
         }
     }
 
-    if (!isValid) { return; }
+    const userRole = checkUserRole();
 
-    const loginData =
-    {
+    if (!isValid || userRole === USER_ROLE_SELECT.ROLE_NOT_SELECT) { 
+        return; 
+    }
+
+    const loginData = {
         userName:   document.getElementById('user_name').value,
         password:   document.getElementById('password').value,
         verifyCode: document.getElementById('verify_code').value
@@ -121,41 +157,80 @@ async function doLogin()
 
     const loginDataJson = JSON.stringify(loginData);
 
-    console.info(loginDataJson);
-
-    try {
+    try 
+    {
         // 从 meta 标签获取 CSRF Token
         const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        
+        // 根据前端所判断的不同类型，来决定调用哪个 API 进行登录操作
+        if (userRole === USER_ROLE_SELECT.ORDINARY_USER)
+        {
+            const response = await fetch(
+                '/api/user_info/login',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: loginDataJson
+                }
+            );
 
-        const response = await fetch(
-            '/api/user_info/login',
+            if (!response.ok) 
             {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken
-                },
-                body: loginDataJson
+                const errorData = await response.text();
+                throw new Error(errorData || '登录失败');
             }
-        );
 
-        if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(errorData || '登录失败');
+            alert(`登录成功，欢迎普通用户：${loginData.userName}！`);
+
+            // 重置表单
+            document.querySelectorAll('input').forEach(input => input.value = '');
+
+            window.location.href = '/user_info/user_front_page';
         }
+        else if (userRole === USER_ROLE_SELECT.ADMIN_USER) 
+        {
+            // 调用管理员登录 API
+            const response = await fetch(
+                '/api/admin/login',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: loginDataJson
+                }
+            );
 
-        alert(`登录成功，欢迎用户：${loginData.userName}！`);
+            if (!response.ok) 
+            {
+                const errorData = await response.text();
+                throw new Error(errorData || '登录失败');
+            }
 
-        // 重置表单
-        document.querySelectorAll('input').forEach(input => input.value = '');
+            alert(`登录成功，欢迎管理员：${loginData.userName}！`);
 
-        window.location.href = '/user_info/user_front_page';
+            // 重置表单
+            document.querySelectorAll('input').forEach(input => input.value = '');
+
+            window.location.href = '/admin/all_users';
+        }
+        else 
+        {
+            /* 
+                此处前面的判断逻辑已经防住了无任何选择的情况，
+                所以这里什么都不用做。
+            */
+        }
     }
     catch (error) 
     {
-        alert('登录失败：' + error.message);
         console.error(error);
+        alert('登录失败：' + error.message);
 
         // 重置表单
         document.querySelectorAll('input').forEach(input => input.value = '');
