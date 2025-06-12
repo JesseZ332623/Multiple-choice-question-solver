@@ -23,6 +23,13 @@ public class RedisService implements RedisServiceInterface
 {
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /** 
+     * 用户所有问题答对次数列表的 Redis 键，
+     * 格式为：CORRECT_TIMES_LIST_OF_[USER_NAME]
+     */
+    private final static String CORRECT_TIMES_LIST_KEY
+            = "CORRECT_TIMES_LIST_OF_";
+
     @Autowired
     public RedisService(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -41,7 +48,8 @@ public class RedisService implements RedisServiceInterface
     )
     {
         this.redisTemplate.opsForList().rightPushAll(
-                userName, correctTimesDTOList
+                CORRECT_TIMES_LIST_KEY + userName,
+                correctTimesDTOList
         );
 
         log.info(
@@ -62,7 +70,11 @@ public class RedisService implements RedisServiceInterface
     {
         // 从Redis中获取指定用户的所有列表元素
         List<Object> redisList
-                = redisTemplate.opsForList().range(userName, 0, -1);
+                = redisTemplate.opsForList()
+                               .range(
+                                       CORRECT_TIMES_LIST_KEY + userName,
+                                       0, -1
+                               );
 
         // 检查是否存在或空列表
         if (redisList == null || redisList.isEmpty()) {
@@ -167,7 +179,11 @@ public class RedisService implements RedisServiceInterface
 
         queryResult.set(questionIndex, questionCorrectTimesDTO);
 
-        this.redisTemplate.opsForList().set(questionPos.getUserName(), 0, queryResult);
+        this.redisTemplate.opsForList()
+                          .set(
+                                  CORRECT_TIMES_LIST_KEY + questionPos.getUserName(),
+                                  0, queryResult
+                          );
 
         log.info(
                 "questionCorrectTimesPlusOneById() User: {} updated correctTimes {} -> {} where question id = {}",
@@ -204,7 +220,11 @@ public class RedisService implements RedisServiceInterface
 
         queryResult.forEach((n) -> n.setCorrectTimes(0));
 
-        this.redisTemplate.opsForList().set(userName, 0, queryResult);
+        this.redisTemplate.opsForList()
+                .set(
+                        CORRECT_TIMES_LIST_KEY + userName,
+                        0, queryResult
+                );
 
         log.info(
                 "cleanAllQuestionCorrectTimesToZero() truncate complete. {} rows affected.",
@@ -219,7 +239,7 @@ public class RedisService implements RedisServiceInterface
     public void
     deleteAllQuestionCorrectTimesByUser(String userName)
     {
-        if (this.redisTemplate.delete(userName))
+        if (this.redisTemplate.delete(CORRECT_TIMES_LIST_KEY + userName))
         {
             log.info(
                     "deleteAllQuestionCorrectTimesByUser() delete user: {} data complete!",
