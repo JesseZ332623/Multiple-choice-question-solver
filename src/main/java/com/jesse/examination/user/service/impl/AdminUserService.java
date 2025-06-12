@@ -1,12 +1,15 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.email.controller.EmailSenderController;
 import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
+import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.entity.UserEntity;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.repository.AdminUserEntityRepository;
 import com.jesse.examination.user.service.AdminServiceInterface;
+import com.jesse.examination.user.service.utils.impl.LoginChecker;
 import com.jesse.examination.user.service.utils.impl.UserArchiveManager;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,12 @@ public class AdminUserService implements AdminServiceInterface
     private final AdminUserEntityRepository       adminUserEntityRepository;
     private final BCryptPasswordEncoder           passwordEncoder;
     private final UserArchiveManager              userArchiveManager ;
+
+    /**
+     * 某管理员登录状态确认 Redis 键，
+     * 拼合后为： LOGIN_STATUS_OF_ADMIN_[ADMIN_NAME]
+     */
+    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_ADMIN_";
 
     @Autowired
     public AdminUserService(
@@ -76,6 +85,57 @@ public class AdminUserService implements AdminServiceInterface
                     format("User full name: [%s] already exists!", fullName)
             );
         }
+    }
+
+    @Override
+    public void
+    adminUserLogin(@NotNull UserLoginDTO userLoginDTO)
+    {
+        var redisTemplate = this.userArchiveManager.getRedisTemplate();
+
+        String adminLoginStatusKey
+                = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+        String varifyCodeKey
+                = EmailSenderController.VERIFYCODE_KEY + userLoginDTO.getUserName();
+
+        UserEntity userQueryRes = this.adminUserEntityRepository
+                .findUserByUsername(userLoginDTO.getUserName())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        format("User name: [%s] not found!", userLoginDTO.getUserName()))
+                );
+
+        LoginChecker.checkLoginStatus(
+                redisTemplate, adminLoginStatusKey
+        );
+
+        LoginChecker.checkRoles(
+                userQueryRes.getRoles(),
+                "ROLE_ADMIN", userQueryRes.getUsername()
+        );
+
+        LoginChecker.passwordCheck(
+                this.passwordEncoder,
+                userLoginDTO.getPassword(),
+                userQueryRes.getPassword()
+        );
+
+        LoginChecker.varifyCodeCheck(
+                redisTemplate,
+                varifyCodeKey, userLoginDTO.getVerifyCode()
+        );
+
+        // 所有检查完毕后，设置登录状态为已登录
+        redisTemplate.opsForValue().set(adminLoginStatusKey, true);
+    }
+
+    @Override
+    public void
+    adminUserLogout(String userName)
+    {
+        // 设置登录状态为未登录
+        this.userArchiveManager
+            .getRedisTemplate().opsForValue()
+            .set(LOGIN_STATUS_KEY + userName, false);
     }
 
     /**
