@@ -36,7 +36,7 @@
 
 - 用户登录页面
   - <https://localhost:8081/user_info/login>
-  ![image](https://github.com/user-attachments/assets/96a61394-043e-4685-acfb-82d4f0365c1e)
+  ![image](https://github.com/user-attachments/assets/5c5eaf60-3f19-4766-82cb-1ec7df8ac30e)
 
 - 普通用户修改账号页面
   - <https://localhost:8081/user_info/modify>
