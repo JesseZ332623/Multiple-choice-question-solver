@@ -1,11 +1,11 @@
 package com.jesse.examination.user.controller.ordinary_user;
 
+import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.service.UserServiceInterface;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -31,61 +31,6 @@ public class UserInfoController
     @Autowired
     public UserInfoController(UserServiceInterface userService) {
         this.userService = userService;
-    }
-
-    /**
-     * 在用户登录时，添加新的 Cookie。
-     *
-     * @param request  HTTP servlet 请求
-     * @param response HTTP servlet 响应
-     * @param userName Cookie 所关联的用户名
-     */
-    private static void
-    addNewCookie(
-            HttpServletRequest request,
-            HttpServletResponse response, String userName)
-    {
-        /*
-         * 为了防止固定会话攻击，每次登录都会强制创建新的 Session。
-         */
-        HttpSession session = request.getSession(false);
-
-        if (!Objects.equals(session, null)) {
-            session.invalidate();
-        }
-
-        // 将用户名和这个 session 相关联。
-        session = request.getSession(true);
-        session.setAttribute("user", userName);
-
-        // 设置 Cookie 确保浏览器使用新会话 ID
-        Cookie cookie = new Cookie("JSESSIONID", session.getId());
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);         // 如果使用 HTTPS
-        response.addCookie(cookie);
-
-        log.info(
-                "User [{}] logged in with session ID: {}",
-                userName, session.getId()
-        );
-    }
-
-    /**
-     * 在用户登出以及确定干掉它自己时，删除 Cookie。
-     *
-     * @param response HTTP servlet 响应
-     */
-    private static void
-    deleteCookie(HttpServletResponse response)
-    {
-        // 创建一个名为 "JSESSIONID" 的新 Cookie，值设为 null
-        Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/");        // 路径必须与登录时设置的路径一致
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);        // 立即过期
-        response.addCookie(cookie); // 将新的 Cookie 添加到响应中
     }
 
     /**
@@ -200,7 +145,10 @@ public class UserInfoController
             this.userService.userLogin(userLoginDTO);
 
             // 添加 Cookie
-            addNewCookie(request, response, userLoginDTO.getUserName());
+            UserInfoProcessUtils.addNewCookie(
+                    request, response,
+                    userLoginDTO.getUserName()
+            );
 
             return ResponseEntity.ok(
                     format(
@@ -226,7 +174,7 @@ public class UserInfoController
     {
         try
         {
-            HttpSession session        = request.getSession(false);
+            HttpSession session = request.getSession(false);
             String      logoutUserName;
 
             if (!Objects.equals(session, null))
@@ -236,7 +184,7 @@ public class UserInfoController
                 // 得查得到用户名才能执行登出操作不是吗。
                 this.userService.userLogout(logoutUserName);
                 session.invalidate();   // 登出完成后，立刻使该会话无效
-                deleteCookie(response); // 删除 Cookie
+                UserInfoProcessUtils.deleteCookie(response); // 删除 Cookie
 
                 log.info("User [{}] logout, see you later~", logoutUserName);
 
@@ -314,7 +262,7 @@ public class UserInfoController
                     其对应的会话和 Cookie 也应该失效。
                 */
                 session.invalidate();
-                deleteCookie(response);
+                UserInfoProcessUtils.deleteCookie(response);
 
                 return ResponseEntity.ok(
                         format("Delete complete! See you again [%s]!", deletedUserName)
