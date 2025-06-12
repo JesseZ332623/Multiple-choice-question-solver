@@ -3,14 +3,21 @@ package com.jesse.examination.user.controller.admin;
 import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
+import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.service.AdminServiceInterface;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -24,6 +31,79 @@ public class AdminController
     @Autowired
     public AdminController(AdminServiceInterface adminServiceInterface) {
         this.adminServiceInterface = adminServiceInterface;
+    }
+
+    @PostMapping(path = "login")
+    public ResponseEntity<String>
+    adminUserLogin(
+            @NotNull @RequestBody
+            UserLoginDTO userLoginDTO,
+            HttpServletRequest request,
+            HttpServletResponse response
+    )
+    {
+        try
+        {
+            this.adminServiceInterface.adminUserLogin(userLoginDTO);
+
+            // 添加 Cookie
+            UserInfoProcessUtils.addNewCookie(
+                    request, response,
+                    userLoginDTO.getUserName()
+            );
+
+            return ResponseEntity.ok(
+                    format(
+                            "Log in complete! Welcome admin: [%s]!",
+                            userLoginDTO.getUserName()
+                    )
+            );
+        }
+        catch (Exception exception)
+        {
+            log.error(exception.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(exception.getMessage());
+        }
+    }
+
+    @PostMapping(path = "logout")
+    public ResponseEntity<String>
+    adminUserLogout(HttpServletRequest request, HttpServletResponse response)
+    {
+        try
+        {
+            HttpSession session = request.getSession(false);
+            String      logoutAdminName;
+
+            if (!Objects.equals(session, null))
+            {
+                logoutAdminName = (String) session.getAttribute("user");
+
+                // 得查得到用户名才能执行登出操作不是吗。
+                this.adminServiceInterface.adminUserLogout(logoutAdminName);
+
+                session.invalidate();                        // 登出完成后，立刻使该会话无效
+                UserInfoProcessUtils.deleteCookie(response); // 删除 Cookie
+
+                log.info("Admin [{}] logout, see you later~", logoutAdminName);
+
+                return ResponseEntity.ok()
+                        .body(format("Admin [%s] logout, see you later~", logoutAdminName));
+            }
+            else    // 倘若连 Session 都查不到，那自然不可能完成登出操作
+            {
+                throw new RuntimeException(
+                        "Session not exist, log out failed!"
+                );
+            }
+        }
+        catch (Exception exception)
+        {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(exception.getMessage());
+        }
     }
 
     /**
@@ -49,7 +129,7 @@ public class AdminController
         {
             log.error(exception.getMessage());
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body(exception.getMessage());
         }
     }
@@ -69,7 +149,8 @@ public class AdminController
     public ResponseEntity<?>
     addNewUser(
             @RequestBody
-            AdminAddNewUserDTO adminAddNewUserDTO)
+            AdminAddNewUserDTO adminAddNewUserDTO
+    )
     {
         try
         {
