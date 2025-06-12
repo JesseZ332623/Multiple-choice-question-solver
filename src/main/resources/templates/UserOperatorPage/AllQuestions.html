@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>题目列表</title>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" 
           th:href="@{/CSS/UserOperatorPageCSS/AllQuestions.css}">
     <link rel="stylesheet" th:href="@{/CSS/General/ToFrontPageLink.css}">
@@ -46,13 +46,13 @@
         <div th:each="question, iter : ${AllQuestions}" class="question-card glow">
 
             <div class="question-header">
-                <i class="fas fa-question-circle fa-lg"></i>
+                <!-- <i class="fas fa-question-circle fa-lg"></i> -->
                 <h3 th:text="${question.questionId} + '. ' + ${question.questionContent}"></h3>
             </div>
 
             <div class="correct-answer">
                 <i class="fas fa-check-circle"></i>
-                <span th:text="'正确答案: ' + ${question.correctAnswer}"></span>
+                <span style="margin-left: 5px;" th:text="'正确答案：' + ${question.correctAnswer}"></span>
             </div>
 
             <h4><i class="fas fa-list-ul"></i> 选项列表</h4>
