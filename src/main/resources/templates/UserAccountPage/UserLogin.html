@@ -18,16 +18,32 @@
         </div>
         
         <form class="login-form-body" id="loginForm">
+            <!-- 用户名输入框 -->
             <div class="form-group">
                 <label for="user_name" class="required">用户名</label>
                 <input type="text" id="user_name" name="username" class="form-control" required>
                 <div class="error-message" id="user_name_error"></div>
             </div>
-
+            
+            <!-- 密码输入框 -->
             <div class="form-group">
                 <label for="password" class="required">密码</label>
                 <input type="password" id="password" name="username" class="form-control" required>
                 <div class="error-message" id="password_error"></div>
+            </div>
+
+            <!-- 身份单选框-->
+            <div class="form-group">
+                <fieldset style="border: 1px solid #30363d;">
+                    <legend>身份：</legend>
+                    <div id="role_radio">
+                        <input type="radio" name="role" id="ordinary_user_radio"/>
+                        <label for="ordinary_user_radio">普通用户</label>
+                        <input type="radio" name="role" id="admin_radio">
+                        <label for="admin_radio">管理员</label>
+                    </div>
+                    <div class="error-message" id="role_select_error"></div>
+                </fieldset>
             </div>
             
             <!-- 验证码发送与校验区域，用户无需显式的填写邮箱，后端会查询出来的 -->
