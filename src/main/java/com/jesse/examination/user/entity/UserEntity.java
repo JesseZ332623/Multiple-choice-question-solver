@@ -43,7 +43,7 @@ public class UserEntity implements UserDetails
     private String email;               // 邮箱
 
     @Column(name = "register_datetime", nullable = false)
-    private LocalDateTime registerDateTime;
+    private LocalDateTime registerDateTime;  // 注册日期
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
