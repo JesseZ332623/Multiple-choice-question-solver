@@ -16,12 +16,11 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     /**
      * 通过用户名查找用户实体。（JPA 自动实现）
      */
-    Optional<UserEntity>
-    findUserByUsername(String userName);
+    Optional<UserEntity> findUserByUsername(String userName);
 
     /**
-     * 通过实体图 (EntityGraph)，配合实体的懒加载，
-     * 用一句 SQL 就能查询出所有的用户信息，避免频繁的数据库操作。
+     * 通过实体图 (Entity Graph) 用一句 SQL 就能查询出所有的用户信息，
+     * 避免频繁的数据库操作（N + 1 问题）。
      * 这里还要使用 DISTINCT 确保在用户过多的情况下避免笛卡尔积爆炸，
      * 未来随着用户数量的增涨还会添加分页查询策略。
      */
@@ -55,6 +54,9 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     )
     List<Long> findAllUserId();
 
+    /**
+     * 查询当前表中的所有用户名。
+     */
     @Query(
             value = "SELECT users.user_name FROM users",
             nativeQuery = true
@@ -77,7 +79,10 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
                     """,
             nativeQuery = true
     )
-    void deleteUserRoleRelationsByIds(@Param(value = "ids") List<Long> ids);
+    void deleteUserRoleRelationsByIds(
+            @Param(value = "ids")
+            List<Long> ids
+    );
 
     /**
      * 按 ids 列表的指示删除 users 主表对应的数据行。
@@ -87,10 +92,19 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
             value = "DELETE FROM users WHERE users.user_id IN :ids",
             nativeQuery = true
     )
-    void deleteUserByIds(@Param(value = "ids") List<Long> ids);
+    void deleteUserByIds(
+            @Param(value = "ids")
+            List<Long> ids
+    );
 
+    /**
+     * 将 users 表的 id 自增重置为 1。
+     */
     @Modifying
-    @Query(value = "ALTER TABLE users AUTO_INCREMENT = 1", nativeQuery = true)
+    @Query(
+            value = "ALTER TABLE users AUTO_INCREMENT = 1",
+            nativeQuery = true
+    )
     void alterAutoIncrementToOne();
 
     /**
