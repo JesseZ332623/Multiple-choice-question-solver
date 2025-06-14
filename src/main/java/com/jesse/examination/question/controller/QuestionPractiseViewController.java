@@ -53,7 +53,7 @@ public class QuestionPractiseViewController
             HttpSession session = request.getSession(false);
 
             // 检查用户是否登录，否则不给浏览页面
-            if (session.getAttribute("user") != null)
+            if (session != null && session.getAttribute("user") != null)
             {
                 List<QuestionInfoDTO> allQuestionQueryResult
                         = this.questionService.getAllQuestionInfo();
@@ -63,11 +63,7 @@ public class QuestionPractiseViewController
                         = new ArrayList<>(allQuestionQueryResult);
                 Collections.shuffle(shuffleAllQuestions);
 
-                model.addAttribute(
-                        "UserName",
-                        session.getAttribute("user")
-                );
-
+                model.addAttribute("UserName", session.getAttribute("user"));
                 model.addAttribute("QuestionPractise", shuffleAllQuestions);
 
                 return "UserOperatorPage/QuestionPractise";
