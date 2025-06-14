@@ -78,7 +78,7 @@ public class UserInfoController
             HttpSession session = request.getSession(false);
             String operatorUserName;
 
-            if (!Objects.equals(session, null))
+            if (session != null && session.getAttribute("user") != null)
             {
                 operatorUserName
                         = (String) session.getAttribute("user");
@@ -92,8 +92,7 @@ public class UserInfoController
                         )
                 );
             }
-            else
-            {
+            else {
                 throw new RuntimeException("Session not found!");
             }
         }
@@ -177,11 +176,11 @@ public class UserInfoController
             HttpSession session = request.getSession(false);
             String      logoutUserName;
 
-            if (!Objects.equals(session, null))
+            // 必须确认会话存在和登录用户存在才可执行登出操作。
+            if (session != null && session.getAttribute("user") != null)
             {
                 logoutUserName = (String) session.getAttribute("user");
 
-                // 得查得到用户名才能执行登出操作不是吗。
                 this.userService.userLogout(logoutUserName);
                 session.invalidate();   // 登出完成后，立刻使该会话无效
                 UserInfoProcessUtils.deleteCookie(response); // 删除 Cookie
@@ -198,24 +197,58 @@ public class UserInfoController
             else    // 倘若连 Session 都查不到，那自然不可能完成登出操作
             {
                 throw new RuntimeException(
-                        "Session not exist, log out failed!"
+                        "[RuntimeException] Session not exist, log out failed!"
                 );
             }
         }
         catch (Exception exception)
         {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(exception.getMessage());
         }
     }
 
     @PutMapping(path = "modify")
     public ResponseEntity<?> doModify(
-            @RequestBody ModifyOperatorDTO modifyOperatorDTO)
+            @RequestBody
+            ModifyOperatorDTO modifyOperatorDTO,
+            HttpServletRequest  request,
+            HttpServletResponse response
+    )
     {
         try
         {
-            this.userService.modifyUserInfo(modifyOperatorDTO);
+            HttpSession session = request.getSession(false);
+            String      modifyUserName;
+
+            // 必须确认会话存在和登录用户存在才可执行登出操作。
+            if (session != null && session.getAttribute("user") != null)
+            {
+                // 查询当前登录的用户名
+                modifyUserName = (String) session.getAttribute("user");
+
+                // 当前登录的用户名必须和表单输入的用户名相同，才执行修改操作
+                if (modifyUserName.equals(
+                        modifyOperatorDTO.getUserLoginDTO().getUserName()))
+                {
+                    this.userService.modifyUserInfo(modifyOperatorDTO);
+
+                    session.invalidate();   // 修改完毕用户登出，立刻使该会话无效
+                    UserInfoProcessUtils.deleteCookie(response); // 删除 Cookie
+                }
+                else // 反之抛出异常，告知用户不得修改不属于自己的账号
+                {
+                    throw new IllegalArgumentException(
+                            format("User %s: you can't modify account which it is not yours.", modifyUserName)
+                    );
+                }
+            }
+            else // 倘若连 Session 都查不到，那自然不可能完成登出操作
+            {
+                throw new RuntimeException(
+                        "[RuntimeException] Session not exist, modify account failed!"
+                );
+            }
 
             return ResponseEntity.ok(
                     format(
@@ -246,7 +279,7 @@ public class UserInfoController
         {
             HttpSession session = request.getSession(false);
 
-            if (!Objects.equals(session, null))
+            if (session != null && session.getAttribute("user") != null)
             {
                 /*
                  * 这里当执行 session.invalidate() 后，
@@ -280,7 +313,7 @@ public class UserInfoController
             log.error(exception.getMessage());
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                 .body(exception.getMessage());
+                    .body(exception.getMessage());
         }
     }
 }
