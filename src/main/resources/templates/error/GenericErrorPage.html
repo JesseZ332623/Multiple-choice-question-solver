@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Not Found!</title>
+    <link rel="stylesheet" th:href="@{/CSS/ErrorPageCSS/Controller_ErrorPage.css}">
+</head>
+<body>
+    <h1>Opps!</h1>
+    <h3 th:text="${ErrorMessage}"></h3>
+
+    <a href="/">🔙 Return to login page</a>
+</body>
+</html>
