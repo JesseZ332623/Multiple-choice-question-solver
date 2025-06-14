@@ -249,7 +249,6 @@ public class FileTransferService implements FileTransferServiceInterface
     {
         Path dir = Paths.get(filePath);
 
-
         // 检查路径是否存在，没有则创建。
         if (!Files.exists(dir)) {
             Files.createDirectories(dir);
@@ -267,9 +266,6 @@ public class FileTransferService implements FileTransferServiceInterface
         );
     }
 
-    /**
-     * 读取指定用户存档的头像数据（以字节数组的形式返回）。
-     */
     @Override
     public byte[] getUserAvatarImage(String userName) throws IOException
     {
@@ -288,9 +284,6 @@ public class FileTransferService implements FileTransferServiceInterface
         return Files.readAllBytes(image);
     }
 
-    /**
-     * 将头像数据写入指定用户的存档。
-     */
     @Override
     public void writeUserAvatarImage(String userName, byte[] imageBytes) throws IOException
     {
@@ -318,12 +311,6 @@ public class FileTransferService implements FileTransferServiceInterface
         );
     }
 
-    /**
-     * 存储用户成绩记录文件。
-     *
-     * @param userName          用户名（作为文件路径的根据）
-     * @param allScoreList      成绩数据列表
-     */
     @Override
     public void saveUserScoreDataFile(
             String userName,
