@@ -6,6 +6,7 @@ import com.jesse.examination.user.dto.userdto.UserLoginDTO;
 import com.jesse.examination.user.dto.userdto.UserRegistrationDTO;
 import com.jesse.examination.user.exceptions.DuplicateUserException;
 import com.jesse.examination.user.exceptions.PasswordMismatchException;
+import com.jesse.examination.user.exceptions.VarifyCodeMismatchException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -14,12 +15,12 @@ import java.io.IOException;
 public interface UserServiceInterface
 {
     /**
-     * 获取指定用户头像数据。
+     * 通过用户名获取用户头像数据。
      */
     byte[] getUserAvatarImage(String userName);
 
     /**
-     * 设置指定用户头像数据。
+     * 设置指定用户的头像数据。
      */
     void setUserAvatarImage(String userName, byte[] imageDataBytes);
 
@@ -29,7 +30,7 @@ public interface UserServiceInterface
      * @param userRegistrationDTO 从前端注册表单上收集而来的新用户数据
      *
      * @throws DuplicateUserException
-     *         当用户名和用户全名冲突的时候所抛的异常
+     *         当用户名或者用户全名冲突的时候所抛的异常
      *
      * @throws IOException 写入用户存档时可能抛出的异常
      */
@@ -41,10 +42,11 @@ public interface UserServiceInterface
     /**
      * 用户登录服务。
      *
-     * @param userLoginDTO 从前端页面收集上来的登录表单信息。
+     * @param userLoginDTO 从前端页面收集上来的登录表单信息
      *
-     * @throws UsernameNotFoundException 检查到用户不存在时抛出
-     * @throws PasswordMismatchException 密码不匹配时抛出
+     * @throws UsernameNotFoundException   检查到用户不存在时抛出
+     * @throws PasswordMismatchException   密码不匹配时抛出
+     * @throws VarifyCodeMismatchException 验证码不匹配时抛出
      */
     void userLogin(@NotNull UserLoginDTO userLoginDTO);
 
@@ -60,6 +62,7 @@ public interface UserServiceInterface
      *
      * @throws UsernameNotFoundException 检查到用户不存在时抛出
      * @throws DuplicateUserException    检查到用户重复时抛出
+     * @throws PasswordMismatchException 密码不匹配时抛出
      */
     void modifyUserInfo(
             @NotNull
@@ -67,7 +70,7 @@ public interface UserServiceInterface
     ) throws Exception;
 
     /**
-     * 用户进行登录验证后删除自己。
+     * 用户删除自己账户的服务。
      *
      * @param userLoginDTO 用户在删除前需要验证一次账户
      *
