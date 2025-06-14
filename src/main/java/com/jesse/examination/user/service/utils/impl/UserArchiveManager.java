@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户存档管理工具类（用户和管理员都会用到）。
@@ -48,9 +49,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         return FileTransferService.getDefaultAvatarImageData();
     }
 
-    /**
-     * 获取指定用户头像数据。
-     */
     @Override
     public byte[]
     getUserAvatarImage(String userName) throws IOException
@@ -58,9 +56,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         return this.fileTransferService.getUserAvatarImage(userName);
     }
 
-    /**
-     * 设置指定用户头像数据。
-     */
     @Override
     public void
     setUserAvatarImage(String userName, byte[] imageDataBytes) throws IOException
@@ -74,19 +69,15 @@ public class UserArchiveManager implements UserArchiveManagerInterface
             String oldUserName, String newUserName
     ) throws DirectoryRenameException
     {
+        // 倘若新旧用户名的值完全相同，自然也没有更改路径之必要。
+        if (oldUserName.equals(newUserName)) {
+            return;
+        }
+
         this.fileTransferService.renameUserArchiveDir(oldUserName, newUserName);
     }
 
-    /**
-     * 为新用户创建存档数据，数据描述如下所示：
-     *
-     * <ol>
-     *      <li>为该用户创建默认的头像</li>
-     *      <li>创建用户所有问题答对次数记录文件</li>
-     * </ol>
-     *
-     * @param userName 指定用户名
-     */
+
     @Override
     public void createNewArchiveForUser(String userName) throws IOException
     {
@@ -101,37 +92,8 @@ public class UserArchiveManager implements UserArchiveManagerInterface
                         this.questionService.getQuestionCount()
                 )
         );
-
-        // 此处，创建新用户存档时不需要也不应该把问题答对次数的数据存入 Redis，
-        // 这个操作应该放在用户登录时再完成。
-//        this.redisService
-//            .deleteAllQuestionCorrectTimesByUser(userName);
-//      this.redisService.saveQuestionCorrectTimeList(
-//                userName,
-//                RedisServiceInterface.createDefaultQuestionCorrectTimesList(
-//                        this.questionService.getQuestionCount()
-//                )
-//        );
     }
 
-    /**
-     * 用户登录时，读取用户的存档信息，具体操作如下所示。
-     *
-     * <ol>
-     *     <li>读取用户所有问题答对次数记录文件</li>
-     *     <li>
-     *         将该列表整体存入 Redis 数据库中，</br>
-     *         键值对是这样的：
-     *         <pre>
-     *         [key = userName, value = questionCorrectTimesDTOS]
-     *         </pre>
-     *          在 Redis 服务器中使用 LRANGE userName 0 -1 命令可以查看这个列表。</br>
-     *         （这大概不是最好的写法，但是目前能用就先予以保留吧。）
-     *     </li>
-     * </ol>
-     *
-     * @param userName 指定用户名
-     */
     @Override
     public void readUserArchive(String userName)
     {
@@ -154,14 +116,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         log.info("Read user: {} archive complete.", userName);
     }
 
-    /**
-     * 用户登出时，保存用户的存档信息，具体操作如下所示：
-     *
-     * <ol>
-     *     <li>将用户所有问题答对次数列表从 Redis 中读出，写入指定文件中</li>
-     *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
-     * </ol>
-     */
     @Override
     public void saveUserArchive(String userName)
     {
@@ -177,16 +131,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         log.info("Save user: {} data to file complete.", userName);
     }
 
-    /**
-     * 删除用户时，对应的存档、数据库记录也应该一并删除，
-     * 具体要删除这几类数据：
-     *
-     * <ol>
-     *     <li>删除用户存档数据</li>
-     *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
-     *     <li>删除 score_record 表中所有用户名为 userName 的数据行</li>
-     * </ol>
-     */
     @Override
     public void deleteUserArchive(String userName)
     {
@@ -195,10 +139,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
         this.scoreRecordService.deleteAllScoreRecordByUserName(userName);
     }
 
-    /**
-     * 获取内部的 RedisTemplate 进行一些独立的操作，
-     * 有点破坏封装性但是可控且值得。
-     */
     @Override
     public RedisTemplate<String, Object> getRedisTemplate() {
         return this.redisService.getRedisTemplate();
