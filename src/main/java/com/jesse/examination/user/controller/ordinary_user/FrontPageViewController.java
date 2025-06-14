@@ -1,5 +1,7 @@
 package com.jesse.examination.user.controller.ordinary_user;
 
+import com.jesse.examination.errorhandle.ControllerErrorMessage;
+import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Objects;
 
-@Slf4j
 @RequestMapping("/user_info")
 @Controller
 public class FrontPageViewController
@@ -26,7 +27,7 @@ public class FrontPageViewController
      * </p>
      */
     @GetMapping(path = "/user_front_page")
-    public String FrontPageView(
+    public String frontPageView(
             Model model,
             HttpServletRequest request
     )
@@ -35,23 +36,34 @@ public class FrontPageViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (!Objects.equals(session, null))
+            if (session != null && session.getAttribute("user") != null)
             {
                 model.addAttribute(
                         "UserName",
                         session.getAttribute("user")
                 );
+
+                return "UserOperatorPage/UserFrontPage";
+            }
+            else
+            {
+                throw new RuntimeException(
+                        "Not login! can't preview this page!"
+                );
             }
         }
         catch (Exception exception)
         {
-            log.error(exception.getMessage());
-
-            model.addAttribute(
-                    "UserName", "Unknow"
+            ControllerErrorMessage errorMessage
+                    = ErrorMessageGenerator.getErrorMessage(
+                    this.getClass().getSimpleName(),
+                    "frontPageView",
+                    exception.getMessage()
             );
-        }
 
-        return "UserOperatorPage/UserFrontPage";
+            model.addAttribute("ErrorMessage", errorMessage);
+
+            return "ErrorPage/Controller_ErrorPage";
+        }
     }
 }
