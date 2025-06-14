@@ -64,16 +64,15 @@ public class UserService implements UserServiceInterface, UserDetailsService
     }
 
     /**
-     * 我希望用户名和用户全名也是唯一的，
-     * 因此在 userRegister() 方法正式将数据写入之前，要进行校验。
+     * 我希望用户名是唯一的，
+     * 因此在正式将数据写入之前，要进行校验。
      *
      * @param userName 用户名
-     * @param fullName 用户全名
      *
      * @throws DuplicateUserException
-     *         当用户名和用户全名冲突的时候所抛的异常
+     *         当用户名冲突的时候所抛的异常
      */
-    private void userNameCheckOut(String userName, String fullName)
+    private void userNameCheckOut(String userName)
     {
         if (this.userEntityRepository.existsByUsername(userName))
         {
@@ -81,7 +80,19 @@ public class UserService implements UserServiceInterface, UserDetailsService
                     format("User name: [%s] already exists!", userName)
             );
         }
+    }
 
+    /**
+     * 我希望用户全名也是唯一的，
+     * 因此在正式将数据写入之前，要进行校验。
+     *
+     * @param fullName 用户全名
+     *
+     * @throws DuplicateUserException
+     *         当用户名冲突的时候所抛的异常
+     */
+    private void userFullNameCheckOut(String fullName)
+    {
         if (this.userEntityRepository.existsByFullName(fullName))
         {
             throw new DuplicateUserException(
@@ -105,9 +116,6 @@ public class UserService implements UserServiceInterface, UserDetailsService
         }
     }
 
-    /**
-     * 设置指定用户头像数据。
-     */
     @Override
     public void
     setUserAvatarImage(String userName, byte[] imageDataBytes)
@@ -124,23 +132,16 @@ public class UserService implements UserServiceInterface, UserDetailsService
         }
     }
 
-    /**
-     * 新用户进行注册服务。
-     *
-     * @param userRegistrationDTO 从前端注册表单上收集而来的新用户数据
-     *
-     * @throws DuplicateUserException
-     *         当用户名和用户全名冲突的时候所抛的异常
-     */
     @Override
     public void
-    userRegister(@NotNull UserRegistrationDTO userRegistrationDTO) throws IOException
+    userRegister(
+            @NotNull
+            UserRegistrationDTO userRegistrationDTO
+    ) throws IOException
     {
         // 验证用户名和全名
-        this.userNameCheckOut(
-                userRegistrationDTO.getUserName(),
-                userRegistrationDTO.getFullName()
-        );
+        this.userNameCheckOut(userRegistrationDTO.getUserName());
+        this.userFullNameCheckOut(userRegistrationDTO.getFullName());
 
         // 构建新用户实体
         UserEntity newUser = new UserEntity();
@@ -168,25 +169,18 @@ public class UserService implements UserServiceInterface, UserDetailsService
         this.userEntityRepository.save(newUser);
 
         // 创建新用户的存档
-        this.userArchiveManager.createNewArchiveForUser(userRegistrationDTO.getUserName());
+        this.userArchiveManager.createNewArchiveForUser(
+                userRegistrationDTO.getUserName()
+        );
     }
 
-    /**
-     * 用户登录服务。
-     *
-     * @param userLoginDTO 从前端页面收集上来的登录表单信息。
-     *
-     * @throws UsernameNotFoundException   检查到用户不存在时抛出
-     * @throws PasswordMismatchException   密码不匹配时抛出
-     * @throws VarifyCodeMismatchException 验证码不匹配时抛出
-     */
     @Override
     public void
     userLogin(@NotNull UserLoginDTO userLoginDTO)
     {
         var redisTemplate = this.userArchiveManager.getRedisTemplate();
 
-        String adminLoginStatusKey
+        String userLoginStatusKey
                 = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
         String varifyCodeKey
                 = EmailSenderController.VERIFYCODE_KEY + userLoginDTO.getUserName();
@@ -198,7 +192,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
                 );
 
         LoginChecker.checkLoginStatus(
-                redisTemplate, adminLoginStatusKey
+                redisTemplate, userLoginStatusKey
         );
 
         LoginChecker.passwordCheck(
@@ -215,7 +209,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
         userArchiveManager.readUserArchive(userLoginDTO.getUserName());
 
         // 所有检查完毕后，设置登录状态为已登录
-        redisTemplate.opsForValue().set(adminLoginStatusKey, true);
+        redisTemplate.opsForValue().set(userLoginStatusKey, true);
     }
 
     /**
@@ -233,23 +227,13 @@ public class UserService implements UserServiceInterface, UserDetailsService
         this.userArchiveManager.saveUserArchive(userName);
     }
 
-    /**
-     * 用户修改账户数据服务（用户在修改前需要验证一次账户）。
-     *
-     * @param modifyOperatorDTO 用户修改操作的 DTO
-     *
-     * @throws UsernameNotFoundException 检查到用户不存在时抛出
-     * @throws DuplicateUserException    检查到用户重复时抛出
-     */
     @Override
     public void modifyUserInfo(
             @NotNull
-            ModifyOperatorDTO modifyOperatorDTO) throws Exception
+            ModifyOperatorDTO modifyOperatorDTO
+    ) throws Exception
     {
-        // 先进行一次登录验证
-        this.userLogin(modifyOperatorDTO.getUserLoginDTO());
-
-        // 获取旧的用户信息
+        // 先获取旧的用户信息
         UserEntity userQueryResult
                 = this.userEntityRepository
                 .findUserByUsername(modifyOperatorDTO.getUserLoginDTO().getUserName())
@@ -259,48 +243,58 @@ public class UserService implements UserServiceInterface, UserDetailsService
                                 modifyOperatorDTO.getUserLoginDTO().getUserName()))
                 );
 
-        // 检查用户名和全名是否冲突（排除自身）
         String newUserName
                 = modifyOperatorDTO.getUserMidifyInfoDTO().getNewUserName();
 
         String newUserFullName
                 = modifyOperatorDTO.getUserMidifyInfoDTO().getNewFullName();
 
-        if (!userQueryResult.getUsername().equals(newUserName))
-        {
-            if (this.userEntityRepository.existsByUsername(newUserName))
-            {
-                throw new DuplicateUserException(
-                        format(
-                                "New user name: [%s] already exist!", newUserName
-                        )
-                );
-            }
+        // 检查用户名是否冲突
+        if (!userQueryResult.getUsername().equals(newUserName)) {
+            this.userNameCheckOut(newUserName);
         }
 
-        if (!userQueryResult.getFullName().equals(newUserFullName))
-        {
-            if (this.userEntityRepository.existsByFullName(newUserFullName))
-            {
-                throw new DuplicateUserException(
-                        format(
-                                "New user name: [%s] already exist!", newUserFullName
-                        )
-                );
-            }
+        // 检查全名是否冲突
+        if (!userQueryResult.getFullName().equals(newUserFullName)) {
+            this.userFullNameCheckOut(newUserFullName);
         }
 
-        // 修改成新的用户信息
+        // 也需要检查表单中输入的旧密码是否和数据库中的密码匹配
+        LoginChecker.passwordCheck(
+                this.passwordEncoder,
+                modifyOperatorDTO.getUserLoginDTO().getPassword(),
+                userQueryResult.getPassword()
+        );
+
+        // 删除旧用户的登录状态
+        this.userArchiveManager
+                .saveUserArchive(userQueryResult.getUsername());
+
+        // 存档用户的数据
+        this.userArchiveManager
+                .getRedisTemplate()
+                .delete(LOGIN_STATUS_KEY + userQueryResult.getUsername());
+
+        // 上述检查全部通过后，开始正式修改用户数据。
+
         userQueryResult.setUsername(newUserName);
         userQueryResult.setPassword(
                 this.passwordEncoder.encode(
+                        // 新密码不要忘记加密后存入
                         modifyOperatorDTO.getUserMidifyInfoDTO().getNewPassword()
                 )
         );
-        userQueryResult.setFullName(modifyOperatorDTO.getUserMidifyInfoDTO().getNewFullName());
-        userQueryResult.setTelephoneNumber(modifyOperatorDTO.getUserMidifyInfoDTO().getNewTelephoneNumber());
-        userQueryResult.setEmail(modifyOperatorDTO.getUserMidifyInfoDTO().getNewEmail());
+        userQueryResult.setFullName(
+                modifyOperatorDTO.getUserMidifyInfoDTO().getNewFullName()
+        );
+        userQueryResult.setTelephoneNumber(
+                modifyOperatorDTO.getUserMidifyInfoDTO().getNewTelephoneNumber()
+        );
+        userQueryResult.setEmail(
+                modifyOperatorDTO.getUserMidifyInfoDTO().getNewEmail()
+        );
 
+        // 存入新用户信息
         this.userEntityRepository.save(userQueryResult);
 
         // 用户名改了，与之对应的存档路径也应该修改。
