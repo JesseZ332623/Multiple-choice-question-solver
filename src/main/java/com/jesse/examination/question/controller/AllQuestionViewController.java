@@ -49,17 +49,17 @@ public class AllQuestionViewController
      */
     @GetMapping(path = "all_questions")
     public String getAllQuestionView(
-            Model model,
-            HttpServletRequest request
+            Model model, HttpServletRequest request
     )
     {
         try
         {
-            HttpSession session       = request.getSession(false);
-            String      loginUserName = (String) session.getAttribute("user");
+            HttpSession session = request.getSession(false);
 
-            if (loginUserName != null)
+            if (session != null && session.getAttribute("user") != null)
             {
+                String loginUserName = (String) session.getAttribute("user");
+
                 List<QuestionInfoDTO> allQuestionQueryResult
                         = this.questionService.getAllQuestionInfo();
 
@@ -117,11 +117,12 @@ public class AllQuestionViewController
     {
         try
         {
-            HttpSession session       = request.getSession(false);
-            String      loginUserName = (String) session.getAttribute("user");
+            HttpSession session = request.getSession(false);
 
-            if (loginUserName != null)
+            if (session != null && session.getAttribute("user") != null)
             {
+                String loginUserName = (String) session.getAttribute("user");
+
                 var allQuestionWithCorrectOptionQueryResult =
                         this.questionService.getAllQuestionWithCorrectOption();
 
