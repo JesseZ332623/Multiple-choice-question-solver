@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,62 +35,37 @@ public class AdminViewController
     }
 
     /**
-     * 对每一个用户实体稍作处理，
-     * 密码仅仅显示加密后的前 6 位，以及更好地展示用户角色和登录时间数据。
+     * 对每一个用户实体稍作处理，密码仅仅显示加密后的前 6 位。
      */
-    private List<AdminDisplayUsersDTO>
+    private List<UserEntity>
     columnValueProcess(@NotNull List<UserEntity> allUsers)
     {
-        List<AdminDisplayUsersDTO> allDisplayUsers = new ArrayList<>();
-
-        for (UserEntity tempUser : allUsers)
-        {
-            AdminDisplayUsersDTO tempDisplayUser
-                    = new AdminDisplayUsersDTO();
-
-            tempDisplayUser.setId(tempUser.getId());
-            tempDisplayUser.setUserName(tempUser.getUsername());
-            tempDisplayUser.setPassword(tempUser.getPassword().substring(0, 16));
-            tempDisplayUser.setFullName(tempUser.getFullName());
-            tempDisplayUser.setTelephoneNumber(tempUser.getTelephoneNumber());
-            tempDisplayUser.setEmail(tempUser.getEmail());
-            tempDisplayUser.setRegisterDateTime(
-                    tempUser.getRegisterDateTime()
-                            .toString().replace('T', ' ')
-            );
-            tempDisplayUser.setRoles(
-                    UserInfoProcessUtils.getRolesString(
-                            tempUser.getRoles()
-                    )
-            );
-
-            allDisplayUsers.add(tempDisplayUser);
+        for (UserEntity user : allUsers) {
+            user.setPassword(user.getPassword().substring(0, 7));
         }
 
-        return allDisplayUsers;
+        return allUsers;
     }
 
     @GetMapping(path = "all_users")
-    public String getAllUsersView(
-            @NotNull Model     model,
-            HttpServletRequest request
-    )
+    public String
+    getAllUsersView(@NotNull Model model, HttpServletRequest request)
     {
         try
         {
-            HttpSession session       = request.getSession(false);
-            String      loginUserName = (String) session.getAttribute("user");
+            HttpSession session  = request.getSession(false);
 
-            if (loginUserName != null)
+            if (session != null && session.getAttribute("user") != null)
             {
-                List<UserEntity> allUserList
-                        = this.adminUserServiceInterface.findAllUsers();
-
-                List<AdminDisplayUsersDTO> allDisplayUsers
-                        = this.columnValueProcess(allUserList);
+                String loginUserName = (String) session.getAttribute("user");
 
                 model.addAttribute("UserName", loginUserName);
-                model.addAttribute("AllUsers", allDisplayUsers);
+                model.addAttribute(
+                        "AllUsers",
+                        this.columnValueProcess(
+                                this.adminUserServiceInterface.findAllUsers()
+                        )
+                );
 
                 return "AdminOperatorPage/AllUsers";
             }
