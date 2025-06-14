@@ -10,6 +10,9 @@ import java.io.IOException;
 */
 public interface UserArchiveManagerInterface
 {
+    /**
+     * 获取用户默认头像。
+     */
     byte[] getDefaultAvatarImage();
 
     /**
@@ -87,6 +90,5 @@ public interface UserArchiveManagerInterface
       * 获取内部的 RedisTemplate 进行一些独立的操作，
       * 有点破坏封装性但是可控且值得。
       */
-     RedisTemplate<String, Object>
-     getRedisTemplate();
+     RedisTemplate<String, Object> getRedisTemplate();
 }
