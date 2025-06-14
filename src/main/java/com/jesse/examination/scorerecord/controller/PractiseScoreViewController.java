@@ -66,61 +66,63 @@ public class PractiseScoreViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (Objects.equals(session, null))
+            if (session != null && session.getAttribute("user") != null)
+            {
+                page = Math.max(0, page);               // 页数不得为负
+                size = Math.min(MAX_COLUMN_SIZE, Math.max(1, size)); // 每一页最多不超过 20 条
+
+                // 从 Session 处获取用户名
+                String userName = (String) session.getAttribute("user");
+
+                // 构建分页信息
+                Pageable pageable
+                        = PageRequest.of(
+                        page - 1, size,
+                        Sort.by("submitDate").descending()
+                );
+
+                // 查询分页数据
+                Page<ScoreRecordEntity> scoreRecordEntityPage
+                        = this.scoreRecordService
+                        .findPaginatedScoreRecordByUserName(
+                                userName, pageable
+                        );
+
+                var pageCount = scoreRecordEntityPage.getTotalPages();
+
+                if (page > pageCount && pageCount != 0)
+                {
+                    throw new IllegalArgumentException(
+                            format("Page value couldn't more than %d.", pageCount)
+                    );
+                }
+
+                // 添加用户名属性
+                model.addAttribute("UserName", userName);
+
+                // 添加当前页码属性
+                model.addAttribute("CurrentPage", page);
+
+                // 添加每页数据条数属性
+                model.addAttribute("OnePageAmount", size);
+
+                // 添加总页数属性
+                model.addAttribute("PageCount", pageCount);
+
+                // 添加总元素数属性
+                model.addAttribute("EntityCount", scoreRecordEntityPage.getTotalElements());
+
+                // 添加某一页的成绩数据属性
+                model.addAttribute("PaginatedScoreRecord", scoreRecordEntityPage);
+
+                return "UserOperatorPage/PaginatedPractiseScore";
+            }
+            else
             {
                 throw new RuntimeException(
-                        "No user log in!"
+                        "No user log in! Can not show score record!"
                 );
             }
-
-            page = Math.max(0, page);               // 页数不得为负
-            size = Math.min(MAX_COLUMN_SIZE, Math.max(1, size)); // 每一页最多不超过 20 条
-
-            // 从 Session 处获取用户名
-            String userName = (String) session.getAttribute("user");
-
-            // 构建分页信息
-            Pageable pageable
-                    = PageRequest.of(
-                    page - 1, size,
-                    Sort.by("submitDate").descending()
-            );
-
-            // 查询分页数据
-            Page<ScoreRecordEntity> scoreRecordEntityPage
-                    = this.scoreRecordService
-                    .findPaginatedScoreRecordByUserName(
-                            userName, pageable
-                    );
-
-            var pageCount = scoreRecordEntityPage.getTotalPages();
-
-            if (page > pageCount && pageCount != 0)
-            {
-                throw new IllegalArgumentException(
-                        format("Page value couldn't more than %d.", pageCount)
-                );
-            }
-
-            // 添加用户名属性
-            model.addAttribute("UserName", userName);
-
-            // 添加当前页码属性
-            model.addAttribute("CurrentPage", page);
-
-            // 添加每页数据条数属性
-            model.addAttribute("OnePageAmount", size);
-
-            // 添加总页数属性
-            model.addAttribute("PageCount", pageCount);
-
-            // 添加总元素数属性
-            model.addAttribute("EntityCount", scoreRecordEntityPage.getTotalElements());
-
-            // 添加某一页的成绩数据属性
-            model.addAttribute("PaginatedScoreRecord", scoreRecordEntityPage);
-
-            return "UserOperatorPage/PaginatedPractiseScore";
         }
         catch (Exception exception)
         {
@@ -145,34 +147,56 @@ public class PractiseScoreViewController
      * 如果期间出现错误，会跳转到统一的 Controller_ErrorPage.html 页面并显示错误消息。
      *
      * <p>
-     * 链接：
-     * <a href="https://localhost:8081/score_record/current_score_settlement">
-     * (GET Method) 渲染所有练习记录，以视图作为响应。
-     * </a>
+     *      链接：
+     *          <a href="https://localhost:8081/score_record/current_score_settlement">
+     *          (GET Method) 渲染所有练习记录，以视图作为响应。
+     *          </a>
      * </p>
      *
      * <strong>
-     * 若用户直接访问的话，就会以最新的一次练习记录作为数据进行渲染。
+     *      若用户直接访问的话，就会以最新的一次练习记录作为数据进行渲染。
      * </strong>
      */
     @GetMapping(path = "current_score_settlement")
     public String scoreSettlementView(
             Model model,
             HttpServletRequest request
-    ) {
-        HttpSession session = request.getSession(false);
+    )
+    {
+        try
+        {
+            HttpSession session = request.getSession(false);
 
-        if (!Objects.equals(session, null)) {
-            model.addAttribute(
-                    "UserName",
-                    session.getAttribute("user")
-            );
-        } else {
-            throw new RuntimeException(
-                    "Opps! No user log in!"
-            );
+            if (session != null && session.getAttribute("user") != null)
+            {
+                model.addAttribute(
+                        "UserName",
+                        session.getAttribute("user")
+                );
+
+                return "UserOperatorPage/ScoreSettlement";
+            }
+            else
+            {
+                throw new RuntimeException(
+                        "No user log in! Can not show current score settlement!"
+                );
+            }
         }
+        catch (Exception exception)
+        {
+            ControllerErrorMessage errorMessage
+                    = ErrorMessageGenerator.getErrorMessage(
+                    this.getClass().getSimpleName(),
+                    "scoreSettlementView",
+                    exception.getMessage()
+            );
 
-        return "UserOperatorPage/ScoreSettlement";
+            log.error(errorMessage.toString());
+
+            model.addAttribute("ErrorMessage", errorMessage);
+
+            return "ErrorPage/Controller_ErrorPage";
+        }
     }
 }
