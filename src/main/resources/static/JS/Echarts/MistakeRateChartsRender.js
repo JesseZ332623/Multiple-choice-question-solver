@@ -53,7 +53,8 @@ function renderMistakeRateCharts()
 
         const mistakeRate 
             = Number.parseFloat(
-                document.getElementById(`mistake_rate_${index}`).textContent
+                document.getElementById(`mistake_rate_${index}`)
+                        .textContent.replace('%', '')
             ).toFixed(2);
 
         mistakeRateMap.set(submitDate, mistakeRate);
