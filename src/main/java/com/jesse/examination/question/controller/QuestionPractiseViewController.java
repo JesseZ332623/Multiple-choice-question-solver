@@ -4,6 +4,8 @@ import com.jesse.examination.question.dto.QuestionInfoDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.user.controller.utils.CookieRoles;
+import com.jesse.examination.user.service.UserServiceInterface;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -16,17 +18,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-
 @Slf4j
 @Controller
 @RequestMapping(path = "/question")
 public class QuestionPractiseViewController
 {
-    private final QuestionService questionService;;
+    private final QuestionService      questionService;
+    private final UserServiceInterface userService;
 
     @Autowired
-    public QuestionPractiseViewController(QuestionService questionService) {
+    public QuestionPractiseViewController(
+            QuestionService questionService,
+            UserServiceInterface userService)
+    {
+        this.userService     = userService;
         this.questionService = questionService;
     }
 
@@ -63,7 +68,16 @@ public class QuestionPractiseViewController
                         = new ArrayList<>(allQuestionQueryResult);
                 Collections.shuffle(shuffleAllQuestions);
 
-                model.addAttribute("UserName", session.getAttribute("user"));
+                String userName
+                        = (String) session.getAttribute(
+                        CookieRoles.USER.toString()
+                );
+
+                model.addAttribute(
+                        "UserID",
+                        this.userService.findUserIdByUserName(userName)
+                );
+                model.addAttribute("UserName", userName);
                 model.addAttribute("QuestionPractise", shuffleAllQuestions);
 
                 return "UserOperatorPage/QuestionPractise";
