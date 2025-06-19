@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.format;
+import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 
 /**
  * Redis 服务，当前 Redis 需要存储的热点数据不多，
@@ -22,13 +23,6 @@ import static java.lang.String.format;
 public class RedisService implements RedisServiceInterface
 {
     private final RedisTemplate<String, Object> redisTemplate;
-
-    /** 
-     * 用户所有问题答对次数列表的 Redis 键，
-     * 格式为：CORRECT_TIMES_LIST_OF_[USER_NAME]
-     */
-    private final static String CORRECT_TIMES_LIST_KEY
-            = "CORRECT_TIMES_LIST_OF_";
 
     @Autowired
     public RedisService(RedisTemplate<String, Object> redisTemplate) {
@@ -256,8 +250,21 @@ public class RedisService implements RedisServiceInterface
     }
 
     /**
-     *
+     * 管理员删除某个用户时，删除这个用户所有角色的登录状态。
      */
+    @Override
+    public void
+    deleteUserAllLoginStatusByUserName(String userName)
+    {
+        if (this.redisTemplate.hasKey(ADMIN_LOGIN_STATUS_KEY.toString())) {
+            this.redisTemplate.delete(ADMIN_LOGIN_STATUS_KEY.toString());
+        }
+
+        if (this.redisTemplate.hasKey(USER_VERIFYCODE_KEY.toString())) {
+            this.redisTemplate.delete(USER_VERIFYCODE_KEY.toString());
+        }
+    }
+
     @Override
     public RedisTemplate<String, Object> getRedisTemplate() {
         return this.redisTemplate;
