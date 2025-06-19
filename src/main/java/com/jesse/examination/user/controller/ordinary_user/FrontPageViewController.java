@@ -2,15 +2,13 @@ package com.jesse.examination.user.controller.ordinary_user;
 
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
+import com.jesse.examination.user.controller.utils.CookieRoles;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.Objects;
 
 @RequestMapping("/user_info")
 @Controller
@@ -36,11 +34,11 @@ public class FrontPageViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
                 model.addAttribute(
                         "UserName",
-                        session.getAttribute("user")
+                        session.getAttribute(CookieRoles.USER.toString())
                 );
 
                 return "UserOperatorPage/UserFrontPage";
