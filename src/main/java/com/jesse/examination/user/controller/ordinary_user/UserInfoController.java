@@ -1,5 +1,6 @@
 package com.jesse.examination.user.controller.ordinary_user;
 
+import com.jesse.examination.user.controller.utils.CookieRoles;
 import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
@@ -16,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -78,10 +77,10 @@ public class UserInfoController
             HttpSession session = request.getSession(false);
             String operatorUserName;
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
                 operatorUserName
-                        = (String) session.getAttribute("user");
+                        = (String) session.getAttribute(CookieRoles.USER.toString());
 
                 this.userService.setUserAvatarImage(operatorUserName, imageByteData);
 
@@ -146,7 +145,7 @@ public class UserInfoController
             // 添加 Cookie
             UserInfoProcessUtils.addNewCookie(
                     request, response,
-                    userLoginDTO.getUserName()
+                    userLoginDTO.getUserName(), CookieRoles.USER
             );
 
             return ResponseEntity.ok(
@@ -177,9 +176,9 @@ public class UserInfoController
             String      logoutUserName;
 
             // 必须确认会话存在和登录用户存在才可执行登出操作。
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
-                logoutUserName = (String) session.getAttribute("user");
+                logoutUserName = (String) session.getAttribute(CookieRoles.USER.toString());
 
                 this.userService.userLogout(logoutUserName);
                 session.invalidate();   // 登出完成后，立刻使该会话无效
@@ -222,10 +221,10 @@ public class UserInfoController
             String      modifyUserName;
 
             // 必须确认会话存在和登录用户存在才可执行登出操作。
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
                 // 查询当前登录的用户名
-                modifyUserName = (String) session.getAttribute("user");
+                modifyUserName = (String) session.getAttribute(CookieRoles.USER.toString());
 
                 // 当前登录的用户名必须和表单输入的用户名相同，才执行修改操作
                 if (modifyUserName.equals(
@@ -279,14 +278,14 @@ public class UserInfoController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
                 /*
                  * 这里当执行 session.invalidate() 后，
                  * 用户名的字符串引用就失效了，所以这里要拿一份拷贝而非引用。
                  */
                 String deletedUserName =
-                        new String((String) session.getAttribute("user"));
+                        new String((String) session.getAttribute(CookieRoles.USER.toString()));
 
                 this.userService.deleteUser(userDeleteDTO, deletedUserName);
 
