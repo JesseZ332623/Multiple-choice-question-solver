@@ -1,11 +1,14 @@
 package com.jesse.examination.scorerecord.service;
 
+import com.jesse.examination.scorerecord.dto.ScoreRecordInsertDTO;
+import com.jesse.examination.scorerecord.dto.ScoreRecordQueryDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ScoreRecordService
 {
@@ -17,7 +20,7 @@ public interface ScoreRecordService
     /**
      * 增加新成绩记录。
      */
-    Integer addNewScoreRecord(ScoreRecordEntity scoreRecord);
+    Integer addNewScoreRecord(ScoreRecordInsertDTO scoreRecordInsertDTO);
 
     /**
      * 根据指定 ID 删除成绩记录。
@@ -27,13 +30,13 @@ public interface ScoreRecordService
     /**
      * 查找指定 userName 的所有成绩记录，存于一个列表中。
      */
-    List<ScoreRecordEntity>
+    List<ScoreRecordQueryDTO>
     findAllScoreRecordByUserName(String userName);
 
     /**
      * 分页的查找查找指定 userName 的所有成绩记录，存于一个列表中。
      */
-    Page<ScoreRecordEntity>
+    Page<ScoreRecordQueryDTO>
     findPaginatedScoreRecordByUserName(
             String userName, Pageable pageable
     );
@@ -59,7 +62,7 @@ public interface ScoreRecordService
     /**
      * 找出指定用户最新的一条成绩记录。
      */
-    ScoreRecordEntity
+    Optional<ScoreRecordQueryDTO>
     findLatestScoreRecordByName(String userName);
 
     /**
