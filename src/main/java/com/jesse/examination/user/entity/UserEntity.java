@@ -1,5 +1,6 @@
 package com.jesse.examination.user.entity;
 
+import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,9 @@ public class UserEntity implements UserDetails
 
     )
     private Set<RoleEntity> roles;      // 用户的角色（多对多）
+
+    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    private List<ScoreRecordEntity> scoreRecords; // 用户的成绩（一对多）
 
     @Override
     public String toString()
