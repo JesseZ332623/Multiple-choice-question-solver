@@ -12,7 +12,7 @@
     <div>
         <button type="button" style="margin-bottom: 10px;"
                 id="logout_btn" onclick="adminLogout()"
-                th:text="'管理员' + ${UserName} + '登出'"></button>
+                th:text="'管理员 ' + ${UserName} + ' 登出'"></button>
     </div>
     <div th:if="${#lists.size(AllUsers) != 0}">
         <table>
@@ -62,7 +62,7 @@
                     <td data-label="注册日期" th:text="${user.registerDateTime}" th:id="'registerDateTime_' + ${user.id}"></td>
 
                     <!-- [7] -->
-                    <td data-label="角色" th:text="${user.roles}" th:id="'roles_' + ${user.id}"></td>
+                    <td data-label="角色" th:text="${user.roles}" th:id="'roles_' + ${user.id}" style="color: rgb(2, 175, 2);"></td>
 
                     <!-- [8] -->
                     <td data-label="操作" th:id="'operator_' + ${user.id}">
