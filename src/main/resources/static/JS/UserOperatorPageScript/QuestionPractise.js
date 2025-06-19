@@ -69,7 +69,7 @@ function getCurrentISOTimeStrWithoutZone() {
 /**
  * 交卷逻辑
  * 
- * @param {Element} button  
+ * @param {HTMLButtonElement} button  
 */
 function totalSubmit(button)
 {
