@@ -1,13 +1,17 @@
 package com.jesse.examination.scorerecord.service.impl;
 
+import com.jesse.examination.scorerecord.dto.ScoreRecordInsertDTO;
+import com.jesse.examination.scorerecord.dto.ScoreRecordQueryDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.repository.ScoreRecordRepository;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 
+import com.jesse.examination.user.repository.UserEntityRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,16 +21,22 @@ import static java.lang.String.format;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class ScoreRecordServiceImplement implements ScoreRecordService
 {
+    private final UserEntityRepository  userEntityRepository;
     private final ScoreRecordRepository scoreRecordRepository;
 
     @Autowired
-    public ScoreRecordServiceImplement(ScoreRecordRepository scoreRecordRepository) {
+    public ScoreRecordServiceImplement(
+            ScoreRecordRepository scoreRecordRepository,
+            UserEntityRepository  userEntityRepository
+    ) {
         this.scoreRecordRepository = scoreRecordRepository;
+        this.userEntityRepository  = userEntityRepository;
     }
 
     /**
@@ -52,16 +62,46 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
     /**
      * 增加新成绩记录。
      *
-     * @param scoreRecord 新的成绩记录
+     * @param scoreRecordInsertDTO 新的成绩记录
      *
      * @return 返回新插入的数据行 ID
      */
     @Override
-    public Integer addNewScoreRecord(ScoreRecordEntity scoreRecord)
+    public Integer addNewScoreRecord(ScoreRecordInsertDTO scoreRecordInsertDTO)
     {
-        Objects.requireNonNull(scoreRecord);
+        Objects.requireNonNull(scoreRecordInsertDTO);
 
-        return this.scoreRecordRepository.save(scoreRecord).getScoreId();
+        ScoreRecordEntity newScoreRecord = new ScoreRecordEntity();
+
+        /*
+         * 这里调用用户仓库的 getReferenceById() 方法，
+         * 创建一个用户实体代理（将用户 ID 与之关联，而非完整的查询这个实体）。
+         */
+        newScoreRecord.setUserEntity(
+                this.userEntityRepository.getReferenceById(
+                        scoreRecordInsertDTO.getUserId()
+                )
+        );
+
+        newScoreRecord.setSubmitDate(
+                scoreRecordInsertDTO.getSubmitDate()
+        );
+
+        newScoreRecord.setCorrectCount(
+                scoreRecordInsertDTO.getCorrectCount()
+        );
+
+        newScoreRecord.setErrorCount(
+                scoreRecordInsertDTO.getErrorCount()
+        );
+
+        newScoreRecord.setNoAnswerCount(
+                scoreRecordInsertDTO.getNoAnswerCount()
+        );
+
+        this.scoreRecordRepository.save(newScoreRecord);
+
+        return newScoreRecord.getScoreId();
     }
 
     /**
@@ -92,7 +132,6 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      * 获取当前所有的成绩记录，以列表的形式返回。
      */
     @Override
-    @Transactional(readOnly = true)
     public List<ScoreRecordEntity> findAllScoreRecord() {
         return this.scoreRecordRepository.findAll();
     }
@@ -101,16 +140,16 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      * 查找指定 userName 的所有成绩记录，存于一个列表中。
      */
     @Override
-    @Transactional(readOnly = true)
-    public List<ScoreRecordEntity>
+    public List<ScoreRecordQueryDTO>
     findAllScoreRecordByUserName(String userName)
     {
-        return this.scoreRecordRepository.findAllScoreRecordByUserName(userName);
+        return this.scoreRecordRepository
+                   .findAllScoreRecordByUserName(userName);
     }
 
     @Override
-    public Page<ScoreRecordEntity>
-           findPaginatedScoreRecordByUserName(
+    public Page<ScoreRecordQueryDTO>
+    findPaginatedScoreRecordByUserName(
             String userName, Pageable pageable
     )
     {
@@ -125,7 +164,8 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      */
     @Override
     @Transactional
-    public Integer deleteAllScoreRecordByUserName(String userName)
+    public Integer
+    deleteAllScoreRecordByUserName(String userName)
     {
         return this.scoreRecordRepository
                    .deleteAllScoreRecordByUserName(userName);
@@ -136,7 +176,8 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      */
     @Override
     @Transactional
-    public void saveScoreRecordFromList(
+    public void
+    saveScoreRecordFromList(
             @NotNull
             List<ScoreRecordEntity> scoreRecordEntities
     )
@@ -149,10 +190,12 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
      */
     @Override
     @Transactional
-    public Long truncateScoreRecordTable()
+    public Long
+    truncateScoreRecordTable()
     {
         Long currentRows
                 = this.scoreRecordRepository.count();
+
         this.scoreRecordRepository.truncateScoreRecordTable();
 
         this.scoreRecordRepository.flush();
@@ -161,14 +204,17 @@ public class ScoreRecordServiceImplement implements ScoreRecordService
     }
 
     @Override
-    public ScoreRecordEntity
+    public Optional<ScoreRecordQueryDTO>
     findLatestScoreRecordByName(String userName)
     {
-        return this.scoreRecordRepository
-                .findLatestScoreRecordByName(userName.trim())
-                .orElseThrow(() -> new NoSuchElementException(
-                    format("用户 %s 还没有最新的成绩记录哦！", userName)
-                )
+        Pageable firstResultOnly
+                = PageRequest.of(0, 1);
+
+        Page<ScoreRecordQueryDTO> pageResult
+                = scoreRecordRepository.findLatestScoreRecordByName(
+                        userName, firstResultOnly
         );
+
+        return pageResult.stream().findFirst();
     }
 }
