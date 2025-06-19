@@ -46,6 +46,22 @@ public interface AdminUserEntityRepository extends JpaRepository<UserEntity, Lon
     );
 
     /**
+     * 查询在 [startId, endId] 范围内，
+     * 实际存在多少个数据，将数据行 id 返回并存入一个列表中。
+     */
+    @Query(value = """
+                    SELECT users.user_name FROM users
+                    WHERE users.user_id
+                    BETWEEN :startId AND :endId
+                    """,
+            nativeQuery = true
+    )
+    List<String> findUserNameByIdBetween(
+            @Param(value = "startId") Long startId,
+            @Param(value = "endId")   Long endId
+    );
+
+    /**
      * 查询当前表中的所有用户 id。
      */
     @Query(
