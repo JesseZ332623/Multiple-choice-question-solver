@@ -27,7 +27,9 @@ public class UserInfoProcessUtils
     public static void
     addNewCookie(
             HttpServletRequest request,
-            HttpServletResponse response, String userName)
+            HttpServletResponse response,
+            String userName, CookieRoles role
+    )
     {
         /*
          * 为了防止固定会话攻击，每次登录都会强制创建新的 Session。
@@ -40,7 +42,7 @@ public class UserInfoProcessUtils
 
         // 将用户名和这个 session 相关联。
         session = request.getSession(true);
-        session.setAttribute("user", userName);
+        session.setAttribute(role.toString(), userName);
 
         // 设置 Cookie 确保浏览器使用新会话 ID
         Cookie cookie = new Cookie("JSESSIONID", session.getId());
@@ -50,8 +52,8 @@ public class UserInfoProcessUtils
         response.addCookie(cookie);
 
         log.info(
-                "User [{}] logged in with session ID: {}",
-                userName, session.getId()
+                "{} [{}] logged in with session ID: {}",
+                role.toString().toUpperCase(), userName, session.getId()
         );
     }
 
