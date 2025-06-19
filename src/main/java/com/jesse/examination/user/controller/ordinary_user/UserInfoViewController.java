@@ -2,6 +2,7 @@ package com.jesse.examination.user.controller.ordinary_user;
 
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
+import com.jesse.examination.user.controller.utils.CookieRoles;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -26,7 +27,7 @@ public class UserInfoViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null) {
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null) {
                 return "UserAccountPage/UserModify";
             }
             else
@@ -58,12 +59,12 @@ public class UserInfoViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
                 model.addAttribute(
                         "UserName",
-                        (String) request.getSession(false)
-                                .getAttribute("user")
+                        request.getSession(false)
+                                .getAttribute(CookieRoles.USER.toString())
                 );
 
                 return "UserAccountPage/UserDelete";
