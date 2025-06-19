@@ -1,5 +1,7 @@
 package com.jesse.examination.scorerecord.controller;
 
+import com.jesse.examination.scorerecord.dto.ScoreRecordInsertDTO;
+import com.jesse.examination.scorerecord.dto.ScoreRecordQueryDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 
@@ -28,8 +30,7 @@ public class ScoreRecordController
     }
 
     /**
-     *  GET 方法请求，通过指定的时间信息查询对应的成绩记录行，
-     *  前后端时间信息遵循 ISO 标准且精确到秒。</br>
+     *  GET 方法请求，通过指定的时间信息查询对应的成绩记录行。
      *  服务器以 JSON 格式作为响应（如果期间出现错误，会以 500 作为响应码）。
      *
      *<p>
@@ -111,8 +112,10 @@ public class ScoreRecordController
     {
         try
         {
-            ScoreRecordEntity latestScoreRecord
-                    = this.scoreRecordService.findLatestScoreRecordByName(userName);
+            ScoreRecordQueryDTO latestScoreRecord
+                    = this.scoreRecordService
+                          .findLatestScoreRecordByName(userName)
+                          .orElseThrow();
 
             return ResponseEntity.ok(latestScoreRecord);
         }
@@ -136,7 +139,6 @@ public class ScoreRecordController
      *     "correctCount": 100,
      *     "errorCount": 20,
      *     "noAnswerCount": 30,
-     *     "mistakeRate": 13.3333333
      * }
      *</pre>
      *
@@ -153,13 +155,13 @@ public class ScoreRecordController
     public ResponseEntity<?> addOneNewScoreRecord(
             @RequestBody
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            ScoreRecordEntity scoreRecord
+            ScoreRecordInsertDTO scoreRecordInsertDTO
     )
     {
         try
         {
             Integer insertFeedBack
-                    = this.scoreRecordService.addNewScoreRecord(scoreRecord);
+                    = this.scoreRecordService.addNewScoreRecord(scoreRecordInsertDTO);
 
             return ResponseEntity.ok()
                                  .body(
