@@ -1,6 +1,5 @@
 package com.jesse.examination.user.service.impl;
 
-import com.jesse.examination.email.controller.EmailSenderController;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
@@ -31,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 import static java.lang.String.format;
 
 @Slf4j
@@ -42,12 +42,6 @@ public class UserService implements UserServiceInterface, UserDetailsService
     private final RoleEntityRepository        roleEntityRepository;
     private final BCryptPasswordEncoder       passwordEncoder;
     private final UserArchiveManagerInterface userArchiveManager;
-
-    /**
-     * 某用户登录状态确认 Redis 键，
-     * 拼合后为： LOGIN_STATUS_OF_USER_[USER_NAME]
-     */
-    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_USER_";
 
     @Autowired
     public UserService(
@@ -181,9 +175,9 @@ public class UserService implements UserServiceInterface, UserDetailsService
         var redisTemplate = this.userArchiveManager.getRedisTemplate();
 
         String userLoginStatusKey
-                = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+                = USER_LOGIN_STATUS_KEY + userLoginDTO.getUserName();
         String varifyCodeKey
-                = EmailSenderController.VERIFYCODE_KEY + userLoginDTO.getUserName();
+                = USER_VERIFYCODE_KEY + userLoginDTO.getUserName();
 
         UserEntity userQueryRes = this.userEntityRepository
                 .findUserByUsername(userLoginDTO.getUserName())
@@ -192,7 +186,8 @@ public class UserService implements UserServiceInterface, UserDetailsService
                 );
 
         LoginChecker.checkLoginStatus(
-                redisTemplate, userLoginStatusKey
+                redisTemplate,
+                userLoginStatusKey, userQueryRes.getRoles()
         );
 
         LoginChecker.passwordCheck(
@@ -221,7 +216,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
         // 设置登录状态为未登录
         this.userArchiveManager
             .getRedisTemplate().opsForValue()
-            .set(LOGIN_STATUS_KEY + userName, false);
+            .set(USER_LOGIN_STATUS_KEY + userName, false);
 
         // 存储用户的存档。
         this.userArchiveManager.saveUserArchive(userName);
@@ -273,7 +268,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
         // 存档用户的数据
         this.userArchiveManager
                 .getRedisTemplate()
-                .delete(LOGIN_STATUS_KEY + userQueryResult.getUsername());
+                .delete(USER_LOGIN_STATUS_KEY + userQueryResult.getUsername());
 
         // 上述检查全部通过后，开始正式修改用户数据。
 
@@ -340,7 +335,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
                 = (String) this.userArchiveManager
                 .getRedisTemplate()
                 .opsForValue()
-                .get(EmailSenderController.VERIFYCODE_KEY + userName);
+                .get(USER_VERIFYCODE_KEY + userName);
 
         // 与从页面表单上收集的验证码做比较
         if (!Objects.equals(userDeleteDTO.getVarifyCode(), userVerifyCode))
@@ -354,20 +349,30 @@ public class UserService implements UserServiceInterface, UserDetailsService
             // 需要注意的是，如果用户删除成功了，对应的验证码也应该删掉。
             this.userArchiveManager
                     .getRedisTemplate()
-                    .delete(EmailSenderController.VERIFYCODE_KEY + userName);
+                    .delete(USER_VERIFYCODE_KEY + userName);
         }
 
         // 完成上述所有验证操作后，开始执行删除操作。
         // 删除这个用户的登录状态数据
         this.userArchiveManager
             .getRedisTemplate()
-            .delete(LOGIN_STATUS_KEY + userName);
+            .delete(USER_LOGIN_STATUS_KEY + userName);
 
         // 删除用户账户信息
         this.userEntityRepository.deleteUserByUsername(userName);
 
         // 删除用户存档信息
         this.userArchiveManager.deleteUserArchive(userName);
+    }
+
+    /**
+     * 通过用户名查询指定的用户 ID（SQL 原生查询）。
+     */
+    public @NotNull Long
+    findUserIdByUserName(@NotNull String userName)
+    {
+        return this.userEntityRepository
+                   .findUserIdByUserName(userName);
     }
 
     /**
