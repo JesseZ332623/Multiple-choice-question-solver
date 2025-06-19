@@ -76,6 +76,12 @@ public interface RedisServiceInterface
     void deleteAllQuestionCorrectTimesByUser(String userName);
 
     /**
-     * */
+     * 管理员删除某个用户时，删除这个用户所有角色的登录状态。
+     */
+    void deleteUserAllLoginStatusByUserName(String userName);
+
+    /**
+     * 获取内部的 RedisTemplate，执行一些独立的操作。
+     */
     RedisTemplate<String, Object> getRedisTemplate();
 }
