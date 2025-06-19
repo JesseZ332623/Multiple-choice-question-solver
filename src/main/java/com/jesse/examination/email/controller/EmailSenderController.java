@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 
 /**
  * 邮件发送服务 Restful 控制器。
@@ -28,25 +29,10 @@ public class EmailSenderController
 {
     /** 默认的验证码长度是 8 位 */
     private final static int    DEFAULT_CODE_LENGTH      = 8;
+    /** 提供邮箱服务的域名 */
     private final static String SMTP_HOST                = "smtp.qq.com";
+    /** 邮箱服务端口*/
     private final static int    SMTP_PORT                = 465;
-
-    /**
-     * 未来验证码自然是由企业邮箱发出的，
-     * 这里先用我的替代。
-     * 安全起见，这里显示的都是 key，值要从 redis 数据库里查，不能明文放出来。
-     */
-    private final static String ENTERPRISE_EMAIL_ADDRESS = "ENTERPRISE_EMAIL_ADDRESS";
-
-    /**
-     * 来自邮箱服务提供的授权码键。
-     */
-    private final static String SERVICE_AUTH_CODE = "SERVICE_AUTH_CODE";
-
-    /**
-     * 规定用户验证码在 Redis 中对应的键的格式是：VERIFY_CODE_FOR_[USER_NAME]
-     */
-    public final static String VERIFYCODE_KEY = "VERIFY_CODE_FOR_";
 
     /** 验证码的有效期为 3 分钟。 */
     private final static int CODE_VALID_TIME = 3;
@@ -94,8 +80,8 @@ public class EmailSenderController
     {
         // 先检查 Redis 中是否存在指定数据
         if (
-                !this.redisTemplate.hasKey(ENTERPRISE_EMAIL_ADDRESS) &&
-                !this.redisTemplate.hasKey(SERVICE_AUTH_CODE)
+                !this.redisTemplate.hasKey(ENTERPRISE_EMAIL_ADDRESS.toString()) &&
+                !this.redisTemplate.hasKey(SERVICE_AUTH_CODE.toString())
         )
         {
             EmailAuthTableEntity emailAuth
@@ -103,12 +89,12 @@ public class EmailSenderController
 
             // 往 Redis 中存入发送者的邮箱
             this.redisTemplate.opsForValue().set(
-                    ENTERPRISE_EMAIL_ADDRESS, emailAuth.getEmail()
+                    ENTERPRISE_EMAIL_ADDRESS.toString(), emailAuth.getEmail()
             );
 
             // 往 Redis 中存入发送者的授权码
             this.redisTemplate.opsForValue().set(
-                    SERVICE_AUTH_CODE, emailAuth.getEmailAuthCode()
+                    SERVICE_AUTH_CODE.toString(), emailAuth.getEmailAuthCode()
             );
         }
     }
@@ -130,8 +116,8 @@ public class EmailSenderController
         this.emailSender = new EmailSender.EmailSenderBuilder()
                 .smtpHost(SMTP_HOST)
                 .smtpPort(SMTP_PORT)
-                .userName((String) this.redisTemplate.opsForValue().get(ENTERPRISE_EMAIL_ADDRESS))
-                .appPassword((String) this.redisTemplate.opsForValue().get(SERVICE_AUTH_CODE))
+                .userName((String) this.redisTemplate.opsForValue().get(ENTERPRISE_EMAIL_ADDRESS.toString()))
+                .appPassword((String) this.redisTemplate.opsForValue().get(SERVICE_AUTH_CODE.toString()))
                 .defaultSetProperties()
                 .defaultSetSession()
                 .build();
@@ -153,7 +139,7 @@ public class EmailSenderController
 
             String varifyCode = EmailSender.generateVarifyCode(DEFAULT_CODE_LENGTH);
 
-            String entireVarifyKey = VERIFYCODE_KEY + userName;
+            String entireVarifyKey = USER_VERIFYCODE_KEY + userName;
 
             /*
              * 若在用户发送验证码前，上一回的验证码存在，需要删除。
