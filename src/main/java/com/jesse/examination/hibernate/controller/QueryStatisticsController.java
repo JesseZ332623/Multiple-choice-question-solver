@@ -2,6 +2,7 @@ package com.jesse.examination.hibernate.controller;
 
 import com.jesse.examination.hibernate.dto.QueryStatisticsDTO;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
@@ -16,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/hibernate/")
 public class QueryStatisticsController
 {
-    // @PersistenceContext
+    @PersistenceContext
     final private EntityManager  entityManager;
+
     final private Statistics     statistics;
 
     public QueryStatisticsController(EntityManager entityManager)
