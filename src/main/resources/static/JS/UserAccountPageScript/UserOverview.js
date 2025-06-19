@@ -1,4 +1,5 @@
-async function doAvatarModify() {
+async function doAvatarModify() 
+{
     // 文件大小不得超过 8 MB
     const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
