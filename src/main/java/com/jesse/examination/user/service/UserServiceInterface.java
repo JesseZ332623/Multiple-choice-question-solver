@@ -80,4 +80,9 @@ public interface UserServiceInterface
             @NotNull
             UserDeleteDTO userLoginDTO, String userName
     );
+
+    /**
+     * 通过用户名查询指定的用户 ID（SQL 原生查询）。
+     */
+    Long findUserIdByUserName(String userName);
 }
