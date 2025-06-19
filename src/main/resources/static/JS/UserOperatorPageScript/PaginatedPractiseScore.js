@@ -1,7 +1,7 @@
 /**
  * 清空某用户的所有答题成绩记录。 
  * 
- * @param {HTMLElement} button 触发这个动作的按钮元素
+ * @param {HTMLButtonElement} button 触发这个动作的按钮元素
 */
 async function truncateRecord(button)
 {
