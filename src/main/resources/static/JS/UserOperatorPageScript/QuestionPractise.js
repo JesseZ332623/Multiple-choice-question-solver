@@ -3,7 +3,7 @@ var TotalCorrect = 0;
 var TotalMistake = 0;
 
 /*
-    不建议如此偷懒，未来会增加自动 + 手动答题存档功能。
+    不应该如此偷懒，未来会增加自动 + 手动答题存档功能。
 */
 // window.addEventListener(
 //     'beforeunload', 
@@ -66,6 +66,11 @@ function getCurrentISOTimeStrWithoutZone() {
     return new Date().toISOString().split('.')[0].replace('Z', ' ');
 }
 
+/**
+ * 交卷逻辑
+ * 
+ * @param {Element} button  
+*/
 function totalSubmit(button)
 {
     // 首先立刻禁用所有的选择按钮。
@@ -79,22 +84,73 @@ function totalSubmit(button)
 
     const recordJson =
     {
-        "userName"      : document.getElementById('user_name_text').textContent.trim(),
+        "userId"        : document.getElementById('user_id_text').textContent.trim(),
         "submitDate"    : getCurrentISOTimeStrWithoutZone(),
         "correctCount"  : TotalCorrect,
         "errorCount"    : TotalMistake,
         "noAnswerCount" : noAnswer,
-        "mistakeRate"   : mistakeRate.toFixed(2)
     };
 
-    addNewScoreRecord(recordJson, button);      // 将成绩数据写入数据表
+    // 数据收集后，将成绩数据写入数据表
+    addNewScoreRecord(recordJson, button);
 
     setTimeout(
         () => {
             button.disabled = false;
             window.location = '../score_record/current_score_settlement';
-        }, 1500
+        }, 1200
     );
+}
+
+/**
+ * 将成绩数据写入数据表。
+ * 
+ * @param {Object}  recordJson
+ * @param {Element} button
+*/
+async function addNewScoreRecord(recordJson, button) 
+{
+    try 
+    {
+        // 从 meta 标签获取 CSRF Token
+        const csrfToken  = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        const response = await fetch(
+            "/api/score_record/add_one_new_score_record",
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(recordJson)
+            }
+        );
+
+        if (!response.ok) 
+        {
+            const errorDetail = await response.text().catch(() => null);
+
+            throw new Error(
+                `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
+            );
+        }
+
+        const responseText = await response.text().catch(() => null);
+
+        const practiseScoreDOM = document.getElementById('practise_score');
+
+        practiseScoreDOM.innerHTML
+            = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交，正在跳转至结算页面。<span>`;
+
+        button.disabled = true;
+
+        console.log(`${responseText}`);
+    }
+    catch (error) {
+        console.error(error);
+    }
 }
 
 async function updateCorrectTimes(questionId)
@@ -141,49 +197,6 @@ async function updateCorrectTimes(questionId)
     catch (error) 
     {
         alert(error);
-        console.error(error);
-    }
-}
-
-async function addNewScoreRecord(recordJson, button) 
-{
-    try 
-    {
-        // 从 meta 标签获取 CSRF Token
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-        const response = await fetch(
-            "/api/score_record/add_one_new_score_record",
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken
-                },
-                body: JSON.stringify(recordJson)
-            }
-        );
-
-        if (!response.ok) {
-            const errorDetail = await response.text().catch(() => null);
-            throw new Error(
-                `Http error! statues: ${response.status}. Detail: ${errorDetail?.message || 'Unknown'}`
-            );
-        }
-
-        const responseText = await response.text().catch(() => null);
-
-        const practiseScoreDOM = document.getElementById('practise_score');
-
-        practiseScoreDOM.innerHTML
-            = `<span>✅ [${getCurrentISOTimeStrWithoutZone()}]: 成绩数据已提交，正在跳转至结算页面。<span>`;
-
-        button.disabled = true;
-
-        console.log(`${responseText}`);
-    }
-    catch (error) {
         console.error(error);
     }
 }
