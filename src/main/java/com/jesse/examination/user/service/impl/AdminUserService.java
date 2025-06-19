@@ -1,6 +1,5 @@
 package com.jesse.examination.user.service.impl;
 
-import com.jesse.examination.email.controller.EmailSenderController;
 import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
@@ -25,12 +24,13 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
+import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 
 /**
  * 管理员操作用户数据接口。
  * 将 @Transactional 注解在类头，
  * 意味着这个类的每一个公共方法都会视为一个事务，
- * 在方法开始时 Start Transactional，在方法结束时 COMMIT 或者 ROLLBACK。
+ * 在方法开始时 Start Transactional，在方法结束时 COMMIT 或者在执行中途 ROLLBACK。
  */
 @Slf4j
 @Service
@@ -40,12 +40,6 @@ public class AdminUserService implements AdminServiceInterface
     private final AdminUserEntityRepository       adminUserEntityRepository;
     private final BCryptPasswordEncoder           passwordEncoder;
     private final UserArchiveManager              userArchiveManager ;
-
-    /**
-     * 某管理员登录状态确认 Redis 键，
-     * 拼合后为： LOGIN_STATUS_OF_ADMIN_[ADMIN_NAME]
-     */
-    private static final String LOGIN_STATUS_KEY = "LOGIN_STATUS_OF_ADMIN_";
 
     @Autowired
     public AdminUserService(
@@ -94,9 +88,9 @@ public class AdminUserService implements AdminServiceInterface
         var redisTemplate = this.userArchiveManager.getRedisTemplate();
 
         String adminLoginStatusKey
-                = LOGIN_STATUS_KEY + userLoginDTO.getUserName();
+                = ADMIN_LOGIN_STATUS_KEY + userLoginDTO.getUserName();
         String varifyCodeKey
-                = EmailSenderController.VERIFYCODE_KEY + userLoginDTO.getUserName();
+                = USER_VERIFYCODE_KEY + userLoginDTO.getUserName();
 
         UserEntity userQueryRes = this.adminUserEntityRepository
                 .findUserByUsername(userLoginDTO.getUserName())
@@ -104,8 +98,14 @@ public class AdminUserService implements AdminServiceInterface
                         format("User name: [%s] not found!", userLoginDTO.getUserName()))
                 );
 
-        LoginChecker.checkLoginStatus(
-                redisTemplate, adminLoginStatusKey
+        LoginChecker.passwordCheck(
+                this.passwordEncoder,
+                userLoginDTO.getPassword(), userQueryRes.getPassword()
+        );
+
+        LoginChecker.varifyCodeCheck(
+                redisTemplate,
+                varifyCodeKey, userLoginDTO.getVerifyCode()
         );
 
         LoginChecker.checkRoles(
@@ -113,15 +113,9 @@ public class AdminUserService implements AdminServiceInterface
                 "ROLE_ADMIN", userQueryRes.getUsername()
         );
 
-        LoginChecker.passwordCheck(
-                this.passwordEncoder,
-                userLoginDTO.getPassword(),
-                userQueryRes.getPassword()
-        );
-
-        LoginChecker.varifyCodeCheck(
+        LoginChecker.checkLoginStatus(
                 redisTemplate,
-                varifyCodeKey, userLoginDTO.getVerifyCode()
+                adminLoginStatusKey, userQueryRes.getRoles()
         );
 
         // 所有检查完毕后，设置登录状态为已登录
@@ -135,7 +129,7 @@ public class AdminUserService implements AdminServiceInterface
         // 设置登录状态为未登录
         this.userArchiveManager
             .getRedisTemplate().opsForValue()
-            .set(LOGIN_STATUS_KEY + userName, false);
+            .set(ADMIN_LOGIN_STATUS_KEY + userName, false);
     }
 
     /**
@@ -329,20 +323,18 @@ public class AdminUserService implements AdminServiceInterface
     deleteUsersByIdRange(Long begin, Long end)
     {
         List<Long> existsIds
-                = this.adminUserEntityRepository.findIdByIdBetween(begin, end);
+                = this.adminUserEntityRepository
+                      .findIdByIdBetween(begin, end);
+        List<String> existsUserNames
+                = this.adminUserEntityRepository
+                      .findUserNameByIdBetween(begin, end);
 
-        if (!existsIds.isEmpty())
+        if (!existsUserNames.isEmpty())
         {
             // 逐个删除（由于经过了 findIdByIdBetween() 的查询，id 基本上不会落空）
-            for (Long id : existsIds)
+            for (String userName : existsUserNames)
             {
-                this.userArchiveManager
-                        .deleteUserArchive(
-                                this.adminUserEntityRepository
-                                        .findById(id)
-                                        .orElseThrow()
-                                        .getUsername()
-                        );
+                this.userArchiveManager.deleteUserArchive(userName);
             }
 
             this.adminUserEntityRepository.deleteUserRoleRelationsByIds(existsIds);
