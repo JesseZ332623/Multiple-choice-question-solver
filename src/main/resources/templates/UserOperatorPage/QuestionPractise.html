@@ -14,6 +14,9 @@
 </head>
 
 <body>
+    <span id="user_id_text" style="display: none;"
+          th:text="${UserID}"></span>
+
     <div id="user_name" class="user-badge" style="float: right;">
         <a th:href="@{'/user_info/overview/' + ${UserName}}">
             <img th:src="@{'/api/user_info/user_overview_avatar/' + ${UserName}}" alt="头像">
