@@ -48,7 +48,7 @@
             
             <!-- 验证码发送与校验区域，用户无需显式的填写邮箱，后端会查询出来的 -->
             <div class="form-group">
-                <label for="verify_code">验证码</label>
+                <label for="verify_code" class="required">验证码</label>
                 <input type="text" id="verify_code" class="form-control" pattern="\d*" required>
                 <button id="send_verify_code" onclick="doObtainVarifyCode()">
                     获取验证码
