@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 用户存档管理工具类（用户和管理员都会用到）。
@@ -97,12 +96,6 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     @Override
     public void readUserArchive(String userName)
     {
-        /*
-            本应用明确了一个用户只能在一个设备登录，
-            所以重复 写入 / 读取 的事情应该不存在了。
-        */
-        // this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
-
         List<QuestionCorrectTimesDTO> questionCorrectTimesDTOS
                 = this.fileTransferService.readUserCorrectTimesDataFile(userName);
 
@@ -136,6 +129,7 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     {
         this.fileTransferService.deleteUserArchive(userName);
         this.redisService.deleteAllQuestionCorrectTimesByUser(userName);
+        this.redisService.deleteUserAllLoginStatusByUserName(userName);
         this.scoreRecordService.deleteAllScoreRecordByUserName(userName);
     }
 
