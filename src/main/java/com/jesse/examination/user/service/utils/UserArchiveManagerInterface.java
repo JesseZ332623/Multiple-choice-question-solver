@@ -81,6 +81,7 @@ public interface UserArchiveManagerInterface
      * <ol>
      *     <li>删除用户存档数据</li>
      *     <li>删除 Redis 数据库中 userName 键对应的整个列表</li>
+     *     <li>删除 Redis 数据库中该用户的所有角色登录状态</li>
      *     <li>删除 score_record 表中所有用户名为 userName 的数据行</li>
      * </ol>
      */
