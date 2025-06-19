@@ -1,9 +1,11 @@
 package com.jesse.examination.scorerecord.controller;
 
-import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
+import com.jesse.examination.question.service.QuestionService;
+import com.jesse.examination.scorerecord.dto.ScoreRecordQueryDTO;
 import com.jesse.examination.errorhandle.ControllerErrorMessage;
 import com.jesse.examination.errorhandle.ErrorMessageGenerator;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
+import com.jesse.examination.user.controller.utils.CookieRoles;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +20,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Objects;
-
 import static java.lang.String.format;
 
 @Slf4j
@@ -27,14 +27,20 @@ import static java.lang.String.format;
 @RequestMapping(path = "/score_record")
 public class PractiseScoreViewController
 {
-    private final ScoreRecordService scoreRecordService;
+    private final ScoreRecordService   scoreRecordService;
+    private final QuestionService      questionService;
 
     // 一页最大行数为 18
     private static final int MAX_COLUMN_SIZE = 20;
 
     @Autowired
-    public PractiseScoreViewController(ScoreRecordService scoreRecordService) {
+    public PractiseScoreViewController(
+            ScoreRecordService  scoreRecordService,
+            QuestionService     questionService
+    )
+    {
         this.scoreRecordService = scoreRecordService;
+        this.questionService    = questionService;
     }
 
     /**
@@ -66,13 +72,13 @@ public class PractiseScoreViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
-                page = Math.max(0, page);               // 页数不得为负
+                page = Math.max(0, page);                            // 页数不得为负
                 size = Math.min(MAX_COLUMN_SIZE, Math.max(1, size)); // 每一页最多不超过 20 条
 
                 // 从 Session 处获取用户名
-                String userName = (String) session.getAttribute("user");
+                String userName = (String) session.getAttribute(CookieRoles.USER.toString());
 
                 // 构建分页信息
                 Pageable pageable
@@ -82,7 +88,7 @@ public class PractiseScoreViewController
                 );
 
                 // 查询分页数据
-                Page<ScoreRecordEntity> scoreRecordEntityPage
+                Page<ScoreRecordQueryDTO> scoreRecordEntityPage
                         = this.scoreRecordService
                         .findPaginatedScoreRecordByUserName(
                                 userName, pageable
@@ -111,6 +117,9 @@ public class PractiseScoreViewController
 
                 // 添加总元素数属性
                 model.addAttribute("EntityCount", scoreRecordEntityPage.getTotalElements());
+
+                // 添加总问题数属性
+                model.addAttribute("QuestionCount", this.questionService.getQuestionCount());
 
                 // 添加某一页的成绩数据属性
                 model.addAttribute("PaginatedScoreRecord", scoreRecordEntityPage);
@@ -167,11 +176,20 @@ public class PractiseScoreViewController
         {
             HttpSession session = request.getSession(false);
 
-            if (session != null && session.getAttribute("user") != null)
+            if (session != null && session.getAttribute(CookieRoles.USER.toString()) != null)
             {
+                String userName
+                        = (String) session.getAttribute(
+                                CookieRoles.USER.toString()
+                );
+
+                // 添加用户名属性
+                model.addAttribute("UserName", userName);
+
+                // 添加问题总数量属性
                 model.addAttribute(
-                        "UserName",
-                        session.getAttribute("user")
+                        "QuestionCount",
+                        this.questionService.getQuestionCount()
                 );
 
                 return "UserOperatorPage/ScoreSettlement";
