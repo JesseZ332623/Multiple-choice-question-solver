@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static java.lang.String.format;
+import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 
 /**
  * 用户和管理员登录时，要进行的各项验证逻辑会放在此处。
@@ -36,34 +37,77 @@ public class LoginChecker
     checkLoginStatus(
             @NotNull
             RedisTemplate<String, Object> redisTemplate,
-            String loginStatusKey
+            String loginStatusKey, Set<RoleEntity> roles
     )
     {
-        // 检查该用户的登录状态键是否存在
-        boolean loginStatusKeyExist = redisTemplate.hasKey(loginStatusKey);
-        Boolean isLogin;
+        String userName
+                = loginStatusKey.substring(
+                loginStatusKey.lastIndexOf('_') + 1
+        );
 
-        // 若存在，检查登录状态
-        if (loginStatusKeyExist) {
-            isLogin = (Boolean) redisTemplate.opsForValue().get(loginStatusKey);
-        }
-        else // 反之认为它是第一回登录
+        Runnable loginStausCheckBasic
+                = () ->
         {
-            isLogin = false;
-            redisTemplate.opsForValue().set(loginStatusKey, false);
-        }
+            // 检查该用户的登录状态键是否存在
+            boolean loginStatusKeyExist = redisTemplate.hasKey(loginStatusKey);
+            Boolean isLogin;
 
-        // 若该用户已经登录了，
-        // 在别的设备上就不允许登录，直接甩出异常。
-        if (isLogin != null && isLogin.equals(true))
+            // 若存在，检查登录状态
+            if (loginStatusKeyExist) {
+                isLogin = (Boolean) redisTemplate.opsForValue().get(loginStatusKey);
+            }
+            else // 反之认为它是第一回登录，新建登录状态键值对
+            {
+                isLogin = false;
+                redisTemplate.opsForValue().set(loginStatusKey, false);
+            }
+
+            // 若该用户已经登录了，
+            // 在别的设备上就不允许登录，直接甩出异常。
+            if (isLogin != null && isLogin.equals(true))
+            {
+                throw new RuntimeException(
+                        format(
+                                "%s %s already login!",
+                                loginStatusKey.contains("ADMIN") ? "Admin" : "User",
+                                userName
+                        )
+                );
+            }
+        };
+
+        /*
+         * 这里需要考虑这么一个情况，一个用户可能既是用户又是管理员，
+         * 当他以管理员登录时，他的用户登录就应该被顶掉（反之亦然，已经通过 Session 实现）。
+         * 因此，这里的登录状态信息也应该同步，
+         * 对于既是 user 又是 admin 的用户，需要确保他只有一个角色的登录状态为真。
+         */
+
+        // 倘若该用户既是 user 又是 admin
+        if (roles.size() == 2)
         {
-            throw new RuntimeException(
-                    format("User %s already login!",
-                            loginStatusKey.substring(
-                                    loginStatusKey.lastIndexOf('_')
-                            )
-                    )
-            );
+            // 若是管理员登录
+            if (loginStatusKey.contains(ADMIN_LOGIN_STATUS_KEY))
+            {
+                loginStausCheckBasic.run();
+                
+                // 顶掉他用户角色的登录状态
+                redisTemplate.opsForValue().set(
+                        USER_LOGIN_STATUS_KEY + userName, false
+                );
+            }
+            else
+            {
+                loginStausCheckBasic.run();
+
+                // 顶掉他管理员角色的登录状态
+                redisTemplate.opsForValue().set(
+                        ADMIN_LOGIN_STATUS_KEY + userName, false
+                );
+            }
+        }
+        else {  // 对于单角色的用户登录状态处理
+            loginStausCheckBasic.run();
         }
     }
 
@@ -161,7 +205,7 @@ public class LoginChecker
             }
         }
 
-        // 倘若不存在管理员角色，需要甩出一个权限不足的异常。
+        // 倘若不存在管理员角色，需要甩出一个权限不足地异常。
         if (!isAdmin)
         {
             throw new InsufficientAuthenticationException(
