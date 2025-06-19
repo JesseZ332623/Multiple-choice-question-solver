@@ -233,7 +233,13 @@ async function doLogin()
         alert('登录失败：' + error.message);
 
         // 重置表单
-        document.querySelectorAll('input').forEach(input => input.value = '');
+        const inputElements = document.querySelectorAll('input');
+
+        for (const input of inputElements) 
+        {
+            if (input.id === 'user_name') { continue; }
+            input.value = '';
+        }
 
         // 看起来验证码的按钮需要重新打开？
         document.getElementById('send_verify_code').disabled = false;
