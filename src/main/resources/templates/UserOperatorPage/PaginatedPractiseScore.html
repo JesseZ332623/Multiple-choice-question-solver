@@ -16,6 +16,7 @@
     <span style="display: none;" th:text="${CurrentPage}" id="current_page"></span>
     <span style="display: none;" th:text="${PageCount}" id="page_count"></span>
     <span style="display: none;" th:text="${OnePageAmount}" id="one_page_amount"></span>
+    <!-- <span style="display: none;" th:text="${QuestionCount}" id="question_count"></span> -->
 
     <div id="user_name" class="user-badge" style="float: right;">
         <a th:href="@{'/user_info/overview/' + ${UserName}}">
@@ -47,13 +48,18 @@
             </thead>
             <tbody>
                 <tr th:each="record,iter : ${PaginatedScoreRecord}" style="--i: ${iter.index}">
-                    <td th:text="${record.submitDate.toString()}"
+                    <td th:text="${record.submitDate}"
                         th:id="'submit_date_' + ${iter.index}"></td>
                     <td th:text="${record.errorCount}"></td>
                     <td th:text="${record.correctCount}"></td>
                     <td th:text="${record.noAnswerCount}"></td>
-                    <td th:text="${record.mistakeRate} + '%'"
-                        th:id="'mistake_rate_' + ${iter.index}"></td>
+                    <td th:text="${#numbers.formatDecimal(
+                                        QuestionCount != 0 
+                                        ? 100.00 * (record.errorCount + record.noAnswerCount) / QuestionCount 
+                                        : 0, 
+                                        1, 2)} + ' %'"
+                        th:id="'mistake_rate_' + ${iter.index}">
+                    </td>
                 </tr>
             </tbody>
         </table>
