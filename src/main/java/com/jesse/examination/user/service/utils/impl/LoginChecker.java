@@ -28,7 +28,7 @@ public class LoginChecker
      * @param loginStatusKey    某用户登录状态键
      *
      * <br> {@code loginStatusKey} 的示例如下：
-     * <br> {@code LOGIN_STATUS_OF_USER_Perter} 或者
+     * <br> {@code LOGIN_STATUS_OF_USER_Peter} 或者
      *      {@code LOGIN_STATUS_OF_ADMIN_Jesse}
      *
      * @throws RuntimeException 在检查到用户已经登录时抛出
@@ -45,6 +45,7 @@ public class LoginChecker
                 loginStatusKey.lastIndexOf('_') + 1
         );
 
+        // 对于无参且无返回值的方法，可以使用 Runnable 函数式接口？
         Runnable loginStausCheckBasic
                 = () ->
         {
@@ -56,8 +57,9 @@ public class LoginChecker
             if (loginStatusKeyExist) {
                 isLogin = (Boolean) redisTemplate.opsForValue().get(loginStatusKey);
             }
-            else // 反之认为它是第一回登录，新建登录状态键值对
+            else
             {
+                /* 反之认为它登录超时或者头一回登录，新建登录状态键值对。*/
                 isLogin = false;
                 redisTemplate.opsForValue().set(loginStatusKey, false);
             }
