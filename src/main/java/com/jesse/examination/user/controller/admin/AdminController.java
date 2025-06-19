@@ -1,9 +1,11 @@
 package com.jesse.examination.user.controller.admin;
 
+import com.jesse.examination.user.controller.utils.CookieRoles;
 import com.jesse.examination.user.controller.utils.UserInfoProcessUtils;
 import com.jesse.examination.user.dto.admindto.AdminAddNewUserDTO;
 import com.jesse.examination.user.dto.admindto.AdminModifyUserDTO;
 import com.jesse.examination.user.dto.userdto.UserLoginDTO;
+import com.jesse.examination.user.entity.RoleEntity;
 import com.jesse.examination.user.service.AdminServiceInterface;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Objects;
+import java.util.Set;
 
 import static java.lang.String.format;
 
@@ -33,13 +35,39 @@ public class AdminController
         this.adminServiceInterface = adminServiceInterface;
     }
 
+    /**
+     * 从集合中获取用户角色并合成一个字符串。
+     * 假设集合
+     *
+     * <pre>
+     *     roles = {{1, "ROLE_ADMIN"}, {2, "ROLE_USER}}
+     * </pre>
+     *
+     * 则函数处理后返回：
+     *
+     * <pre> rolesString = "[ROLE_ADMIN, ROLE_USER]" </pre>
+     */
+    static public String getRolesString(
+            @NotNull Set<RoleEntity> roles)
+    {
+        StringBuilder newUserRoles = new StringBuilder("[");
+
+        for (RoleEntity role : roles) {
+            newUserRoles.append(role.getRoleName()).append(", ");
+        }
+
+        newUserRoles.delete(newUserRoles.length() - 2, newUserRoles.length());
+        newUserRoles.append("]");
+
+        return newUserRoles.toString();
+    }
+
     @PostMapping(path = "login")
     public ResponseEntity<String>
     adminUserLogin(
             @NotNull @RequestBody
             UserLoginDTO userLoginDTO,
-            HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletRequest request, HttpServletResponse response
     )
     {
         try
@@ -49,7 +77,7 @@ public class AdminController
             // 添加 Cookie
             UserInfoProcessUtils.addNewCookie(
                     request, response,
-                    userLoginDTO.getUserName()
+                    userLoginDTO.getUserName(), CookieRoles.ADMIN
             );
 
             return ResponseEntity.ok(
@@ -77,9 +105,9 @@ public class AdminController
             HttpSession session = request.getSession(false);
             String      logoutAdminName;
 
-            if (!Objects.equals(session, null))
+            if (session != null && session.getAttribute(CookieRoles.ADMIN.toString()) != null)
             {
-                logoutAdminName = (String) session.getAttribute("user");
+                logoutAdminName = (String) session.getAttribute(CookieRoles.ADMIN.toString());
 
                 // 得查得到用户名才能执行登出操作不是吗。
                 this.adminServiceInterface.adminUserLogout(logoutAdminName);
@@ -90,7 +118,12 @@ public class AdminController
                 log.info("Admin [{}] logout, see you later~", logoutAdminName);
 
                 return ResponseEntity.ok()
-                        .body(format("Admin [%s] logout, see you later~", logoutAdminName));
+                        .body(
+                                format(
+                                        "Admin [%s] logout, see you later~",
+                                        logoutAdminName
+                                )
+                        );
             }
             else    // 倘若连 Session 都查不到，那自然不可能完成登出操作
             {
