@@ -17,6 +17,7 @@ import com.jesse.examination.user.service.utils.impl.LoginChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 import static java.lang.String.format;
@@ -42,6 +44,10 @@ public class UserService implements UserServiceInterface, UserDetailsService
     private final RoleEntityRepository        roleEntityRepository;
     private final BCryptPasswordEncoder       passwordEncoder;
     private final UserArchiveManagerInterface userArchiveManager;
+
+    /** 从配置文件中获取的 Session 过期时间，单位为秒*/
+    @Value(value = "${server.servlet.session.timeout}")
+    private int SESSION_TIME_OUT;
 
     @Autowired
     public UserService(
@@ -203,8 +209,15 @@ public class UserService implements UserServiceInterface, UserDetailsService
         // 所有验证通过之后，加载用户存档。
         userArchiveManager.readUserArchive(userLoginDTO.getUserName());
 
-        // 所有检查完毕后，设置登录状态为已登录
-        redisTemplate.opsForValue().set(userLoginStatusKey, true);
+        /*
+         * 所有检查完毕后，设置登录状态为已登录
+         * （有效期为 SESSION_TIME_OUT ，与会话超时时间同步，超时则删除该数据）。
+         */
+        redisTemplate.opsForValue()
+                     .set(
+                             userLoginStatusKey, true,
+                             SESSION_TIME_OUT, TimeUnit.SECONDS
+                     );
     }
 
     /**
