@@ -112,10 +112,11 @@ public class ExpirationScanner
                 (RedisCallback<Set<String>>)
                 connection -> {
                     Set<String> matchedKeys = new HashSet<>();
-                    ScanOptions options     = ScanOptions.scanOptions()
-                                                         .match(pattern)     // 设置键样式
-                                                         .count(100)   // 每回扫描 100 条
-                                                         .build();
+                    ScanOptions options
+                            = ScanOptions.scanOptions()
+                                         .match(pattern)  // 设置键样式
+                                         .count(100)      // 每回扫描 100 条
+                                         .build();
 
                     /*
                      * 将准备好的命令选项 options 交给 Redis 去执行，
