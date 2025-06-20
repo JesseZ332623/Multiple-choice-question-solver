@@ -5,18 +5,19 @@ import com.jesse.examination.redis.dto.QuestionPosDTO;
 import com.jesse.examination.redis.service.RedisServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 
 /**
- * Redis 服务，当前 Redis 需要存储的热点数据不多，
- * 当前只存储该用户的所有问题答对次数。
+ * Redis 服务。
  */
 @Slf4j
 @Service
@@ -24,13 +25,31 @@ public class RedisService implements RedisServiceInterface
 {
     private final RedisTemplate<String, Object> redisTemplate;
 
+    /** 从配置文件中获取的 Session 过期时间，单位为秒。*/
+    @Value(value = "${server.servlet.session.timeout}")
+    private int SESSION_TIME_OUT;
+
     @Autowired
     public RedisService(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     /**
-     * 将指定用户的所有问题的答对次数列表存入 Redis。
+     * 当用户操作活跃时，一些数据的有效期应该重置。
+     * （Session 的机制也是这样，我管它叫续期操作）。
+     *
+     * @param key 对哪个键执行续期操作？
+     */
+    private void refreshTTL(String key)
+    {
+        this.redisTemplate.expire(
+                key, SESSION_TIME_OUT, TimeUnit.SECONDS
+        );
+    }
+
+    /**
+     * 用户登录时，将指定用户的所有问题的
+     * 答对次数列表从文件系统读出并存入 Redis。
      *
      * @param userName              用户名，作为存储键
      * @param correctTimesDTOList   该用户所有问题答对次数的列表
@@ -41,10 +60,12 @@ public class RedisService implements RedisServiceInterface
             List<QuestionCorrectTimesDTO> correctTimesDTOList
     )
     {
-        this.redisTemplate.opsForList().rightPushAll(
-                CORRECT_TIMES_LIST_KEY + userName,
-                correctTimesDTOList
-        );
+        String key = CORRECT_TIMES_LIST_KEY + userName;
+
+        this.redisTemplate.opsForList()
+                          .rightPushAll(key, correctTimesDTOList);
+
+        this.refreshTTL(key);
 
         log.info(
                 "User: {} save correct time list complete, size: {}.",
@@ -126,7 +147,13 @@ public class RedisService implements RedisServiceInterface
 
         queryResult.set(questionPos.getQuestionId() - 1, questionCorrectTimesDTO);
 
-        this.redisTemplate.opsForList().set(questionPos.getUserName(), 0, queryResult);
+        String key = CORRECT_TIMES_LIST_KEY + questionPos.getUserName();
+
+        this.redisTemplate
+            .opsForList().set(key, 0, queryResult);
+
+        // 续期操作
+        this.refreshTTL(key);
 
         log.info(
                 "setQuestionCorrectTimesById() User: {} updated correctTimes {} -> {} where question id = {}",
@@ -173,11 +200,13 @@ public class RedisService implements RedisServiceInterface
 
         queryResult.set(questionIndex, questionCorrectTimesDTO);
 
+        String key = CORRECT_TIMES_LIST_KEY + questionPos.getUserName();
+
         this.redisTemplate.opsForList()
-                          .set(
-                                  CORRECT_TIMES_LIST_KEY + questionPos.getUserName(),
-                                  0, queryResult
-                          );
+                          .set(key, 0, queryResult);
+
+        // 续期操作
+        this.refreshTTL(key);
 
         log.info(
                 "questionCorrectTimesPlusOneById() User: {} updated correctTimes {} -> {} where question id = {}",
@@ -214,11 +243,13 @@ public class RedisService implements RedisServiceInterface
 
         queryResult.forEach((n) -> n.setCorrectTimes(0));
 
+        String key = CORRECT_TIMES_LIST_KEY + userName;
+
         this.redisTemplate.opsForList()
-                .set(
-                        CORRECT_TIMES_LIST_KEY + userName,
-                        0, queryResult
-                );
+                          .set(key, 0, queryResult);
+
+        // 续期操作
+        this.refreshTTL(key);
 
         log.info(
                 "cleanAllQuestionCorrectTimesToZero() truncate complete. {} rows affected.",
