@@ -18,9 +18,18 @@ var CURRENT_PAGE
 var PAGE_COUNT
     = Number.parseInt(document.getElementById('page_count').textContent);
 
-// 当存在 3 条及以上的记录时，图表渲染才有意义。
-if (TOTAL_RECORD_AMOUNT >= 3) {
-    renderMistakeRateCharts();
+isRandered();
+
+function isRandered() 
+{
+    // 来到最后一页且该页的数据不足 3 条，就不渲染图表了。
+    if (CURRENT_PAGE === PAGE_COUNT &&
+        RECORD_AMOUNT_OF_LAST_PAGE < 3) { return; }
+
+    // 当总共存在 3 条及以上的成绩记录时，图表渲染才有意义。
+    if (TOTAL_RECORD_AMOUNT >= 3) {
+        renderMistakeRateCharts();
+    }
 }
 
 /**
