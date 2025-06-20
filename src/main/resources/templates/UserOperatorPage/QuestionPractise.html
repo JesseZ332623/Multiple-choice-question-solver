@@ -46,10 +46,14 @@
         <div th:if="${question.options != null}">
             <ul>
                 <li th:each="entry : ${question.options.entrySet()}">
-                    <input type="radio" th:id="'option_' + ${entry.getKey()}"
-                           th:name="'options_' + ${question.questionId}" th:value="${entry.getKey()}">
-                    <span th:for="'option_' + ${entry.getKey()}"
-                          th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span><br>
+                    <label th:for="'questin_' + ${question.questionId} + '_option_' + ${entry.getKey()}">
+                        <input type="radio"
+                               th:id="'questin_' + ${question.questionId} + '_option_' + ${entry.getKey()}"
+                               th:name="'options_' + ${question.questionId}"
+                               th:value="${entry.getKey()}">
+                        <span th:id="'questin_' + ${question.questionId} + '_option_' + ${entry.getKey()}"
+                              th:text="${entry.getKey()} + ': ' + ${entry.getValue()}"></span><br>
+                    </label>
                 </li>
             </ul>
         </div>
