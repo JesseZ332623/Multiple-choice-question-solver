@@ -1,6 +1,7 @@
 package com.jesse.examination.user.service.utils.impl;
 
 import com.jesse.examination.user.entity.RoleEntity;
+import com.jesse.examination.user.exceptions.AlreadyLoginException;
 import com.jesse.examination.user.exceptions.PasswordMismatchException;
 import com.jesse.examination.user.exceptions.VarifyCodeMismatchException;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class LoginChecker
      * <br> {@code LOGIN_STATUS_OF_USER_Peter} 或者
      *      {@code LOGIN_STATUS_OF_ADMIN_Jesse}
      *
-     * @throws RuntimeException 在检查到用户已经登录时抛出
+     * @throws AlreadyLoginException 在检查到用户已经登录时抛出
      */
     public static void
     checkLoginStatus(
@@ -68,7 +69,7 @@ public class LoginChecker
             // 在别的设备上就不允许登录，直接甩出异常。
             if (isLogin != null && isLogin.equals(true))
             {
-                throw new RuntimeException(
+                throw new AlreadyLoginException(
                         format(
                                 "%s %s already login!",
                                 loginStatusKey.contains("ADMIN") ? "Admin" : "User",
