@@ -9,6 +9,7 @@ import com.jesse.examination.redis.service.RedisServiceInterface;
 import com.jesse.examination.scorerecord.service.ScoreRecordService;
 import com.jesse.examination.user.service.utils.UserArchiveManagerInterface;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,7 @@ public class UserArchiveManager implements UserArchiveManagerInterface
     @Override
     public void
     renameUserArchiveDir(
-            String oldUserName, String newUserName
+            @NotNull String oldUserName, String newUserName
     ) throws DirectoryRenameException
     {
         // 倘若新旧用户名的值完全相同，自然也没有更改路径之必要。
