@@ -1,5 +1,6 @@
 package com.jesse.examination.user.service.impl;
 
+import com.jesse.examination.config.properties.PropertiesValue;
 import com.jesse.examination.file.exceptions.FileNotExistException;
 import com.jesse.examination.user.dto.userdto.ModifyOperatorDTO;
 import com.jesse.examination.user.dto.userdto.UserDeleteDTO;
@@ -17,7 +18,6 @@ import com.jesse.examination.user.service.utils.impl.LoginChecker;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,23 +44,22 @@ public class UserService implements UserServiceInterface, UserDetailsService
     private final RoleEntityRepository        roleEntityRepository;
     private final BCryptPasswordEncoder       passwordEncoder;
     private final UserArchiveManagerInterface userArchiveManager;
-
-    /** 从配置文件中获取的 Session 过期时间，单位为秒*/
-    @Value(value = "${server.servlet.session.timeout}")
-    private int SESSION_TIME_OUT;
+    private final PropertiesValue             propertiesValue;
 
     @Autowired
     public UserService(
             UserEntityRepository        userEntityRepository,
             RoleEntityRepository        roleEntityRepository,
             BCryptPasswordEncoder       passwordEncoder,
-            UserArchiveManagerInterface userArchiveManager
+            UserArchiveManagerInterface userArchiveManager,
+            PropertiesValue             propertiesValue
     )
     {
         this.userEntityRepository  = userEntityRepository;
         this.roleEntityRepository  = roleEntityRepository;
         this.passwordEncoder       = passwordEncoder;
         this.userArchiveManager    = userArchiveManager;
+        this.propertiesValue       = propertiesValue;
     }
 
     /**
@@ -216,7 +215,8 @@ public class UserService implements UserServiceInterface, UserDetailsService
         redisTemplate.opsForValue()
                      .set(
                              userLoginStatusKey, true,
-                             SESSION_TIME_OUT, TimeUnit.SECONDS
+                             this.propertiesValue.getSessionTimeOutSeconds(),
+                             TimeUnit.SECONDS
                      );
     }
 
@@ -391,7 +391,7 @@ public class UserService implements UserServiceInterface, UserDetailsService
     /**
      * Locates the user based on the username.
      * In the actual implementation, the search
-     * may possibly be case-sensitive, or case-insensitive depending on how the
+     * may be case-sensitive, or case-insensitive depending on how the
      * implementation instance is configured.
      * In this case, the <code>UserDetails</code>
      * object that comes back may have a username of a different case than what
