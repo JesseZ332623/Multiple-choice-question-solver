@@ -1,5 +1,6 @@
 package com.jesse.examination.redis.service.impl;
 
+import com.jesse.examination.config.properties.PropertiesValue;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.redis.dto.QuestionPosDTO;
 import com.jesse.examination.redis.service.RedisServiceInterface;
@@ -24,14 +25,16 @@ import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 public class RedisService implements RedisServiceInterface
 {
     private final RedisTemplate<String, Object> redisTemplate;
-
-    /** 从配置文件中获取的 Session 过期时间，单位为秒。*/
-    @Value(value = "${server.servlet.session.timeout}")
-    private int SESSION_TIME_OUT;
+    private final PropertiesValue               propertiesValue;
 
     @Autowired
-    public RedisService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    public RedisService(
+            RedisTemplate<String, Object> redisTemplate,
+            PropertiesValue propertiesValue
+    )
+    {
+        this.propertiesValue = propertiesValue;
+        this.redisTemplate   = redisTemplate;
     }
 
     /**
@@ -43,7 +46,9 @@ public class RedisService implements RedisServiceInterface
     private void refreshTTL(String key)
     {
         this.redisTemplate.expire(
-                key, SESSION_TIME_OUT, TimeUnit.SECONDS
+                key,
+                propertiesValue.getSessionTimeOutSeconds(),
+                TimeUnit.SECONDS
         );
     }
 
