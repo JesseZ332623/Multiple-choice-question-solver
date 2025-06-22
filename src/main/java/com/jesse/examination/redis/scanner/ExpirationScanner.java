@@ -1,5 +1,6 @@
 package com.jesse.examination.redis.scanner;
 
+import com.jesse.examination.config.properties.PropertiesValue;
 import com.jesse.examination.file.FileTransferServiceInterface;
 import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,19 +29,19 @@ public class ExpirationScanner
 {
     private final RedisTemplate<String, Object> redisTemplate;
     private final FileTransferServiceInterface  fileTransferService;
+    private final PropertiesValue               propertiesValue;
 
-    /** 从配置文件中获取的 Session 过期时间，单位为秒。*/
-    @Value(value = "${server.servlet.session.timeout}")
-    private int SESSION_TIME_OUT;
 
     @Autowired
     public ExpirationScanner(
             RedisTemplate<String, Object> redisTemplate,
-            FileTransferServiceInterface fileTransferService
+            FileTransferServiceInterface  fileTransferService,
+            PropertiesValue               propertiesValue
     )
     {
         this.redisTemplate       = redisTemplate;
         this.fileTransferService = fileTransferService;
+        this.propertiesValue     = propertiesValue;
     }
 
     /**
@@ -50,6 +52,7 @@ public class ExpirationScanner
     @Scheduled(fixedRate = 60_000)
     public void scanExpiringCorrectTimesListKeys()
     {
+
         Set<String> matchedKeys
                 = this.scanKeyByPattern("CORRECT_TIMES_LIST_OF_*");
 
@@ -63,11 +66,16 @@ public class ExpirationScanner
             // getExpire() 检查某个键的剩余过期时间，TimeUnit 指定时间单位
             Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
 
+            log.info(
+                    "Key: {}, expire time reminder: {} seconds.",
+                    key, ttl
+            );
+
             /*
              * 若这个数据的过期时间已经不到 Session 过期时间的五分之一了，
              * 就得进行持久化操作。
              */
-            if (ttl < SESSION_TIME_OUT / 5)
+            if (ttl < this.propertiesValue.getSessionTimeOutSeconds() / 5)
             {
                 // 提取用户名
                 String userName
