@@ -3,6 +3,7 @@ package com.jesse.examination.file.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jesse.examination.config.jacksonconfig.JacksonConfig;
+import com.jesse.examination.config.properties.PropertiesValue;
 import com.jesse.examination.file.FileTransferServiceInterface;
 import com.jesse.examination.file.exceptions.DirectoryRenameException;
 import com.jesse.examination.file.exceptions.FileNotExistException;
@@ -10,7 +11,7 @@ import com.jesse.examination.question.dto.QuestionCorrectTimesDTO;
 import com.jesse.examination.scorerecord.entity.ScoreRecordEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
@@ -28,8 +29,7 @@ import static java.lang.String.format;
 @Service
 public class FileTransferService implements FileTransferServiceInterface
 {
-    @Value(value = "${file.upload-dir}")
-    private String storagePath;     // 文件存储目录（从配置文件中读取）
+    private final PropertiesValue propertiesValue;
 
     // 创建带有时间字符串解析的 ObjectMapper 实例。
     private final ObjectMapper mapper = JacksonConfig.createObjectMapper();
@@ -37,16 +37,22 @@ public class FileTransferService implements FileTransferServiceInterface
     // 获取默认头像图片的字节数组。
     private static final byte[] DEFAULT_AVATAR_IMAGE_DATA;
 
+    private static final String AVATAR_FILE_NAME        = "avatar.png";
+    private static final String SCORE_FILE_NAME         = "score_settlement.json";
+    private static final String CORRECT_TIMES_FILE_NAME = "correct_times.json";
+
     /*
      * 终于把静态块用出来了，一些被 static 修饰的实例在初始化时也可能抛出异常，
      * 此时就需要 静态块 去捕获。
-     * 这样在 Spring 应用启动的时候，如果资源加载失败，应用在输出异常信息后也会停止。
+     * 这样在 Spring 应用启动的时候，如果资源加载失败，应用输出异常信息表明该资源加载失败。
      */
     static
     {
+        byte[] defaultAvatarImageData;
+
         try
         {
-            DEFAULT_AVATAR_IMAGE_DATA = Files.readAllBytes(
+            defaultAvatarImageData = Files.readAllBytes(
                     Paths.get(
                             "D:/Spring-In-Action/Multiple-choice-question-solver" +
                                  "/src/main/resources/image/avatar.png"
@@ -55,12 +61,20 @@ public class FileTransferService implements FileTransferServiceInterface
         }
         catch (IOException exception)
         {
-            log.error(exception.getMessage());
-
-            throw new RuntimeException(
-                    "[RuntimeException] " + exception.getMessage()
+            log.error(
+                    "Load default avatar failed. Cause: {}.",
+                    exception.getMessage()
             );
+
+            defaultAvatarImageData = new byte[0];
         }
+
+        DEFAULT_AVATAR_IMAGE_DATA = defaultAvatarImageData;
+    }
+
+    @Autowired
+    public FileTransferService(PropertiesValue propertiesValue) {
+        this.propertiesValue = propertiesValue;
     }
 
     /**
@@ -107,8 +121,7 @@ public class FileTransferService implements FileTransferServiceInterface
      *          "submitDate"    : "2025-05-06T03:50:40",
      *          "correctCount"  : 1,
      *          "errorCount"    : 0,
-     *          "noAnswerCount" : 320,
-     *          "mistakeRate"   : 99.690000
+     *          "noAnswerCount" : 320
      *     },
      * </pre>
      */
@@ -270,14 +283,14 @@ public class FileTransferService implements FileTransferServiceInterface
     public byte[] getUserAvatarImage(String userName) throws IOException
     {
         // 头像存储路径
-        String avatarPath = this.storagePath + "/" + userName + "/" + "avatar.png";
-
-        Path image = Paths.get(avatarPath);
+        Path image = this.propertiesValue.getFileUploadPath()
+                         .resolve(userName)
+                         .resolve(AVATAR_FILE_NAME).normalize();
 
         if (!Files.exists(image))
         {
             throw new FileNotExistException(
-                    "[FileNotExistException] Path: " + avatarPath + " NOT EXIST!"
+                    "[FileNotExistException] Path: " + image + " NOT EXIST!"
             );
         }
 
@@ -287,16 +300,9 @@ public class FileTransferService implements FileTransferServiceInterface
     @Override
     public void writeUserAvatarImage(String userName, byte[] imageBytes) throws IOException
     {
-        String avatarDirStr  = this.storagePath + "/" + userName + "/";
-        String avatarName    = "avatar.png";
+        String avatarDirStr  = this.propertiesValue.getFileUploadPath() + "\\" + userName + "\\";
 
-        Path avatarDir = Paths.get(avatarDirStr);
-
-        if (!Files.exists(avatarDir)) {
-            Files.createDirectories(avatarDir);
-        }
-
-        this.saveFile(avatarDirStr, avatarName, imageBytes);
+        this.saveFile(avatarDirStr, AVATAR_FILE_NAME, imageBytes);
     }
 
     @Override
@@ -306,8 +312,8 @@ public class FileTransferService implements FileTransferServiceInterface
     ) throws DirectoryRenameException
     {
         this.renameDirectory(
-                this.storagePath  + "/" + oldUserName,
-                this.storagePath + "/" + newUserName
+                this.propertiesValue.getFileUploadPath().resolve(oldUserName).toString(),
+                this.propertiesValue.getFileUploadPath().resolve(newUserName).toString()
         );
     }
 
@@ -319,7 +325,6 @@ public class FileTransferService implements FileTransferServiceInterface
     {
         try
         {
-            final String  scoreFileName = "score_settlement.json";
             StringBuilder scoreDataJsonBuilder = new StringBuilder();
 
             // 手动将数据拼合成 JSON 文件（笑）
@@ -340,8 +345,9 @@ public class FileTransferService implements FileTransferServiceInterface
             scoreDataJsonBuilder.append("]\n");
 
             this.saveFile(
-                    this.storagePath + "/" + userName,
-                    scoreFileName,
+                    this.propertiesValue.getFileUploadPath()
+                        .resolve(userName).toString(),
+                    SCORE_FILE_NAME,
                     scoreDataJsonBuilder.toString()
             );
         }
@@ -368,8 +374,6 @@ public class FileTransferService implements FileTransferServiceInterface
     {
         try
         {
-            // 文件名示例：correct_times.json
-            final String  correctTimesFileName    = "correct_times.json";
             StringBuilder correctTimesJsonBuilder = new StringBuilder();
 
             correctTimesJsonBuilder.append("[\n");
@@ -390,8 +394,8 @@ public class FileTransferService implements FileTransferServiceInterface
             correctTimesJsonBuilder.append("]\n");
 
             this.saveFile(
-                    storagePath + "/" + userName,
-                    correctTimesFileName,
+                    this.propertiesValue.getFileUploadPath().resolve(userName).toString(),
+                    CORRECT_TIMES_FILE_NAME,
                     correctTimesJsonBuilder.toString()
             );
         }
@@ -416,10 +420,11 @@ public class FileTransferService implements FileTransferServiceInterface
         * 文件路径示例：
         * D:/Spring-In-Action/Multiple-choice-question-solver/UserData/Perter/correct_times.json
         */
-        final String filePath = this.storagePath +
-                                "/"              +
-                                userName         +
-                                "/correct_times.json";
+        final String filePath
+                = this.propertiesValue.getFileUploadPath()
+                                      .resolve(userName)
+                                      .resolve("correct_times.json")
+                                      .normalize().toString();
 
         List<QuestionCorrectTimesDTO> resultList = new ArrayList<>();
 
@@ -456,7 +461,10 @@ public class FileTransferService implements FileTransferServiceInterface
     readUserScoreDataFile(String userName)
     {
         final String filePath
-                = this.storagePath + "/" + userName + "/score_settlement.json";
+                = this.propertiesValue.getFileUploadPath()
+                                      .resolve(userName)
+                                      .resolve(SCORE_FILE_NAME)
+                                      .normalize().toString();
 
         List<ScoreRecordEntity> resultList = new ArrayList<>();
 
@@ -491,7 +499,9 @@ public class FileTransferService implements FileTransferServiceInterface
     {
         // 指定文件路径（示例：${file.upload-dir}/Perter/）
         final String filePath
-                = this.storagePath + "/" + userName + "/";
+                = this.propertiesValue.getFileUploadPath()
+                                      .resolve(userName)
+                                      .normalize().toString();
 
         boolean isSuccess
                 = FileSystemUtils.deleteRecursively(
