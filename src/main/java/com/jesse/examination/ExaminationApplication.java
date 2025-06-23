@@ -2,6 +2,7 @@ package com.jesse.examination;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
@@ -9,10 +10,12 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  * Spring Boot 应用启动类。
  *
  * <ul>
- *     <li>EnableRedisHttpSession 注解用于启用 Http 会话。</li>
+ *     <li>EnableAsync			  注解用于启用异步任务的执行</li>
  *     <li>EnableScheduling       注解用于启用定时任务执行</li>
+ *     <li>EnableRedisHttpSession 注解用于启用 Http 会话。</li>
  * </ul>
  */
+@EnableAsync
 @EnableScheduling
 @EnableRedisHttpSession
 @SpringBootApplication
