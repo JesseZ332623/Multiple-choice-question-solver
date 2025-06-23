@@ -40,8 +40,8 @@ public class AsyncConfig
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(5);                     // 常驻线程数量
-        executor.setMaxPoolSize(20);                      // 最大线程数量
-        executor.setQueueCapacity(50);                  // 最大队列数量
+        executor.setMaxPoolSize(20);                     // 最大线程数量
+        executor.setQueueCapacity(50);                   // 最大队列数量
 
         /*
          * 当本线程池中的所有线程空闲超过 30 秒后，
