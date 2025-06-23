@@ -45,6 +45,8 @@ public class RedisService implements RedisServiceInterface
      */
     private void refreshTTL(String key)
     {
+        // log.info("{}", propertiesValue.getSessionTimeOutSeconds());
+
         this.redisTemplate.expire(
                 key,
                 propertiesValue.getSessionTimeOutSeconds(),
