@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
  * 用户存档管理工具类（用户和管理员都会用到）。
  */
@@ -105,9 +107,13 @@ public class UserArchiveManager implements UserArchiveManagerInterface
             this.redisService.saveQuestionCorrectTimeList(
                     userName, questionCorrectTimesDTOS
             );
-        }
 
-        log.info("Read user: {} archive complete.", userName);
+            log.info("Read user: {} archive complete.", userName);
+        }
+        else
+        {
+            throw new RuntimeException(format("Read %s's archive failed.", userName));
+        }
     }
 
     @Override
