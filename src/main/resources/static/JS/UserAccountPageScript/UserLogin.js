@@ -19,9 +19,9 @@ function showError(elementId, message)
     );
 }
 
-function showNotify(message) 
+function showNotify(elementId, message) 
 {
-    const el = document.getElementById('notifyMessage');
+    const el = document.getElementById(elementId);
     el.textContent = message;
     el.style.color = `#58A6FF`;
 
@@ -52,7 +52,10 @@ async function doObtainVarifyCode()
 
     sendBtn.disabled = true;
 
-    try {
+    showNotify('notifyMessage', '验证码发送中.....');
+
+    try 
+    {
         const response = await fetch(
             `/api/email/send_verify_code_email/${userName}`,
             {
@@ -61,14 +64,15 @@ async function doObtainVarifyCode()
             }
         );
 
-        if (!response.ok) {
+        if (!response.ok) 
+        {
             sendBtn.disabled = false;
             throw new Error(
-                `验证码发送失败，状态码：${response.status}\n原因：${await response.text()}。`
+                `验证码发送失败，状态码：${response.status} 原因：${await response.text()}。`
             );
         }
 
-        showNotify('验证码已经发送至您的邮箱。');
+        showNotify('notifyMessage', '验证码已经发送至您的邮箱。');
         setTimeout(() => sendBtn.disabled = false, 90000);
     }
     catch (error) {
@@ -81,6 +85,7 @@ const USER_ROLE_SELECT = {
     ADMIN_USER      :  0,
     ORDINARY_USER   :  1
 };
+
 /**
  * 检查用户的角色，有三种情况：
  * 
