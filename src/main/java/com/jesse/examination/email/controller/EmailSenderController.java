@@ -2,6 +2,7 @@ package com.jesse.examination.email.controller;
 
 import com.jesse.examination.email.dto.EmailContentDTO;
 import com.jesse.examination.email.entity.EmailAuthTableEntity;
+import com.jesse.examination.email.exception.EmailSendFailedException;
 import com.jesse.examination.email.service.EmailAuthServiceInterface;
 import com.jesse.examination.email.service.EmailSenderInterface;
 import com.jesse.examination.email.service.impl.EmailSender;
@@ -9,11 +10,13 @@ import com.jesse.examination.user.service.AdminServiceInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
@@ -27,12 +30,8 @@ import static com.jesse.examination.redis.keys.ProjectRedisKey.*;
 @RequestMapping(path = "/api/email")
 public class EmailSenderController
 {
-    /** 默认的验证码长度是 8 位 */
-    private final static int    DEFAULT_CODE_LENGTH      = 8;
-    /** 提供邮箱服务的域名 */
-    private final static String SMTP_HOST                = "smtp.qq.com";
-    /** 邮箱服务端口*/
-    private final static int    SMTP_PORT                = 465;
+    /** 默认的验证码长度是 8 位。 */
+    private final static int DEFAULT_CODE_LENGTH = 8;
 
     /** 验证码的有效期为 3 分钟。 */
     private final static int CODE_VALID_TIME = 3;
@@ -103,24 +102,17 @@ public class EmailSenderController
     public EmailSenderController(
             EmailAuthServiceInterface      emailAuthService,
             AdminServiceInterface          emailQueryService,
+            @Qualifier("emailSenderCreator")
+            EmailSenderInterface emailSender,
             RedisTemplate<String, Object>  redisTemplate
     )
     {
         this.emailAuthService   = emailAuthService;
         this.emailQueryService  = emailQueryService;
+        this.emailSender        = emailSender;
         this.redisTemplate      = redisTemplate;
 
         this.saveEmailAuthInfoToRedis();
-
-        // 邮箱模块采用生成器模式，所以它的参数需要我自己决定。
-        this.emailSender = new EmailSender.EmailSenderBuilder()
-                .smtpHost(SMTP_HOST)
-                .smtpPort(SMTP_PORT)
-                .userName((String) this.redisTemplate.opsForValue().get(ENTERPRISE_EMAIL_ADDRESS.toString()))
-                .appPassword((String) this.redisTemplate.opsForValue().get(SERVICE_AUTH_CODE.toString()))
-                .defaultSetProperties()
-                .defaultSetSession()
-                .build();
     }
 
     /**
@@ -128,7 +120,7 @@ public class EmailSenderController
      * 先查询 userName 对应的邮箱，然后填写信息后再正式发送。
      */
     @PostMapping(path = "/send_verify_code_email/{userName}")
-    ResponseEntity<?>
+    CompletableFuture<ResponseEntity<String>>
     sendVarifyCodeEmail(@PathVariable String userName)
     {
         try
@@ -142,37 +134,82 @@ public class EmailSenderController
             String entireVarifyKey = USER_VERIFYCODE_KEY + userName;
 
             /*
-             * 若在用户发送验证码前，上一回的验证码存在，需要删除。
+             * 若在用户发送验证码前，
+             * 上一回的验证码存在，需要删除。
              */
-            if (this.redisTemplate.opsForValue().get(entireVarifyKey) != null)
-            {
+            if (this.redisTemplate.hasKey(entireVarifyKey)) {
                 this.redisTemplate.delete(entireVarifyKey);
             }
 
-            /*
-             * 将验证码存入 Redis 数据库，
-             * 并设置有效期为 CODE_VALID_TIME 分钟，超过该时间 Redis 会自动删除。
-             */
-            this.redisTemplate.opsForValue().set(
-                    entireVarifyKey, varifyCode,
-                    CODE_VALID_TIME, TimeUnit.MINUTES
-            );
+            // 准备邮件内容
+            EmailContentDTO emailContent
+                    = getEmailContentDTO(userName, userEmail, varifyCode);
 
-            EmailContentDTO emailContent = getEmailContentDTO(userName, userEmail, varifyCode);
+            var future = this.emailSender.sendEmail(emailContent);
 
-            this.emailSender.sendEmail(emailContent);
+            log.info("Email send to: {} complete.\n", userEmail);
 
-            return ResponseEntity.ok(
-                    format("Send email to %s complete!", userEmail)
-            );
+            // 正式发送（异步的执行）
+            return future.thenApply((sendResponse) -> {
+                           if (sendResponse.getKey())
+                           {
+                               try
+                               {
+                                   /*
+                                    * 邮件成功发送后，再将验证码存入 Redis 数据库，
+                                    * 并设置有效期为 CODE_VALID_TIME 分钟，超过该时间 Redis 会自动删除。
+                                    *
+                                    * 此外，这个操作也要被 try-catch 包裹，
+                                    * 倘若发送邮件成功之后，Redis 存储验证码之前
+                                    * Redis 服务奔溃，则可能无法完成输入验证的操作，
+                                    * 因此这样的错误需要被捕获。
+                                    */
+                                   this.redisTemplate.opsForValue().set(
+                                           entireVarifyKey, varifyCode,
+                                           CODE_VALID_TIME, TimeUnit.MINUTES
+                                   );
+
+                                   return ResponseEntity.ok(
+                                           format("Send email to %s complete!", userEmail)
+                                   );
+                               }
+                               catch (Exception exception)
+                               {
+                                   log.error(
+                                           "Save varify code to redis failed! Cause: {}",
+                                           exception.getMessage()
+                                   );
+
+                                   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                           .body(exception.getMessage());
+                               }
+                           }
+                           else
+                           {
+                               throw new EmailSendFailedException(sendResponse.getValue());
+                           }
+                       }).exceptionally((exception) -> {
+                           log.error(
+                                   "Email service not available! Cause: {}",
+                                   exception.getMessage()
+                           );
+
+                           return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                                .body("Email service not available!");
+
+                    });
         }
-        catch (Exception exception)
+        catch (Exception exception)  // 处理同步操作所抛的异常
         {
-            log.error(exception.getMessage());
+            log.error(
+                    "Request processing failed! Cause: {}",
+                    exception.getMessage()
+            );
 
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(exception.getMessage());
+            return CompletableFuture.completedFuture(
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                  .body(exception.getMessage())
+            );
         }
     }
 }
