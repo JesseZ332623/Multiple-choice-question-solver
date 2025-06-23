@@ -17,7 +17,7 @@ public class PropertiesValue
     @Value("${file.upload-dir}")
     private String fileUploadPath;
 
-    @Value("${server.servlet.session.timeout}")
+    @Value("${spring.session.timeout}")
     private Duration sessionTimeOut;
 
     public Path getFileUploadPath()
