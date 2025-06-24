@@ -2,13 +2,14 @@ package com.jesse.examination.redis.keys;
 
 import org.jetbrains.annotations.NotNull;
 
-public enum ProjectRedisKey implements CharSequence {
+public enum ProjectRedisKey implements CharSequence
+{
     /**
      * <p>某普通用户登录状态确认 Redis 键。</p>
      * <p>
      *     格式为：
      *     <pre>
-     *         K: LOGIN_STATUS_OF_USER_[USER_NAME],
+     *         K: LOGIN_STATUS_OF_USER_[USER_NAME]
      *         V: String
      *     </pre>
      * </p>
@@ -20,7 +21,7 @@ public enum ProjectRedisKey implements CharSequence {
      * <p>
      *     格式为：
      *     <pre>
-     *         K: LOGIN_STATUS_OF_ADMIN_[ADMIN_NAME],
+     *         K: LOGIN_STATUS_OF_ADMIN_[ADMIN_NAME]
      *         V: String
      *     </pre>
      * </p>
@@ -33,7 +34,7 @@ public enum ProjectRedisKey implements CharSequence {
      *     格式为：
      *     <pre>
      *         K: CORRECT_TIMES_LIST_OF_[USER_NAME]
-     *         V: List
+     *         V: List（准确来说是 List{@literal <List>}）
      *     </pre>
      * </p>
      */
