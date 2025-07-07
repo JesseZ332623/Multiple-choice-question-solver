@@ -22,6 +22,15 @@ body {
   align-items: center;
 }
 
+#particles-js {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* 确保它在登录表单下方 */
+}
+
 .login-form {
   background-color: #161b22;
   border: 1px solid var(--gh-border-color);
