@@ -8,10 +8,15 @@
     <link rel="stylesheet"
           th:href="@{/CSS/UserAccountPageCSS/UserLogin.css}">
     <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>     
+    <script type="text/javascript"
             th:src="@{/JS/UserAccountPageScript/UserLogin.js}"></script>
 </head>
 
 <body>
+    <!-- 粒子背景 -->
+    <div id="particles-js"></div>
+    
     <div class="login-form">
         <div class="login-form-header">
             <h1>登录</h1>
@@ -50,7 +55,7 @@
             <div class="form-group">
                 <label for="verify_code" class="required">验证码</label>
                 <input type="text" id="verify_code" class="form-control" pattern="\d*" required>
-                <button id="send_verify_code" onclick="doObtainVarifyCode()">
+                <button type="button" id="send_verify_code" onclick="doObtainVarifyCode()">
                     获取验证码
                 </button>
                 <div class="notify-message" id="notifyMessage"></div>
