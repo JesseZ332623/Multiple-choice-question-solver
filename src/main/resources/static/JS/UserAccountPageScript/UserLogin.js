@@ -1,3 +1,45 @@
+document.addEventListener(
+    'DOMContentLoaded', 
+    function() {
+        particlesJS('particles-js', {
+                particles: 
+                {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: "#58a6ff" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.5, random: true },
+                    size: { value: 3, random: true },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#30363d",
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: { enable: true, mode: "grab" },
+                        onclick: { enable: true, mode: "push" },
+                        resize: true
+                    }
+                },
+                retina_detect: true
+            }
+        );
+    }
+);
+
 const isNumeric = (str) => { return /^\d+$/.test(str); };
 
 // 增强版验证逻辑
@@ -46,7 +88,7 @@ async function doObtainVarifyCode()
     const sendBtn = document.getElementById('send_verify_code');
 
     if (!userName) {
-        showError('user_nameError', "请先输入用户名!");
+        showError('user_name_error', '请先输入用户名!');
         return;
     }
 
